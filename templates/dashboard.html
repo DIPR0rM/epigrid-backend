@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EpiGrid | Epidemiological Preemption & ST-GNN Command Center</title>
+
+  <!-- Leaflet Geospatial CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet Gaussian Heatmap Plugin -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <!-- Chart.js for 14-Day Outbreak Trajectories & ST-GNN Convergence -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #070b14;
+      --bg-panel: #0f172a;
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 40px;
+    }
+    header {
+      background: linear-gradient(90deg, #090d16 0%, #0f172a 50%, #090d16 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 12px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .control-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+    }
+    .input-group label {
+      color: var(--text-muted);
+      margin-right: 6px;
+      font-weight: 600;
+    }
+    .input-group input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      width: 72px;
+      font-size: 0.82rem;
+      outline: none;
+    }
+    button.btn-primary {
+      background: linear-gradient(135deg, #06b6d4, #2563eb);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button.btn-primary:hover { opacity: 0.9; }
+    button.btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px 24px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .kpi-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card .kpi-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .kpi-card .kpi-value {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .kpi-card .kpi-sub {
+      font-size: 0.76rem;
+      margin-top: 4px;
+      color: var(--accent-cyan);
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 1150px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-cyan { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
+    .badge-red { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-amber { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+    #map {
+      width: 100%;
+      height: 500px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: #0b1120;
+    }
+    .scrubber-box {
+      margin-top: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .scrubber-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.84rem;
+      margin-bottom: 8px;
+    }
+    .scrubber-slider {
+      width: 100%;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+    }
+    .chart-box {
+      position: relative;
+      height: 245px;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1150px) {
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .alert-card {
+      background: var(--bg-card);
+      border-left: 4px solid var(--accent-red);
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .alert-card.warning-tier {
+      border-left-color: var(--accent-amber);
+    }
+    .alert-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .alert-ward {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+    .alert-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.65);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      margin-bottom: 8px;
+    }
+    .resource-item span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+    .resource-item strong {
+      color: var(--accent-cyan);
+    }
+    .hash-footer {
+      font-family: monospace;
+      font-size: 0.7rem;
+      color: #64748b;
+      word-break: break-all;
+    }
+    table.ward-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    table.ward-table th, table.ward-table td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    table.ward-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+    }
+    table.ward-table tr:hover {
+      background: rgba(30, 41, 59, 0.6);
+      cursor: pointer;
+    }
+    .prob-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+    .legend-bar {
+      display: flex;
+      gap: 14px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">
+      <div class="pulse-dot" id="statusDot"></div>
+      <div>
+        <h1>EPIGRID: EPIDEMIOLOGICAL PREEMPTION ENGINE</h1>
+        <div class="brand-subtitle">Phase 5 Geospatial ST-GNN Outbreak Heat Map & Automated Municipal Alerting System</div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <div class="input-group">
+        <label>LAT</label>
+        <input type="number" id="latInput" value="23.8103" step="0.001" />
+      </div>
+      <div class="input-group">
+        <label>LON</label>
+        <input type="number" id="lonInput" value="90.4125" step="0.001" />
+      </div>
+      <div class="input-group">
+        <label>EPOCHS</label>
+        <input type="number" id="epochsInput" value="120" min="20" max="500" />
+      </div>
+      <button class="btn-primary" id="runBtn" onclick="executeEpiGridPipeline()">
+        Run ST-GNN & Trigger Preemptive Alerts
+      </button>
+      <button class="btn-secondary" onclick="downloadAlertManifest()">
+        Export JSON Manifest
+      </button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Top Telemetry KPI Row -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Sentinel-2 Waterlogging Nodes</div>
+        <div class="kpi-value" id="kpiNodes">--</div>
+        <div class="kpi-sub" id="kpiViableNodes">Synchronizing MNDWI/NDWI...</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Aedes Extrinsic Incubation (EIP)</div>
+        <div class="kpi-value" id="kpiEip">--</div>
+        <div class="kpi-sub" id="kpiAquatic">Brière Thermal Reaction Norm</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">DGHS Hospital Baseline</div>
+        <div class="kpi-value" id="kpiDghs">--</div>
+        <div class="kpi-sub" id="kpiDghsPressure">Live HEOC Surveillance Stream</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">PyTorch ST-GNN Final Loss</div>
+        <div class="kpi-value" id="kpiLoss">--</div>
+        <div class="kpi-sub" id="kpiAccelerator">BCE + Horizon MSE + Laplacian</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Automated Municipal Alerts</div>
+        <div class="kpi-value" id="kpiAlerts" style="color: #f87171;">--</div>
+        <div class="kpi-sub" id="kpiCorpSplit">DNCC & DSCC Fogging Dispatches</div>
+      </div>
+    </div>
+
+    <!-- Main Geospatial Heat Map + Neural Network Telemetry Charts -->
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>Dhaka Municipal Ward Predictive Outbreak Heat Map (14-Day ST-GNN Horizon)</span>
+          </div>
+          <span class="badge badge-cyan" id="sceneBadge">Sentinel-2 L2A + NASA POWER</span>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="scrubber-box">
+          <div class="scrubber-header">
+            <strong>Interactive Temporal Forecast Horizon Scrubber:</strong>
+            <span id="scrubberLabel" style="color: var(--accent-cyan); font-weight: 700;">
+              Day +14 Forecast Horizon
+            </span>
+          </div>
+          <input
+            type="range"
+            id="daySlider"
+            class="scrubber-slider"
+            min="0"
+            max="13"
+            value="13"
+            oninput="updateMapHorizon(this.value)"
+          />
+          <div class="legend-bar">
+            <div class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> Critical Outbreak Imminent (&ge; 75%)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> High Transmission Risk (55% – 74%)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Moderate Endemic Surveillance (&lt; 55%)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> Kipf-Welling ST-GNN Graph Edge (d &le; 4.5 km)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">14-Day Ward Outbreak Probability Trajectories</div>
+          <span class="badge badge-emerald">Multi-Horizon Sigmoid Decoder</span>
+        </div>
+        <div class="chart-box">
+          <canvas id="trajectoryChart"></canvas>
+        </div>
+
+        <div class="panel-header" style="margin-top: 6px;">
+          <div class="panel-title">PyTorch ST-GNN Backpropagation Convergence</div>
+          <span class="badge badge-cyan" id="epochsBadge">120 Epochs</span>
+        </div>
+        <div class="chart-box" style="height: 205px; margin-bottom: 0;">
+          <canvas id="lossChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Grid: Automated Municipal Alert Dispatches & Ward Probability Matrix Table -->
+    <div class="bottom-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Automated Municipal Preemption & Fogging Work Orders</div>
+          <span class="badge badge-red" id="alertCountBadge">0 Active Dispatches</span>
+        </div>
+        <div class="alert-list" id="alertFeed">
+          <div style="color: var(--text-muted); font-size: 0.85rem;">
+            Executing PyTorch ST-GNN inference and evaluating municipal preemption thresholds...
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">14-Day Municipal Ward Probability Matrix</div>
+          <span class="badge badge-amber">Click Any Ward to Focus Map</span>
+        </div>
+        <div style="overflow-x: auto; max-height: 520px;">
+          <table class="ward-table">
+            <thead>
+              <tr>
+                <th>Ward ID</th>
+                <th>Municipal Ward Name</th>
+                <th>Day +1</th>
+                <th>Day +7</th>
+                <th>Day +14</th>
+                <th>Risk Status</th>
+              </tr>
+            </thead>
+            <tbody id="wardTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let mapInstance = null;
+    let heatLayer = null;
+    let markerGroup = null;
+    let edgeGroup = null;
+    let trajectoryChartInstance = null;
+    let lossChartInstance = null;
+    let latestPayload = null;
+    let forecastDates = [];
+
+    function initMap() {
+      mapInstance = L.map('map', {
+        center: [23.7805, 90.4000],
+        zoom: 12,
+        zoomControl: true
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO | EpiGrid ST-GNN',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(mapInstance);
+
+      edgeGroup = L.layerGroup().addTo(mapInstance);
+      markerGroup = L.layerGroup().addTo(mapInstance);
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371.0;
+      const dLat = (lat2 - lat1) * Math.PI / 180.0;
+      const dLon = (lon2 - lon1) * Math.PI / 180.0;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180.0) * Math.cos(lat2 * Math.PI / 180.0) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function getRiskColor(prob) {
+      if (prob >= 0.75) return '#ef4444';
+      if (prob >= 0.55) return '#f59e0b';
+      return '#10b981';
+    }
+
+    function updateMapHorizon(dayIndex) {
+      if (!latestPayload) return;
+      const idx = parseInt(dayIndex, 10);
+      const wards = latestPayload.predictive_14_day_probability_matrix.prioritized_urban_ward_forecasts;
+      const dateStr = forecastDates[idx] || `Day +${idx + 1}`;
+
+      document.getElementById('scrubberLabel').innerText =
+        `Forecast Horizon: Day +${idx + 1} (${dateStr})`;
+
+      markerGroup.clearLayers();
+      edgeGroup.clearLayers();
+
+      const heatPoints = [];
+
+      // Draw Kipf-Welling ST-GNN topological graph edges between nodes within 4.5 km
+      for (let i = 0; i < wards.length; i++) {
+        for (let j = i + 1; j < wards.length; j++) {
+          const c1 = wards[i].coordinates;
+          const c2 = wards[j].coordinates;
+          const dist = haversineKm(c1.latitude, c1.longitude, c2.latitude, c2.longitude);
+          if (dist <= 4.5) {
+            L.polyline(
+              [[c1.latitude, c1.longitude], [c2.latitude, c2.longitude]],
+              { color: '#38bdf8', weight: 1.4, opacity: 0.35, dashArray: '4, 4' }
+            ).addTo(edgeGroup);
+          }
+        }
+      }
+
+      wards.forEach((w) => {
+        const trajValues = Object.values(w.daily_probability_trajectory_14d);
+        const probAtDay = trajValues[idx] !== undefined ? trajValues[idx] : w.day_14_outbreak_probability;
+        const lat = w.coordinates.latitude;
+        const lon = w.coordinates.longitude;
+
+        // Add primary heat point and surrounding spatial kernel density cloud
+        heatPoints.push([lat, lon, Math.min(1.0, probAtDay * 1.15)]);
+        const offsets = [
+          [0.003, 0.003], [-0.003, -0.003], [0.003, -0.003], [-0.003, 0.003]
+        ];
+        offsets.forEach(([dLat, dLon]) => {
+          heatPoints.push([lat + dLat, lon + dLon, probAtDay * 0.65]);
+        });
+
+        const color = getRiskColor(probAtDay);
+        const circle = L.circleMarker([lat, lon], {
+          radius: 9 + (probAtDay * 7),
+          fillColor: color,
+          color: '#ffffff',
+          weight: 1.8,
+          opacity: 0.95,
+          fillOpacity: 0.85
+        });
+
+        circle.bindPopup(`
+          <div style="font-family: sans-serif; color: #0f172a; min-width: 220px;">
+            <strong style="font-size: 0.95rem;">${w.municipal_ward_name}</strong><br/>
+            <span style="font-size: 0.78rem; color: #475569;">
+              Sector: ${w.ward_sector_id} | Node: ${w.source_waterlogging_node}
+            </span>
+            <hr style="margin: 6px 0; border: none; border-top: 1px solid #cbd5e1;"/>
+            <div style="font-size: 0.82rem; line-height: 1.5;">
+              <b>Structure:</b> ${w.structural_classification}<br/>
+              <b>Day +${idx + 1} (${dateStr}) Risk:</b>
+              <span style="color:${color}; font-weight:700;">${(probAtDay * 100).toFixed(1)}%</span><br/>
+              <b>Day +14 Terminal Risk:</b> ${(w.day_14_outbreak_probability * 100).toFixed(1)}%<br/>
+              <b>Preemptive Action:</b> ${w.recommended_municipal_preemption}
+            </div>
+          </div>
+        `);
+
+        circle.addTo(markerGroup);
+      });
+
+      if (heatLayer) {
+        mapInstance.removeLayer(heatLayer);
+      }
+      heatLayer = L.heatLayer(heatPoints, {
+        radius: 38,
+        blur: 24,
+        maxZoom: 15,
+        max: 1.0,
+        gradient: {
+          0.25: '#06b6d4',
+          0.50: '#10b981',
+          0.68: '#f59e0b',
+          0.85: '#ef4444',
+          1.00: '#991b1b'
+        }
+      }).addTo(mapInstance);
+    }
+
+    function renderCharts(payload) {
+      const wards = payload.predictive_14_day_probability_matrix.prioritized_urban_ward_forecasts.slice(0, 5);
+      const dates = Object.keys(wards[0].daily_probability_trajectory_14d);
+      const palette = ['#ef4444', '#f59e0b', '#06b6d4', '#10b981', '#8b5cf6'];
+
+      const datasets = wards.map((w, i) => ({
+        label: w.ward_sector_id,
+        data: Object.values(w.daily_probability_trajectory_14d).map(v => +(v * 100).toFixed(1)),
+        borderColor: palette[i % palette.length],
+        backgroundColor: palette[i % palette.length],
+        borderWidth: 2,
+        tension: 0.35,
+        pointRadius: 2
+      }));
+
+      const ctxTraj = document.getElementById('trajectoryChart').getContext('2d');
+      if (trajectoryChartInstance) trajectoryChartInstance.destroy();
+      trajectoryChartInstance = new Chart(ctxTraj, {
+        type: 'line',
+        data: { labels: dates.map(d => d.slice(5)), datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#cbd5e1', boxWidth: 12, font: { size: 11 } } }
+          },
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } },
+            y: {
+              min: 0, max: 100,
+              ticks: { color: '#94a3b8', callback: v => v + '%' },
+              grid: { color: '#1e293b' }
+            }
+          }
+        }
+      });
+
+      const conv = payload.st_gnn_neural_network_telemetry.training_telemetry.convergence_curve;
+      const ctxLoss = document.getElementById('lossChart').getContext('2d');
+      if (lossChartInstance) lossChartInstance.destroy();
+      lossChartInstance = new Chart(ctxLoss, {
+        type: 'line',
+        data: {
+          labels: conv.map(c => 'Epoch ' + c.epoch),
+          datasets: [{
+            label: 'Composite Epidemiological Loss',
+            data: conv.map(c => c.total_loss),
+            borderColor: '#38bdf8',
+            backgroundColor: 'rgba(56, 189, 248, 0.15)',
+            fill: true,
+            borderWidth: 2.2,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11 } } } },
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
+          }
+        }
+      });
+    }
+
+    function renderAlertsAndTable(payload) {
+      const alerts = payload.automated_municipal_alert_system.active_municipal_dispatch_manifest;
+      document.getElementById('alertCountBadge').innerText = `${alerts.length} Active Dispatches`;
+
+      const feed = document.getElementById('alertFeed');
+      if (alerts.length === 0) {
+        feed.innerHTML = `<div style="color: var(--text-muted);">No wards breached the preemption threshold.</div>`;
+      } else {
+        feed.innerHTML = alerts.map(a => {
+          const isCrit = a.epidemiological_risk_metrics.day_14_probability >= 0.70;
+          const res = a.preemptive_fogging_work_order.resource_quantification;
+          return `
+            <div class="alert-card ${isCrit ? '' : 'warning-tier'}">
+              <div class="alert-top">
+                <div class="alert-ward">${a.municipal_ward_name} (${a.ward_sector_id})</div>
+                <span class="badge ${isCrit ? 'badge-red' : 'badge-amber'}">
+                  Day +14 Risk: ${(a.epidemiological_risk_metrics.day_14_probability * 100).toFixed(1)}%
+                </span>
+              </div>
+              <div class="alert-meta">
+                <b>Authority:</b> ${a.recipient_authority.authority_name}<br/>
+                <b>Directive:</b> ${a.preemptive_fogging_work_order.directive} |
+                <b>GPS:</b> ${a.gps_dispatch_coordinates.latitude.toFixed(4)}, ${a.gps_dispatch_coordinates.longitude.toFixed(4)}
+              </div>
+              <div class="resource-grid">
+                <div class="resource-item">
+                  <span>Temephos 50 EC</span>
+                  <strong>${res.temephos_larvicide_50ec_liters} Liters</strong>
+                </div>
+                <div class="resource-item">
+                  <span>Deltamethrin Fog</span>
+                  <strong>${res.deltamethrin_thermal_fog_liters} Liters</strong>
+                </div>
+                <div class="resource-item">
+                  <span>Preemption Lead</span>
+                  <strong>${res.preemption_lead_time_days} Days Prior</strong>
+                </div>
+              </div>
+              <div class="hash-footer">
+                Dispatch ID: ${a.alert_dispatch_id} | SHA-256: ${a.sha256_cryptographic_receipt.slice(0, 36)}...
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const wards = payload.predictive_14_day_probability_matrix.prioritized_urban_ward_forecasts;
+      const tbody = document.getElementById('wardTableBody');
+      tbody.innerHTML = wards.map(w => {
+        const p14 = w.day_14_outbreak_probability;
+        const badgeClass = p14 >= 0.75 ? 'badge-red' : (p14 >= 0.55 ? 'badge-amber' : 'badge-emerald');
+        return `
+          <tr onclick="focusWard(${w.coordinates.latitude}, ${w.coordinates.longitude})">
+            <td style="font-weight:700; color:#38bdf8;">${w.ward_sector_id}</td>
+            <td>${w.municipal_ward_name}</td>
+            <td>${(w.day_1_outbreak_probability * 100).toFixed(1)}%</td>
+            <td>${(w.day_7_outbreak_probability * 100).toFixed(1)}%</td>
+            <td><span class="prob-pill ${badgeClass}">${(p14 * 100).toFixed(1)}%</span></td>
+            <td><span class="badge ${badgeClass}">${w.outbreak_risk_classification.replace(/_/g, ' ')}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function focusWard(lat, lon) {
+      if (mapInstance) {
+        mapInstance.flyTo([lat, lon], 14, { duration: 1.0 });
+      }
+    }
+
+    async function executeEpiGridPipeline() {
+      const btn = document.getElementById('runBtn');
+      const lat = document.getElementById('latInput').value || 23.8103;
+      const lon = document.getElementById('lonInput').value || 90.4125;
+      const epochs = document.getElementById('epochsInput').value || 120;
+
+      btn.disabled = true;
+      btn.innerText = 'Training ST-GNN & Dispatching Alerts...';
+
+      try {
+        const res = await fetch(
+          `/api/v1/alerts/evaluate-and-dispatch?lat=${lat}&lon=${lon}&epochs=${epochs}`
+        );
+        const data = await res.json();
+        latestPayload = data;
+
+        const wards = data.predictive_14_day_probability_matrix.prioritized_urban_ward_forecasts;
+        if (wards.length > 0) {
+          forecastDates = Object.keys(wards[0].daily_probability_trajectory_14d);
+        }
+
+        // Update Top KPI Cards
+        const syncSummary = data.spatiotemporal_waterlogging_summary;
+        const bioSummary = data.aedes_biological_incubation_summary.aedes_aegypti_kinetics || {};
+        const gnnTelem = data.st_gnn_neural_network_telemetry;
+        const alertSys = data.automated_municipal_alert_system;
+
+        document.getElementById('kpiNodes').innerText =
+          `${syncSummary.total_nodes_isolated} Nodes`;
+        document.getElementById('kpiViableNodes').innerText =
+          `${syncSummary.viable_breeding_nodes} Viable Breeding Rooftops/Alleys`;
+
+        document.getElementById('kpiEip').innerText =
+          `${bioSummary.extrinsic_incubation_period_eip_days || '--'} Days`;
+        document.getElementById('kpiAquatic').innerText =
+          `Aquatic Emergence: ${bioSummary.aquatic_larval_emergence_days || '--'} Days`;
+
+        const dghsInfo = gnnTelem.dghs_epidemiological_baseline_integration || {};
+        document.getElementById('kpiDghs').innerText =
+          `${dghsInfo.extracted_admission_metric || '--'} Cases`;
+        document.getElementById('kpiDghsPressure').innerText =
+          `Baseline Pressure Index: ${dghsInfo.normalized_baseline_pressure_index || '--'}`;
+
+        const finalLoss = gnnTelem.training_telemetry.final_epoch_loss_breakdown.composite_objective_loss;
+        document.getElementById('kpiLoss').innerText = finalLoss;
+        document.getElementById('kpiAccelerator').innerText =
+          gnnTelem.compute_accelerator || gnnTelem.framework;
+
+        document.getElementById('kpiAlerts').innerText =
+          `${alertSys.automated_alerts_triggered_count} Dispatched`;
+        document.getElementById('kpiCorpSplit').innerText =
+          `DNCC: ${alertSys.dncc_dispatches_count} | DSCC: ${alertSys.dscc_dispatches_count} Preemptive Orders`;
+
+        document.getElementById('epochsBadge').innerText = `${epochs} Epochs`;
+        document.getElementById('daySlider').value = 13;
+
+        updateMapHorizon(13);
+        renderCharts(data);
+        renderAlertsAndTable(data);
+      } catch (err) {
+        console.error('Pipeline execution error:', err);
+        alert('Failed to fetch ST-GNN telemetry. Ensure epigrid.service is running.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Run ST-GNN & Trigger Preemptive Alerts';
+      }
+    }
+
+    function downloadAlertManifest() {
+      if (!latestPayload) return;
+      const blob = new Blob([JSON.stringify(latestPayload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `epigrid_phase5_municipal_manifest_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      executeEpiGridPipeline();
+    });
+  </script>
+</body>
+</html>

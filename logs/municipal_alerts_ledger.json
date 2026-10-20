@@ -1,0 +1,554 @@
+[
+  {
+    "alert_dispatch_id": "EPI-ALT-DA89E7A6",
+    "dispatched_at_utc": "2026-10-20T04:09:46.249115",
+    "sha256_cryptographic_receipt": "df0c9fff487c52164876081aa69a7bc4ef349f784671ba47e939e3fa638110c1",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S03",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-003",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.807488,
+      "longitude": 90.405937
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6965,
+      "day_7_probability": 0.9361,
+      "day_14_probability": 0.9687,
+      "mean_14d_probability": 0.8946,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 300.0,
+        "hydrological_retention_days": 16.75,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 2.66,
+        "deltamethrin_thermal_fog_liters": 2.55,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 4.1
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-DBFEF0CA",
+    "dispatched_at_utc": "2026-10-20T04:09:46.249115",
+    "sha256_cryptographic_receipt": "c71977ef97c537b244776a4e91810c6f82793d83a7292d6bd46b365c92fb07f9",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S02",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-002",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.808425,
+      "longitude": 90.419062
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6959,
+      "day_7_probability": 0.9351,
+      "day_14_probability": 0.968,
+      "mean_14d_probability": 0.8935,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 100.0,
+        "hydrological_retention_days": 13.19,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 0.89,
+        "deltamethrin_thermal_fog_liters": 0.73,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 1.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-8BF8E289",
+    "dispatched_at_utc": "2026-10-20T04:09:46.249115",
+    "sha256_cryptographic_receipt": "915ecae9b5954162a7619ece155f77298331269b86463c16a8c8794af804f4ff",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S05",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-005",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.799831,
+      "longitude": 90.395313
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6944,
+      "day_7_probability": 0.933,
+      "day_14_probability": 0.9665,
+      "mean_14d_probability": 0.891,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 600.0,
+        "hydrological_retention_days": 19.49,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 5.31,
+        "deltamethrin_thermal_fog_liters": 5.66,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 9.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-D52043AD",
+    "dispatched_at_utc": "2026-10-20T04:09:46.249115",
+    "sha256_cryptographic_receipt": "1427fd2e8e3854457b66e4830726b4f6d0289b225df5c6b2912e7cbcf6f50eff",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S06",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-006",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.792331,
+      "longitude": 90.402031
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6942,
+      "day_7_probability": 0.9326,
+      "day_14_probability": 0.9663,
+      "mean_14d_probability": 0.8906,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 200.0,
+        "hydrological_retention_days": 16.27,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 1.77,
+        "deltamethrin_thermal_fog_liters": 1.67,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 2.6
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-0954F728",
+    "dispatched_at_utc": "2026-10-20T04:09:46.249115",
+    "sha256_cryptographic_receipt": "094fe88ef8533ce2412dd1edb7109f02c7ddab5cfab7f41d3fc9ee4692cb0b55",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S01",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-001",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.819675,
+      "longitude": 90.4125
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6939,
+      "day_7_probability": 0.9321,
+      "day_14_probability": 0.9659,
+      "mean_14d_probability": 0.89,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 300.0,
+        "hydrological_retention_days": 17.08,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 2.65,
+        "deltamethrin_thermal_fog_liters": 2.58,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 4.2
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-8894FAC1",
+    "dispatched_at_utc": "2026-10-20T04:09:46.249115",
+    "sha256_cryptographic_receipt": "7f39a2fb806aada57a215f33b7f4483f98eb9b08d6d883b30599be692d92c1f0",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S04",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-004",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.803425,
+      "longitude": 90.425937
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6938,
+      "day_7_probability": 0.9319,
+      "day_14_probability": 0.9658,
+      "mean_14d_probability": 0.8898,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 100.0,
+        "hydrological_retention_days": 14.94,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 0.88,
+        "deltamethrin_thermal_fog_liters": 0.79,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 1.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-1DBB4964",
+    "dispatched_at_utc": "2026-10-20T04:09:08.413912",
+    "sha256_cryptographic_receipt": "4290d8081522496dfb95655ddb60b2aaf9e0a6af516abd092c6da409739799cf",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S03",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-003",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.807488,
+      "longitude": 90.405937
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6965,
+      "day_7_probability": 0.9361,
+      "day_14_probability": 0.9687,
+      "mean_14d_probability": 0.8946,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 300.0,
+        "hydrological_retention_days": 16.75,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 2.66,
+        "deltamethrin_thermal_fog_liters": 2.55,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 4.1
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-F47A6AA4",
+    "dispatched_at_utc": "2026-10-20T04:09:08.413912",
+    "sha256_cryptographic_receipt": "9c412866b8935dec401dddcce118bb178377e61e35ef4359f40e217ba3a03c90",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S02",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-002",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.808425,
+      "longitude": 90.419062
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6959,
+      "day_7_probability": 0.9351,
+      "day_14_probability": 0.968,
+      "mean_14d_probability": 0.8935,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 100.0,
+        "hydrological_retention_days": 13.19,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 0.89,
+        "deltamethrin_thermal_fog_liters": 0.73,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 1.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-E519C26A",
+    "dispatched_at_utc": "2026-10-20T04:09:08.413912",
+    "sha256_cryptographic_receipt": "a417d8e685d811a9ee2430e8baaeecc0bfe86b3d63c96f00349f497210066e56",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S05",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-005",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.799831,
+      "longitude": 90.395313
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6944,
+      "day_7_probability": 0.933,
+      "day_14_probability": 0.9665,
+      "mean_14d_probability": 0.891,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 600.0,
+        "hydrological_retention_days": 19.49,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 5.31,
+        "deltamethrin_thermal_fog_liters": 5.66,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 9.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-BAFAAA47",
+    "dispatched_at_utc": "2026-10-20T04:09:08.413912",
+    "sha256_cryptographic_receipt": "8ccb38b6f304c86236cc9a15d944b2e925376f70d2a515513aa2093183c295d9",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S06",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-006",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.792331,
+      "longitude": 90.402031
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6942,
+      "day_7_probability": 0.9326,
+      "day_14_probability": 0.9663,
+      "mean_14d_probability": 0.8906,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 200.0,
+        "hydrological_retention_days": 16.27,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 1.77,
+        "deltamethrin_thermal_fog_liters": 1.67,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 2.6
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-67A2D73E",
+    "dispatched_at_utc": "2026-10-20T04:09:08.413912",
+    "sha256_cryptographic_receipt": "9cf90db0c0b2448897efccf68266d83b485cbda6f12cfda7fd25d61e892f6a13",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S01",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-001",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.819675,
+      "longitude": 90.4125
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6939,
+      "day_7_probability": 0.9321,
+      "day_14_probability": 0.9659,
+      "mean_14d_probability": 0.89,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 300.0,
+        "hydrological_retention_days": 17.08,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 2.65,
+        "deltamethrin_thermal_fog_liters": 2.58,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 4.2
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-4F4F368C",
+    "dispatched_at_utc": "2026-10-20T04:09:08.413912",
+    "sha256_cryptographic_receipt": "da6d700a5e1f2883ddd869b2f7123096442b1b696f31431328f632a0270661b6",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Zone-North",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "ward_sector_id": "DNCC-W19-S04",
+    "municipal_ward_name": "Banani-Gulshan (Ward 19)",
+    "target_waterlogging_node_id": "EPI-NODE-004",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.803425,
+      "longitude": 90.425937
+    },
+    "epidemiological_risk_metrics": {
+      "day_1_probability": 0.6938,
+      "day_7_probability": 0.9319,
+      "day_14_probability": 0.9658,
+      "mean_14d_probability": 0.8898,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours",
+      "resource_quantification": {
+        "target_waterlogging_area_m2": 100.0,
+        "hydrological_retention_days": 14.94,
+        "aedes_extrinsic_incubation_eip_days": 7.25,
+        "projected_threshold_breach_date": "2026-10-21",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 0.88,
+        "deltamethrin_thermal_fog_liters": 0.79,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 1.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)",
+      "ledger_persisted": true
+    }
+  }
+]
