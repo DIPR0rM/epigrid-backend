@@ -6,25 +6,26 @@ from services.sentinel_client import fetch_sentinel2_waterlogging_scenes
 from services.nasa_power_client import fetch_nasa_meteorological_matrix
 from services.dghs_client import fetch_dghs_dengue_baseline
 from services.spatiotemporal_pipeline import execute_spatiotemporal_pipeline
+from services.st_gnn_engine import execute_phase4_stgnn_training_and_forecast
 
 app = FastAPI(
     title="EpiGrid: Epidemiological Preemption Engine",
-    description="Phase 3: Spatio-Temporal Pipeline (Sentinel-2 MNDWI Rooftop/Alley Isolation & Aedes Thermodynamic Synchronization)",
-    version="3.0.0"
+    description="Phase 4: Spatio-Temporal Graph Neural Network (PyTorch ST-GNN) Outbreak Forecasting Engine",
+    version="4.0.0"
 )
 
 @app.get("/")
 async def root():
     return {
         "project": "EpiGrid",
-        "phase": "Phase 3: Spatio-Temporal Pipeline Active",
+        "phase": "Phase 4: Predictive Neural Network Training (PyTorch ST-GNN) Active",
         "timestamp_utc": datetime.utcnow().isoformat()
     }
 
 @app.get("/health")
 async def health_check():
     await asyncio.sleep(0.05)
-    return {"server": "Uvicorn ASGI", "healthy": True, "phase": 3}
+    return {"server": "Uvicorn ASGI", "healthy": True, "phase": 4}
 
 @app.get("/api/v1/ingest/sentinel2")
 async def ingest_sentinel2(
@@ -73,9 +74,18 @@ async def run_spatiotemporal_pipeline(
     lon: float = Query(90.4125, description="Target Urban Longitude (Default: Dhaka)"),
     days_back: int = Query(14, description="Meteorological incubation window in days")
 ):
-    """
-    Phase 3 Pipeline: Isolates urban rooftop/alley water-retaining coordinates via Sentinel-2
-    MNDWI/NDWI morphological segmentation and synchronizes them with NASA POWER thermal data
-    to compute Aedes aegypti biological incubation parameters (EIP, MDR, Gonotrophic Cycle).
-    """
+    """Phase 3 Pipeline: Isolates urban micro-waterlogging nodes and computes Aedes incubation kinetics."""
     return await execute_spatiotemporal_pipeline(lat, lon, days_back)
+
+@app.get("/api/v1/ai/train-and-predict-stgnn")
+async def run_stgnn_training_and_prediction(
+    lat: float = Query(23.8103, description="Target Urban Latitude (Default: Dhaka)"),
+    lon: float = Query(90.4125, description="Target Urban Longitude (Default: Dhaka)"),
+    epochs: int = Query(120, ge=20, le=500, description="PyTorch backpropagation training epochs")
+):
+    """
+    Phase 4 Pipeline: Constructs a Spatio-Temporal Graph Neural Network (ST-GNN) in PyTorch,
+    trains on cross-referenced Sentinel-2, NASA POWER, and DGHS baseline tensors, and outputs
+    a 14-day predictive outbreak probability matrix across urban municipal wards.
+    """
+    return await execute_phase4_stgnn_training_and_forecast(lat=lat, lon=lon, epochs=epochs)
