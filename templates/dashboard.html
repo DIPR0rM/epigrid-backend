@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EpiGrid | Epidemiological Preemption & ST-GNN Command Center</title>
+  <title>EpiGrid | National Bangladesh Epidemiological Preemption Center</title>
 
-  <!-- Leaflet Geospatial CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Leaflet Gaussian Heatmap Plugin -->
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-  <!-- Chart.js for 14-Day Outbreak Trajectories & ST-GNN Convergence -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
@@ -25,7 +22,6 @@
       --accent-emerald: #10b981;
       --accent-amber: #f59e0b;
       --accent-red: #ef4444;
-      --accent-purple: #8b5cf6;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -35,28 +31,26 @@
       line-height: 1.5;
       padding-bottom: 40px;
     }
+    /* Dark Mode Filter for Free OpenStreetMap Tiles (No API Key Required!) */
+    .osm-dark-tiles {
+      filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(90%);
+    }
     header {
       background: linear-gradient(90deg, #090d16 0%, #0f172a 50%, #090d16 100%);
       border-bottom: 1px solid var(--border-color);
-      padding: 16px 28px;
+      padding: 14px 24px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       position: sticky;
       top: 0;
       z-index: 1000;
     }
-    .brand-title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .brand-title { display: flex; align-items: center; gap: 12px; }
     .pulse-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
+      width: 12px; height: 12px; border-radius: 50%;
       background: var(--accent-emerald);
       box-shadow: 0 0 12px var(--accent-emerald);
       animation: pulse 2s infinite;
@@ -66,308 +60,124 @@
       50% { transform: scale(1.2); opacity: 1; }
       100% { transform: scale(0.95); opacity: 0.8; }
     }
-    .brand-title h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: #fff;
-    }
-    .brand-subtitle {
-      font-size: 0.78rem;
-      color: var(--accent-cyan);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .control-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .brand-title h1 { font-size: 1.18rem; font-weight: 700; color: #fff; }
+    .brand-subtitle { font-size: 0.75rem; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.8px; }
+    .control-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .input-group {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 0.8rem;
+      border-radius: 6px; padding: 5px 10px; font-size: 0.78rem;
     }
-    .input-group label {
-      color: var(--text-muted);
-      margin-right: 6px;
-      font-weight: 600;
+    .input-group label { color: var(--text-muted); margin-right: 6px; font-weight: 600; }
+    .input-group select, .input-group input {
+      background: #1e293b; border: none; color: #fff;
+      font-size: 0.8rem; outline: none; cursor: pointer;
     }
-    .input-group input {
-      background: transparent;
-      border: none;
-      color: #fff;
-      width: 72px;
-      font-size: 0.82rem;
-      outline: none;
-    }
+    .input-group input { width: 65px; }
     button.btn-primary {
       background: linear-gradient(135deg, #06b6d4, #2563eb);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-weight: 600;
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: opacity 0.2s;
+      color: #fff; border: none; border-radius: 6px;
+      padding: 8px 14px; font-weight: 600; font-size: 0.8rem; cursor: pointer;
     }
-    button.btn-primary:hover { opacity: 0.9; }
     button.btn-secondary {
-      background: var(--bg-card);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      cursor: pointer;
+      background: var(--bg-card); color: var(--text-main);
+      border: 1px solid var(--border-color); border-radius: 6px;
+      padding: 8px 12px; font-size: 0.78rem; cursor: pointer;
     }
-    .container {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 20px 24px;
-    }
+    .container { max-width: 1600px; margin: 0 auto; padding: 18px 24px; }
     .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px; margin-bottom: 18px;
     }
     .kpi-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 16px 18px;
-      position: relative;
-      overflow: hidden;
+      background: var(--bg-panel); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 14px 16px;
     }
-    .kpi-card .kpi-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-    .kpi-card .kpi-value {
-      font-size: 1.65rem;
-      font-weight: 700;
-      color: #fff;
-    }
-    .kpi-card .kpi-sub {
-      font-size: 0.76rem;
-      margin-top: 4px;
-      color: var(--accent-cyan);
-    }
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1.55fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    @media (max-width: 1150px) {
-      .main-grid { grid-template-columns: 1fr; }
-    }
+    .kpi-card .kpi-label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .kpi-card .kpi-value { font-size: 1.55rem; font-weight: 700; color: #fff; }
+    .kpi-card .kpi-sub { font-size: 0.74rem; margin-top: 4px; color: var(--accent-cyan); }
+    .main-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; margin-bottom: 18px; }
+    @media (max-width: 1150px) { .main-grid { grid-template-columns: 1fr; } }
     .panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
+      background: var(--bg-panel); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 16px; display: flex; flex-direction: column;
     }
     .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);
     }
-    .panel-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .panel-title { font-size: 0.92rem; font-weight: 700; color: #fff; }
     .badge {
-      font-size: 0.7rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-weight: 600;
-      text-transform: uppercase;
+      font-size: 0.68rem; padding: 3px 8px; border-radius: 4px;
+      font-weight: 600; text-transform: uppercase;
     }
     .badge-cyan { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
     .badge-red { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
     .badge-amber { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
     .badge-emerald { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-
-    #map {
-      width: 100%;
-      height: 500px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: #0b1120;
-    }
+    #map { width: 100%; height: 500px; border-radius: 8px; border: 1px solid var(--border-color); background: #0b1120; }
     .scrubber-box {
-      margin-top: 14px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px 16px;
+      margin-top: 12px; background: var(--bg-card);
+      border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px;
     }
-    .scrubber-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.84rem;
-      margin-bottom: 8px;
-    }
-    .scrubber-slider {
-      width: 100%;
-      accent-color: var(--accent-cyan);
-      cursor: pointer;
-    }
-    .chart-box {
-      position: relative;
-      height: 245px;
-      width: 100%;
-      margin-bottom: 16px;
-    }
-    .bottom-grid {
-      display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: 20px;
-    }
-    @media (max-width: 1150px) {
-      .bottom-grid { grid-template-columns: 1fr; }
-    }
-    .alert-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 520px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
+    .scrubber-header { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px; }
+    .scrubber-slider { width: 100%; accent-color: var(--accent-cyan); cursor: pointer; }
+    .chart-box { position: relative; height: 240px; width: 100%; margin-bottom: 14px; }
+    .bottom-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; }
+    @media (max-width: 1150px) { .bottom-grid { grid-template-columns: 1fr; } }
+    .alert-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; }
     .alert-card {
-      background: var(--bg-card);
-      border-left: 4px solid var(--accent-red);
-      border-top: 1px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
-      border-bottom: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 14px;
+      background: var(--bg-card); border-left: 4px solid var(--accent-red);
+      border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color); border-radius: 8px; padding: 12px;
     }
-    .alert-card.warning-tier {
-      border-left-color: var(--accent-amber);
-    }
-    .alert-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-    .alert-ward {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #fff;
-    }
-    .alert-meta {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
+    .alert-card.warning-tier { border-left-color: var(--accent-amber); }
+    .alert-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .alert-ward { font-weight: 700; font-size: 0.9rem; color: #fff; }
+    .alert-meta { font-size: 0.76rem; color: var(--text-muted); margin-bottom: 8px; }
     .resource-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      background: rgba(15, 23, 42, 0.65);
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 0.76rem;
-      margin-bottom: 8px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+      background: rgba(15, 23, 42, 0.65); padding: 8px 10px; border-radius: 6px;
+      font-size: 0.74rem; margin-bottom: 6px;
     }
-    .resource-item span {
-      display: block;
-      color: var(--text-muted);
-      font-size: 0.7rem;
-    }
-    .resource-item strong {
-      color: var(--accent-cyan);
-    }
-    .hash-footer {
-      font-family: monospace;
-      font-size: 0.7rem;
-      color: #64748b;
-      word-break: break-all;
-    }
-    table.ward-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-    }
-    table.ward-table th, table.ward-table td {
-      padding: 10px 8px;
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
-    }
-    table.ward-table th {
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.72rem;
-    }
-    table.ward-table tr:hover {
-      background: rgba(30, 41, 59, 0.6);
-      cursor: pointer;
-    }
-    .prob-pill {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.75rem;
-    }
-    .legend-bar {
-      display: flex;
-      gap: 14px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
+    .resource-item span { display: block; color: var(--text-muted); font-size: 0.68rem; }
+    .resource-item strong { color: var(--accent-cyan); }
+    .hash-footer { font-family: monospace; font-size: 0.68rem; color: #64748b; }
+    table.ward-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    table.ward-table th, table.ward-table td { padding: 9px 8px; text-align: left; border-bottom: 1px solid var(--border-color); }
+    table.ward-table th { color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; }
+    table.ward-table tr:hover { background: rgba(30, 41, 59, 0.6); cursor: pointer; }
+    .prob-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 0.74rem; }
+    .legend-bar { display: flex; gap: 14px; font-size: 0.74rem; color: var(--text-muted); margin-top: 8px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
   </style>
 </head>
 <body>
 
   <header>
     <div class="brand-title">
-      <div class="pulse-dot" id="statusDot"></div>
+      <div class="pulse-dot"></div>
       <div>
-        <h1>EPIGRID: EPIDEMIOLOGICAL PREEMPTION ENGINE</h1>
-        <div class="brand-subtitle">Phase 5 Geospatial ST-GNN Outbreak Heat Map & Automated Municipal Alerting System</div>
+        <h1>EPIGRID: NATIONAL BANGLADESH PREEMPTION ENGINE</h1>
+        <div class="brand-subtitle">8 Divisions • 64 Districts • All Municipal Wards ST-GNN Forecast & Automated Alerting</div>
       </div>
     </div>
 
     <div class="control-bar">
+      <div class="input-group">
+        <label>DIVISION</label>
+        <select id="divisionSelect" onchange="onDivisionChange()"></select>
+      </div>
+      <div class="input-group">
+        <label>DISTRICT / CITY</label>
+        <select id="districtSelect" onchange="onDistrictChange()"></select>
+      </div>
+      <div class="input-group">
+        <label>WARD</label>
+        <select id="wardSelect" onchange="onWardChange()"></select>
+      </div>
       <div class="input-group">
         <label>LAT</label>
         <input type="number" id="latInput" value="23.8103" step="0.001" />
@@ -378,19 +188,18 @@
       </div>
       <div class="input-group">
         <label>EPOCHS</label>
-        <input type="number" id="epochsInput" value="120" min="20" max="500" />
+        <input type="number" id="epochsInput" value="120" min="20" max="500" style="width:48px;" />
       </div>
       <button class="btn-primary" id="runBtn" onclick="executeEpiGridPipeline()">
-        Run ST-GNN & Trigger Preemptive Alerts
+        Scan District & Dispatch Alerts
       </button>
       <button class="btn-secondary" onclick="downloadAlertManifest()">
-        Export JSON Manifest
+        Export JSON
       </button>
     </div>
   </header>
 
   <div class="container">
-    <!-- Top Telemetry KPI Row -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-label">Sentinel-2 Waterlogging Nodes</div>
@@ -415,25 +224,24 @@
       <div class="kpi-card">
         <div class="kpi-label">Automated Municipal Alerts</div>
         <div class="kpi-value" id="kpiAlerts" style="color: #f87171;">--</div>
-        <div class="kpi-sub" id="kpiCorpSplit">DNCC & DSCC Fogging Dispatches</div>
+        <div class="kpi-sub" id="kpiCorpSplit">Municipal Fogging Dispatches</div>
       </div>
     </div>
 
-    <!-- Main Geospatial Heat Map + Neural Network Telemetry Charts -->
     <div class="main-grid">
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">
-            <span>Dhaka Municipal Ward Predictive Outbreak Heat Map (14-Day ST-GNN Horizon)</span>
+          <div class="panel-title" id="mapHeaderTitle">
+            Municipal Ward Predictive Outbreak Heat Map (14-Day ST-GNN Horizon)
           </div>
-          <span class="badge badge-cyan" id="sceneBadge">Sentinel-2 L2A + NASA POWER</span>
+          <span class="badge badge-cyan" id="sceneBadge">OpenStreetMap + Esri Satellite</span>
         </div>
 
         <div id="map"></div>
 
         <div class="scrubber-box">
           <div class="scrubber-header">
-            <strong>Interactive Temporal Forecast Horizon Scrubber:</strong>
+            <strong>Interactive Temporal Forecast Horizon Scrubber (Day +1 to Day +14):</strong>
             <span id="scrubberLabel" style="color: var(--accent-cyan); font-weight: 700;">
               Day +14 Forecast Horizon
             </span>
@@ -450,8 +258,8 @@
           <div class="legend-bar">
             <div class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> Critical Outbreak Imminent (&ge; 75%)</div>
             <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> High Transmission Risk (55% – 74%)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Moderate Endemic Surveillance (&lt; 55%)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> Kipf-Welling ST-GNN Graph Edge (d &le; 4.5 km)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Moderate Surveillance (&lt; 55%)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> ST-GNN Mosquito Dispersal Edge (d &le; 4.5 km)</div>
           </div>
         </div>
       </div>
@@ -466,7 +274,7 @@
         </div>
 
         <div class="panel-header" style="margin-top: 6px;">
-          <div class="panel-title">PyTorch ST-GNN Backpropagation Convergence</div>
+          <div class="panel-title">PyTorch ST-GNN Backpropagation Convergence (AI Error Reduction)</div>
           <span class="badge badge-cyan" id="epochsBadge">120 Epochs</span>
         </div>
         <div class="chart-box" style="height: 205px; margin-bottom: 0;">
@@ -475,24 +283,19 @@
       </div>
     </div>
 
-    <!-- Bottom Grid: Automated Municipal Alert Dispatches & Ward Probability Matrix Table -->
     <div class="bottom-grid">
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">Automated Municipal Preemption & Fogging Work Orders</div>
           <span class="badge badge-red" id="alertCountBadge">0 Active Dispatches</span>
         </div>
-        <div class="alert-list" id="alertFeed">
-          <div style="color: var(--text-muted); font-size: 0.85rem;">
-            Executing PyTorch ST-GNN inference and evaluating municipal preemption thresholds...
-          </div>
-        </div>
+        <div class="alert-list" id="alertFeed"></div>
       </div>
 
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">14-Day Municipal Ward Probability Matrix</div>
-          <span class="badge badge-amber">Click Any Ward to Focus Map</span>
+          <span class="badge badge-amber">Click Any Ward Row to Zoom Map</span>
         </div>
         <div style="overflow-x: auto; max-height: 520px;">
           <table class="ward-table">
@@ -522,22 +325,108 @@
     let lossChartInstance = null;
     let latestPayload = null;
     let forecastDates = [];
+    let bdDirectory = {};
 
     function initMap() {
+      // 100% Free, Zero-API-Key Map Layers (OpenStreetMap Dark, OpenStreetMap Standard, Esri World Satellite)
+      const osmDark = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        className: 'osm-dark-tiles',
+        attribution: '&copy; OpenStreetMap contributors | EpiGrid ST-GNN',
+        maxZoom: 19
+      });
+
+      const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors | EpiGrid ST-GNN',
+        maxZoom: 19
+      });
+
+      const esriSatellite = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Copernicus Sentinel-2',
+          maxZoom: 19
+        }
+      );
+
       mapInstance = L.map('map', {
-        center: [23.7805, 90.4000],
-        zoom: 12,
+        center: [23.8103, 90.4125],
+        zoom: 13,
+        layers: [osmDark],
         zoomControl: true
       });
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO | EpiGrid ST-GNN',
-        subdomains: 'abcd',
-        maxZoom: 19
-      }).addTo(mapInstance);
+      L.control.layers(
+        {
+          "Dark Street Map (No API Key)": osmDark,
+          "Standard Street Map": osmStandard,
+          "Satellite Imagery (Esri)": esriSatellite
+        },
+        null,
+        { position: 'topright' }
+      ).addTo(mapInstance);
 
       edgeGroup = L.layerGroup().addTo(mapInstance);
       markerGroup = L.layerGroup().addTo(mapInstance);
+    }
+
+    async function loadBangladeshHierarchy() {
+      const res = await fetch('/api/v1/locations/bangladesh');
+      bdDirectory = await res.json();
+
+      const divSelect = document.getElementById('divisionSelect');
+      divSelect.innerHTML = Object.keys(bdDirectory).map(
+        div => `<option value="${div}">${div}</option>`
+      ).join('');
+
+      divSelect.value = "Dhaka Division";
+      onDivisionChange(false);
+    }
+
+    function onDivisionChange(autoRun = true) {
+      const div = document.getElementById('divisionSelect').value;
+      const districts = bdDirectory[div] || {};
+      const distSelect = document.getElementById('districtSelect');
+
+      distSelect.innerHTML = Object.keys(districts).map(
+        d => `<option value="${d}">${d}</option>`
+      ).join('');
+
+      onDistrictChange(autoRun);
+    }
+
+    function onDistrictChange(autoRun = true) {
+      const div = document.getElementById('divisionSelect').value;
+      const dist = document.getElementById('districtSelect').value;
+      const dInfo = (bdDirectory[div] || {})[dist];
+      if (!dInfo) return;
+
+      document.getElementById('latInput').value = dInfo.lat;
+      document.getElementById('lonInput').value = dInfo.lon;
+
+      const wardSelect = document.getElementById('wardSelect');
+      wardSelect.innerHTML = `<option value="ALL">All 12 Municipal Wards (${dist})</option>` +
+        dInfo.wards.map(
+          w => `<option value="${w.ward_id}">${w.ward_name}</option>`
+        ).join('');
+
+      if (autoRun) {
+        executeEpiGridPipeline();
+      }
+    }
+
+    function onWardChange() {
+      const div = document.getElementById('divisionSelect').value;
+      const dist = document.getElementById('districtSelect').value;
+      const wardId = document.getElementById('wardSelect').value;
+      const dInfo = (bdDirectory[div] || {})[dist];
+
+      if (wardId !== "ALL" && dInfo) {
+        const wObj = dInfo.wards.find(w => w.ward_id === wardId);
+        if (wObj && mapInstance) {
+          mapInstance.flyTo([wObj.lat, wObj.lon], 15, { duration: 1.0 });
+        }
+      }
+      executeEpiGridPipeline();
     }
 
     function haversineKm(lat1, lon1, lat2, lon2) {
@@ -571,7 +460,6 @@
 
       const heatPoints = [];
 
-      // Draw Kipf-Welling ST-GNN topological graph edges between nodes within 4.5 km
       for (let i = 0; i < wards.length; i++) {
         for (let j = i + 1; j < wards.length; j++) {
           const c1 = wards[i].coordinates;
@@ -580,7 +468,7 @@
           if (dist <= 4.5) {
             L.polyline(
               [[c1.latitude, c1.longitude], [c2.latitude, c2.longitude]],
-              { color: '#38bdf8', weight: 1.4, opacity: 0.35, dashArray: '4, 4' }
+              { color: '#38bdf8', weight: 1.5, opacity: 0.45, dashArray: '4, 4' }
             ).addTo(edgeGroup);
           }
         }
@@ -592,38 +480,36 @@
         const lat = w.coordinates.latitude;
         const lon = w.coordinates.longitude;
 
-        // Add primary heat point and surrounding spatial kernel density cloud
         heatPoints.push([lat, lon, Math.min(1.0, probAtDay * 1.15)]);
-        const offsets = [
-          [0.003, 0.003], [-0.003, -0.003], [0.003, -0.003], [-0.003, 0.003]
-        ];
+        const offsets = [[0.002, 0.002], [-0.002, -0.002], [0.002, -0.002], [-0.002, 0.002]];
         offsets.forEach(([dLat, dLon]) => {
           heatPoints.push([lat + dLat, lon + dLon, probAtDay * 0.65]);
         });
 
         const color = getRiskColor(probAtDay);
         const circle = L.circleMarker([lat, lon], {
-          radius: 9 + (probAtDay * 7),
+          radius: 9 + (probAtDay * 6),
           fillColor: color,
           color: '#ffffff',
-          weight: 1.8,
+          weight: 2,
           opacity: 0.95,
-          fillOpacity: 0.85
+          fillOpacity: 0.88
         });
 
         circle.bindPopup(`
-          <div style="font-family: sans-serif; color: #0f172a; min-width: 220px;">
+          <div style="font-family: sans-serif; color: #0f172a; min-width: 240px;">
             <strong style="font-size: 0.95rem;">${w.municipal_ward_name}</strong><br/>
-            <span style="font-size: 0.78rem; color: #475569;">
-              Sector: ${w.ward_sector_id} | Node: ${w.source_waterlogging_node}
+            <span style="font-size: 0.76rem; color: #475569;">
+              ${w.division_name} &bull; ${w.district_name} | Sector: ${w.ward_sector_id}
             </span>
             <hr style="margin: 6px 0; border: none; border-top: 1px solid #cbd5e1;"/>
-            <div style="font-size: 0.82rem; line-height: 1.5;">
-              <b>Structure:</b> ${w.structural_classification}<br/>
+            <div style="font-size: 0.8rem; line-height: 1.5;">
+              <b>Authority:</b> ${w.municipal_authority}<br/>
+              <b>Water Trap Type:</b> ${w.structural_classification}<br/>
               <b>Day +${idx + 1} (${dateStr}) Risk:</b>
               <span style="color:${color}; font-weight:700;">${(probAtDay * 100).toFixed(1)}%</span><br/>
               <b>Day +14 Terminal Risk:</b> ${(w.day_14_outbreak_probability * 100).toFixed(1)}%<br/>
-              <b>Preemptive Action:</b> ${w.recommended_municipal_preemption}
+              <b>Directive:</b> ${w.recommended_municipal_preemption}
             </div>
           </div>
         `);
@@ -635,8 +521,8 @@
         mapInstance.removeLayer(heatLayer);
       }
       heatLayer = L.heatLayer(heatPoints, {
-        radius: 38,
-        blur: 24,
+        radius: 34,
+        blur: 22,
         maxZoom: 15,
         max: 1.0,
         gradient: {
@@ -650,9 +536,11 @@
     }
 
     function renderCharts(payload) {
-      const wards = payload.predictive_14_day_probability_matrix.prioritized_urban_ward_forecasts.slice(0, 5);
+      const wards = payload.predictive_14_day_probability_matrix.prioritized_urban_ward_forecasts.slice(0, 6);
+      if (wards.length === 0) return;
+
       const dates = Object.keys(wards[0].daily_probability_trajectory_14d);
-      const palette = ['#ef4444', '#f59e0b', '#06b6d4', '#10b981', '#8b5cf6'];
+      const palette = ['#ef4444', '#f59e0b', '#06b6d4', '#10b981', '#8b5cf6', '#ec4899'];
 
       const datasets = wards.map((w, i) => ({
         label: w.ward_sector_id,
@@ -672,9 +560,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { labels: { color: '#cbd5e1', boxWidth: 12, font: { size: 11 } } }
-          },
+          plugins: { legend: { labels: { color: '#cbd5e1', boxWidth: 12, font: { size: 11 } } } },
           scales: {
             x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } },
             y: {
@@ -781,41 +667,53 @@
 
     function focusWard(lat, lon) {
       if (mapInstance) {
-        mapInstance.flyTo([lat, lon], 14, { duration: 1.0 });
+        mapInstance.flyTo([lat, lon], 15, { duration: 0.9 });
       }
     }
 
     async function executeEpiGridPipeline() {
       const btn = document.getElementById('runBtn');
+      const dist = document.getElementById('districtSelect').value || 'Dhaka';
+      const wardFilter = document.getElementById('wardSelect').value || 'ALL';
       const lat = document.getElementById('latInput').value || 23.8103;
       const lon = document.getElementById('lonInput').value || 90.4125;
       const epochs = document.getElementById('epochsInput').value || 120;
 
       btn.disabled = true;
-      btn.innerText = 'Training ST-GNN & Dispatching Alerts...';
+      btn.innerText = `Scanning ${dist}...`;
 
       try {
         const res = await fetch(
-          `/api/v1/alerts/evaluate-and-dispatch?lat=${lat}&lon=${lon}&epochs=${epochs}`
+          `/api/v1/alerts/evaluate-and-dispatch?lat=${lat}&lon=${lon}&epochs=${epochs}&district=${encodeURIComponent(dist)}&ward_filter=${encodeURIComponent(wardFilter)}`
         );
         const data = await res.json();
         latestPayload = data;
+
+        const region = data.administrative_region || {};
+        document.getElementById('mapHeaderTitle').innerText =
+          `${region.district || dist} (${region.division || ''}) — 14-Day Ward Outbreak Heat Map`;
+
+        if (mapInstance && region.center_coordinates) {
+          mapInstance.flyTo(
+            [region.center_coordinates.latitude, region.center_coordinates.longitude],
+            wardFilter === 'ALL' ? 13 : 15,
+            { duration: 1.1 }
+          );
+        }
 
         const wards = data.predictive_14_day_probability_matrix.prioritized_urban_ward_forecasts;
         if (wards.length > 0) {
           forecastDates = Object.keys(wards[0].daily_probability_trajectory_14d);
         }
 
-        // Update Top KPI Cards
         const syncSummary = data.spatiotemporal_waterlogging_summary;
         const bioSummary = data.aedes_biological_incubation_summary.aedes_aegypti_kinetics || {};
         const gnnTelem = data.st_gnn_neural_network_telemetry;
         const alertSys = data.automated_municipal_alert_system;
 
-        document.getElementById('kpiNodes').innerText =
-          `${syncSummary.total_nodes_isolated} Nodes`;
+        document.getElementById('kpiNodes').innerText = `${syncSummary.total_nodes_isolated} Wards`;
         document.getElementById('kpiViableNodes').innerText =
-          `${syncSummary.viable_breeding_nodes} Viable Breeding Rooftops/Alleys`;
+          `${region.district || dist} Breeding Rooftops/Alleys`;
 
         document.getElementById('kpiEip').innerText =
           `${bioSummary.extrinsic_incubation_period_eip_days || '--'} Days`;
@@ -830,13 +728,11 @@
 
         const finalLoss = gnnTelem.training_telemetry.final_epoch_loss_breakdown.composite_objective_loss;
         document.getElementById('kpiLoss').innerText = finalLoss;
-        document.getElementById('kpiAccelerator').innerText =
-          gnnTelem.compute_accelerator || gnnTelem.framework;
+        document.getElementById('kpiAccelerator').innerText = gnnTelem.compute_accelerator;
 
         document.getElementById('kpiAlerts').innerText =
           `${alertSys.automated_alerts_triggered_count} Dispatched`;
-        document.getElementById('kpiCorpSplit').innerText =
-          `DNCC: ${alertSys.dncc_dispatches_count} | DSCC: ${alertSys.dscc_dispatches_count} Preemptive Orders`;
+        document.getElementById('kpiCorpSplit').innerText = alertSys.authority_name;
 
         document.getElementById('epochsBadge').innerText = `${epochs} Epochs`;
         document.getElementById('daySlider').value = 13;
@@ -845,11 +741,10 @@
         renderCharts(data);
         renderAlertsAndTable(data);
       } catch (err) {
-        console.error('Pipeline execution error:', err);
-        alert('Failed to fetch ST-GNN telemetry. Ensure epigrid.service is running.');
+        console.error('Pipeline error:', err);
       } finally {
         btn.disabled = false;
-        btn.innerText = 'Run ST-GNN & Trigger Preemptive Alerts';
+        btn.innerText = 'Scan District & Dispatch Alerts';
       }
     }
 
@@ -859,13 +754,14 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `epigrid_phase5_municipal_manifest_${new Date().toISOString().slice(0,10)}.json`;
+      a.download = `epigrid_bangladesh_manifest_${new Date().toISOString().slice(0,10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       initMap();
+      await loadBangladeshHierarchy();
       executeEpiGridPipeline();
     });
   </script>

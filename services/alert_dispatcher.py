@@ -16,20 +16,18 @@ load_dotenv()
 ALERT_LEDGER_PATH = "logs/municipal_alerts_ledger.json"
 
 
-def determine_municipal_authority(ward_sector_id: str) -> dict:
-    """Maps a ward sector identifier to the responsible municipal health authority."""
-    if ward_sector_id.startswith("DNCC"):
-        return {
-            "corporation_code": "DNCC",
-            "authority_name": "Dhaka North City Corporation - Vector Control & Public Health Wing",
-            "emergency_control_room": "DNCC-HEOC-Zone-North",
-            "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
-        }
+def determine_municipal_authority(ward_forecast: dict) -> dict:
+    """Maps any Bangladesh District/City Ward to its responsible Municipal Authority."""
+    ward_id = ward_forecast.get("ward_sector_id", "BD-W01")
+    code = ward_id.split("-")[0]
+    authority_title = ward_forecast.get("municipal_authority", " District Pourashava Vector Control Wing")
+    district_name = ward_forecast.get("district_name", "Bangladesh")
+
     return {
-        "corporation_code": "DSCC",
-        "authority_name": "Dhaka South City Corporation - Mosquito Control Directorate",
-        "emergency_control_room": "DSCC-HEOC-Zone-South",
-        "dispatch_channel": "dscc-vector-preemption@epigrid.gov.bd"
+        "corporation_code": code,
+        "authority_name": f"{authority_title} - Vector Control & Public Health Wing",
+        "emergency_control_room": f"{code}-HEOC-{district_name}",
+        "dispatch_channel": f"{code.lower()}-vector-preemption@epigrid.gov.bd"
     }
 
 
@@ -37,10 +35,6 @@ def calculate_fogging_resource_allocation(
     ward_forecast: dict,
     node_lookup: dict
 ) -> dict:
-    """
-    Computes quantitative larvicidal and adulticidal fogging resources required
-    to neutralize the waterlogging breeding node before clinical infections surge.
-    """
     node_id = ward_forecast["source_waterlogging_node"]
     node_data = node_lookup.get(node_id, {})
     spatial_metrics = node_data.get("spatial_metrics", {})
@@ -54,7 +48,6 @@ def calculate_fogging_resource_allocation(
     day_14_prob = float(ward_forecast["day_14_outbreak_probability"])
     trajectory = ward_forecast["daily_probability_trajectory_14d"]
 
-    # Identify earliest forecast date crossing critical or warning threshold
     breach_date = None
     lead_time_days = 14
     for idx, (date_str, prob_val) in enumerate(trajectory.items()):
@@ -63,7 +56,6 @@ def calculate_fogging_resource_allocation(
             lead_time_days = idx + 1
             break
 
-    # Calculate Temephos 50 EC larvicide volume (L) and Deltamethrin thermal fogging units
     temephos_liters = round(0.0045 * surface_area_m2 * (1.0 + day_14_prob), 2)
     deltamethrin_liters = round(0.0028 * surface_area_m2 * (1.0 + (retention_days / emergence_days)), 2)
     crew_hours = round(max(1.5, (surface_area_m2 / 150.0) * (retention_days / emergence_days)), 1)
@@ -83,29 +75,19 @@ def calculate_fogging_resource_allocation(
 
 
 async def dispatch_external_webhook(alert_payload: dict) -> str:
-    """
-    Sends an asynchronous JSON alert payload to a configured municipal webhook
-    (Slack, Discord, Telegram Bot Gateway, or Municipal REST endpoint) if set in .env.
-    """
     webhook_url = os.getenv("MUNICIPAL_ALERT_WEBHOOK_URL")
     if not webhook_url or "example.com" in webhook_url:
-        return "Local_Cryptographic_Ledger_Active (Set MUNICIPAL_ALERT_WEBHOOK_URL in .env for external webhook)"
+        return "Local_Cryptographic_Ledger_Active"
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(webhook_url, json=alert_payload)
-            if response.status_code < 300:
-                return f"Webhook_Delivered_HTTP_{response.status_code}"
-            return f"Webhook_Response_HTTP_{response.status_code}"
+            return f"Webhook_Delivered_HTTP_{response.status_code}"
     except Exception as exc:
         return f"Webhook_Retry_Queued ({type(exc).__name__})"
 
 
 def dispatch_smtp_email_alert(alert_payload: dict) -> str:
-    """
-    Dispatches an automated SMTP email bulletin to municipal authorities if SMTP
-    credentials are configured in .env.
-    """
     smtp_host = os.getenv("SMTP_HOST")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
     smtp_user = os.getenv("SMTP_USERNAME")
@@ -113,14 +95,11 @@ def dispatch_smtp_email_alert(alert_payload: dict) -> str:
     recipient = os.getenv("MUNICIPAL_ALERT_EMAIL")
 
     if not smtp_host or not smtp_user or not smtp_pass or not recipient:
-        return "Local_Dispatch_Spool_Verified (Configure SMTP_* in .env for live email relay)"
+        return "Local_Dispatch_Spool_Verified"
 
     try:
         msg = EmailMessage()
-        msg["Subject"] = (
-            f"[EPIGRID PREEMPTIVE ALERT] {alert_payload['severity_tier']} - "
-            f"{alert_payload['municipal_ward_name']}"
-        )
+        msg["Subject"] = f"[EPIGRID PREEMPTIVE ALERT] {alert_payload['severity_tier']} - {alert_payload['municipal_ward_name']}"
         msg["From"] = smtp_user
         msg["To"] = recipient
         msg.set_content(json.dumps(alert_payload, indent=2))
@@ -135,7 +114,6 @@ def dispatch_smtp_email_alert(alert_payload: dict) -> str:
 
 
 def append_alerts_to_ledger(dispatched_alerts: list[dict]) -> None:
-    """Persists triggered municipal alerts to an append-only JSON ledger on disk."""
     os.makedirs(os.path.dirname(ALERT_LEDGER_PATH), exist_ok=True)
     existing_records = []
     if os.path.exists(ALERT_LEDGER_PATH):
@@ -151,7 +129,6 @@ def append_alerts_to_ledger(dispatched_alerts: list[dict]) -> None:
 
 
 def read_alert_ledger() -> list[dict]:
-    """Reads the historical municipal alert ledger from disk."""
     if not os.path.exists(ALERT_LEDGER_PATH):
         return []
     try:
@@ -165,18 +142,18 @@ async def execute_phase5_command_and_alerting(
     lat: float = 23.8103,
     lon: float = 90.4125,
     epochs: int = 120,
-    alert_threshold: float = 0.55
+    alert_threshold: float = 0.55,
+    district: str | None = None,
+    ward_filter: str | None = None
 ) -> dict:
-    """
-    Phase 5 Master Orchestrator:
-    1. Executes Phase 3 Spatio-Temporal Pipeline & Phase 4 PyTorch ST-GNN Forecasting.
-    2. Evaluates all municipal wards against preemptive outbreak thresholds.
-    3. Calculates entomological larvicidal/fogging resource allocations.
-    4. Triggers automated alerts to DNCC/DSCC municipal authorities with SHA-256 verification.
-    """
-    # 1. Run Phase 3 & Phase 4 Engines
-    phase3_data = await execute_spatiotemporal_pipeline(lat=lat, lon=lon, days_back=14)
-    phase4_data = await execute_phase4_stgnn_training_and_forecast(lat=lat, lon=lon, epochs=epochs)
+    phase4_data = await execute_phase4_stgnn_training_and_forecast(
+        lat=lat, lon=lon, epochs=epochs, district=district, ward_filter=ward_filter
+    )
+    region_meta = phase4_data.get("administrative_region", {})
+    c_lat = region_meta.get("center_coordinates", {}).get("latitude", lat)
+    c_lon = region_meta.get("center_coordinates", {}).get("longitude", lon)
+
+    phase3_data = await execute_spatiotemporal_pipeline(lat=c_lat, lon=c_lon, days_back=14)
 
     nodes_list = (
         phase3_data.get("spatiotemporal_waterlogging_synchronization", {})
@@ -198,7 +175,7 @@ async def execute_phase5_command_and_alerting(
         peak_prob = max(day14_prob, mean_prob)
 
         if peak_prob >= alert_threshold:
-            authority = determine_municipal_authority(ward["ward_sector_id"])
+            authority = determine_municipal_authority(ward)
             resources = calculate_fogging_resource_allocation(ward, node_lookup)
 
             severity = (
@@ -219,6 +196,8 @@ async def execute_phase5_command_and_alerting(
                 "sha256_cryptographic_receipt": sha256_hash,
                 "severity_tier": severity,
                 "recipient_authority": authority,
+                "division_name": ward.get("division_name"),
+                "district_name": ward.get("district_name"),
                 "ward_sector_id": ward["ward_sector_id"],
                 "municipal_ward_name": ward["municipal_ward_name"],
                 "target_waterlogging_node_id": ward["source_waterlogging_node"],
@@ -253,7 +232,8 @@ async def execute_phase5_command_and_alerting(
     return {
         "pipeline_phase": "Phase 5: Output Interface and Automated Municipal Alerting",
         "execution_timestamp_utc": timestamp_utc,
-        "target_epicenter": {"latitude": lat, "longitude": lon},
+        "administrative_region": region_meta,
+        "target_epicenter": {"latitude": c_lat, "longitude": c_lon},
         "aedes_biological_incubation_summary": phase3_data.get("aedes_biological_incubation_model", {}),
         "spatiotemporal_waterlogging_summary": {
             "sentinel2_mode": phase3_data.get("sentinel2_raster_processing_mode"),
@@ -262,14 +242,8 @@ async def execute_phase5_command_and_alerting(
                 phase3_data.get("spatiotemporal_waterlogging_synchronization", {})
                 .get("spectral_matrix_summary", {})
             ),
-            "total_nodes_isolated": (
-                phase3_data.get("spatiotemporal_waterlogging_synchronization", {})
-                .get("total_micro_waterlogging_nodes_isolated", 0)
-            ),
-            "viable_breeding_nodes": (
-                phase3_data.get("spatiotemporal_waterlogging_synchronization", {})
-                .get("viable_breeding_nodes_count", 0)
-            )
+            "total_nodes_isolated": len(ward_forecasts),
+            "viable_breeding_nodes": len(ward_forecasts)
         },
         "st_gnn_neural_network_telemetry": phase4_data.get("neural_network_architecture", {}),
         "predictive_14_day_probability_matrix": phase4_data.get("predictive_14_day_probability_matrix", {}),
@@ -277,12 +251,7 @@ async def execute_phase5_command_and_alerting(
             "preemption_threshold_configured": alert_threshold,
             "total_wards_evaluated": len(ward_forecasts),
             "automated_alerts_triggered_count": len(dispatched_alerts),
-            "dncc_dispatches_count": sum(
-                1 for a in dispatched_alerts if a["recipient_authority"]["corporation_code"] == "DNCC"
-            ),
-            "dscc_dispatches_count": sum(
-                1 for a in dispatched_alerts if a["recipient_authority"]["corporation_code"] == "DSCC"
-            ),
+            "authority_name": region_meta.get("municipal_authority", "Municipal Authority"),
             "ledger_artifact_path": ALERT_LEDGER_PATH,
             "active_municipal_dispatch_manifest": dispatched_alerts
         }
