@@ -1,3 +1,4 @@
+# services/st_gnn_engine.py
 import os
 import re
 import math
@@ -5,7 +6,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 from datetime import datetime, timedelta
-
 from services.dghs_client import fetch_dghs_dengue_baseline
 from services.nasa_power_client import fetch_nasa_meteorological_matrix
 from services.spatiotemporal_pipeline import execute_spatiotemporal_pipeline, briere_rate
@@ -13,7 +13,7 @@ from services.spatiotemporal_pipeline import execute_spatiotemporal_pipeline, br
 MODEL_WEIGHTS_PATH = "models/epigrid_stgnn_weights.pt"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Complete Administrative Gazetteer of Bangladesh: All 8 Divisions & All 64 Districts
+### Complete Administrative Gazetteer of Bangladesh: All 8 Divisions & All 64 Districts
 BANGLADESH_ADMIN_GAZETTEER = {
     "Dhaka Division": {
         "Dhaka": {"code": "DHK", "lat": 23.8103, "lon": 90.4125, "authority": "Dhaka North & South City Corporation (DNCC/DSCC)", "zones": ["Uttara Model Town", "Mirpur Pallabi", "Banani-Gulshan", "Badda-Rampura", "Tejgaon Industrial", "Mohammadpur", "Dhanmondi Residential", "Motijheel Commercial", "Sabujbagh-Basabo", "Mugda-Maniknagar", "Lalbagh-Kotwali", "Jatrabari-Sayedabad"]},
@@ -98,20 +98,11 @@ BANGLADESH_ADMIN_GAZETTEER = {
 }
 
 DEFAULT_WARD_ZONES = [
-    "Sadar Central Commercial",
-    "Hospital & Civil Lines Sector",
-    "Pourashava Core Residential",
-    "Station & Terminal Corridor",
-    "North Bazar Drainage Basin",
-    "South Residential Housing",
-    "East Canal & Market Sector",
-    "West College & University Zone",
-    "Industrial & Warehouse Belt",
-    "Riverfront / Embankment Sector",
-    "New Town Extension Block",
-    "Suburban Periphery Sector"
+    "Sadar Central Commercial", "Hospital & Civil Lines Sector", "Pourashava Core Residential",
+    "Station & Terminal Corridor", "North Bazar Drainage Basin", "South Residential Housing",
+    "East Canal & Market Sector", "West College & University Zone", "Industrial & Warehouse Belt",
+    "Riverfront / Embankment Sector", "New Town Extension Block", "Suburban Periphery Sector"
 ]
-
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Computes geodesic Haversine distance (km) between two WGS84 coordinates."""
@@ -121,7 +112,6 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     d_lambda = math.radians(lon2 - lon1)
     a = math.sin(d_phi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2.0) ** 2
     return 2.0 * r_earth * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
-
 
 def get_nearest_district_profile(lat: float, lon: float, district_name: str | None = None) -> dict:
     """Finds the requested or nearest Bangladesh district and generates its 12 Municipal Wards."""
@@ -154,7 +144,6 @@ def get_nearest_district_profile(lat: float, lon: float, district_name: str | No
     code = selected_entry["code"]
     zones = selected_entry.get("zones", DEFAULT_WARD_ZONES)
 
-    # Generate 12 spatially distributed Municipal Wards around the district urban core
     wards = []
     for w_idx in range(12):
         angle = (2.0 * math.pi * w_idx) / 12.0
@@ -183,7 +172,6 @@ def get_nearest_district_profile(lat: float, lon: float, district_name: str | No
         "wards": wards
     }
 
-
 def get_full_bangladesh_hierarchy() -> dict:
     """Returns the complete 8-Division, 64-District, 768-Ward directory for the UI selector."""
     directory = {}
@@ -196,22 +184,14 @@ def get_full_bangladesh_hierarchy() -> dict:
                 "lat": d_info["lat"],
                 "lon": d_info["lon"],
                 "authority": d_info["authority"],
-                "wards": [
-                    {"ward_id": w["ward_id"], "ward_name": w["ward_name"], "lat": w["lat"], "lon": w["lon"]}
-                    for w in profile["wards"]
-                ]
+                "wards": [{"ward_id": w["ward_id"], "ward_name": w["ward_name"], "lat": w["lat"], "lon": w["lon"]} for w in profile["wards"]]
             }
     return directory
 
-
 def build_normalized_adjacency_matrix(coords: list[tuple[float, float]], sigma_km: float = 1.5) -> torch.Tensor:
-    """
-    Constructs the Kipf-Welling symmetrically normalized spatial adjacency matrix
-    A_hat = D^(-1/2) * (A + I) * D^(-1/2) using a Gaussian flight-dispersal kernel.
-    """
+    """Constructs the Kipf-Welling symmetrically normalized spatial adjacency matrix."""
     n_nodes = len(coords)
     adj = np.eye(n_nodes, dtype=np.float32)
-
     for i in range(n_nodes):
         for j in range(i + 1, n_nodes):
             dist = haversine_km(coords[i][0], coords[i][1], coords[j][0], coords[j][1])
@@ -225,9 +205,8 @@ def build_normalized_adjacency_matrix(coords: list[tuple[float, float]], sigma_k
     a_hat = d_inv_sqrt @ adj @ d_inv_sqrt
     return torch.tensor(a_hat, dtype=torch.float32, device=DEVICE)
 
-
 class SpectralGraphConvolution(nn.Module):
-    """Kipf-Welling Spectral Graph Convolutional Layer (GCN) for spatial message passing."""
+    """Kipf-Welling Spectral Graph Convolutional Layer (GCN) with residual connections."""
     def __init__(self, in_features: int, out_features: int):
         super().__init__()
         self.weight = nn.Parameter(torch.empty(in_features, out_features))
@@ -239,23 +218,22 @@ class SpectralGraphConvolution(nn.Module):
         output = torch.matmul(adj_norm, support) + self.bias
         return output
 
-
 class EpiGridSTGNN(nn.Module):
-    """
-    Spatio-Temporal Graph Neural Network (ST-GNN) combining two-stage Spectral Graph
-    Convolutions, Gated Recurrent Units (GRU), Temporal Attention, and a 14-day Horizon Decoder.
-    """
-    def __init__(self, num_features: int = 8, hidden_dim: int = 32, forecast_horizon: int = 14):
+    """Upgraded Spatio-Temporal Graph Neural Network (hidden_dim=64, residual skip connections)."""
+    def __init__(self, num_features: int = 8, hidden_dim: int = 64, forecast_horizon: int = 14):
         super().__init__()
         self.gcn1 = SpectralGraphConvolution(num_features, hidden_dim)
         self.gcn2 = SpectralGraphConvolution(hidden_dim, hidden_dim)
-        self.activation = nn.ELU()
-        self.layer_norm = nn.LayerNorm(hidden_dim)
-        self.gru = nn.GRU(input_size=hidden_dim, hidden_size=hidden_dim, num_layers=1, batch_first=True)
+        self.gcn3 = SpectralGraphConvolution(hidden_dim, hidden_dim)
+        self.activation = nn.GELU()
+        self.layer_norm1 = nn.LayerNorm(hidden_dim)
+        self.layer_norm2 = nn.LayerNorm(hidden_dim)
+        self.gru = nn.GRU(input_size=hidden_dim, hidden_size=hidden_dim, num_layers=2, batch_first=True, dropout=0.1)
         self.attention_proj = nn.Linear(hidden_dim, 1)
         self.decoder = nn.Sequential(
             nn.Linear(hidden_dim, hidden_dim),
-            nn.ELU(),
+            nn.GELU(),
+            nn.Dropout(0.05),
             nn.Linear(hidden_dim, forecast_horizon),
             nn.Sigmoid()
         )
@@ -267,8 +245,9 @@ class EpiGridSTGNN(nn.Module):
         for t in range(t_steps):
             x_t = x_seq[:, t, :]
             h1 = self.activation(self.gcn1(x_t, adj_norm))
-            h2 = self.layer_norm(self.activation(self.gcn2(h1, adj_norm) + h1))
-            spatial_embeddings.append(h2)
+            h2 = self.layer_norm1(self.activation(self.gcn2(h1, adj_norm) + h1))
+            h3 = self.layer_norm2(self.activation(self.gcn3(h2, adj_norm) + h2))
+            spatial_embeddings.append(h3)
 
         spatial_seq = torch.stack(spatial_embeddings, dim=1)
         gru_out, _ = self.gru(spatial_seq)
@@ -277,26 +256,17 @@ class EpiGridSTGNN(nn.Module):
         prob_matrix = self.decoder(context_vector)
         return prob_matrix
 
-
 class EpidemiologicalObjectiveFunction(nn.Module):
-    """
-    Composite Objective Function combining Binary Cross-Entropy (BCE), Horizon MSE,
-    and Graph Laplacian Spatial Diffusion Regularization.
-    """
-    def __init__(self, lambda_mse: float = 0.25, lambda_laplacian: float = 0.08):
+    """High-Precision Zero-Floor Objective Function (Smooth L1 Huber + MSE + Laplacian Regularization)."""
+    def __init__(self, lambda_mse: float = 0.35, lambda_laplacian: float = 0.05):
         super().__init__()
-        self.bce = nn.BCELoss()
+        self.huber = nn.SmoothL1Loss(beta=0.05)
         self.mse = nn.MSELoss()
         self.lambda_mse = lambda_mse
         self.lambda_laplacian = lambda_laplacian
 
-    def forward(
-        self,
-        y_pred: torch.Tensor,
-        y_true: torch.Tensor,
-        adj_norm: torch.Tensor
-    ) -> tuple[torch.Tensor, dict]:
-        bce_loss = self.bce(y_pred, y_true)
+    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor, adj_norm: torch.Tensor) -> tuple[torch.Tensor, dict]:
+        huber_loss = self.huber(y_pred, y_true)
         mse_loss = self.mse(y_pred, y_true)
 
         eye = torch.eye(adj_norm.shape[0], device=adj_norm.device)
@@ -305,14 +275,13 @@ class EpidemiologicalObjectiveFunction(nn.Module):
             y_pred.shape[0] * y_pred.shape[1]
         )
 
-        total_loss = bce_loss + (self.lambda_mse * mse_loss) + (self.lambda_laplacian * laplacian_penalty)
+        total_loss = huber_loss + (self.lambda_mse * mse_loss) + (self.lambda_laplacian * laplacian_penalty)
         return total_loss, {
-            "bce_outbreak_loss": round(float(bce_loss.item()), 5),
-            "horizon_mse_loss": round(float(mse_loss.item()), 5),
-            "graph_laplacian_regularization": round(float(laplacian_penalty.item()), 5),
-            "composite_objective_loss": round(float(total_loss.item()), 5)
+            "huber_precision_loss": round(float(huber_loss.item()), 6),
+            "horizon_mse_loss": round(float(mse_loss.item()), 6),
+            "graph_laplacian_regularization": round(float(laplacian_penalty.item()), 6),
+            "composite_objective_loss": round(float(total_loss.item()), 6)
         }
-
 
 def parse_dghs_baseline_factor(dghs_payload: dict) -> tuple[int, float]:
     extracted_numbers = []
@@ -323,18 +292,11 @@ def parse_dghs_baseline_factor(dghs_payload: dict) -> tuple[int, float]:
                 val = int(cleaned)
                 if 5 <= val <= 250000:
                     extracted_numbers.append(val)
-
     daily_admissions = extracted_numbers[0] if extracted_numbers else 420
     baseline_pressure = float(np.clip(math.log1p(daily_admissions) / math.log1p(1500.0), 0.20, 0.92))
     return daily_admissions, round(baseline_pressure, 4)
 
-
-def construct_spatiotemporal_tensors(
-    nodes: list[dict],
-    nasa_payload: dict,
-    dghs_pressure: float,
-    adj_norm: torch.Tensor
-) -> tuple[torch.Tensor, torch.Tensor]:
+def construct_spatiotemporal_tensors(nodes: list[dict], nasa_payload: dict, dghs_pressure: float, adj_norm: torch.Tensor, forecast_horizon: int = 14) -> tuple[torch.Tensor, torch.Tensor]:
     ts = nasa_payload.get("time_series", {})
     temps = list(ts.get("T2M", {}).values())[-14:] or [28.5] * 14
     rhs = list(ts.get("RH2M", {}).values())[-14:] or [76.0] * 14
@@ -349,7 +311,7 @@ def construct_spatiotemporal_tensors(
 
     n_nodes = len(nodes)
     x_array = np.zeros((n_nodes, 14, 8), dtype=np.float32)
-    y_raw = np.zeros((n_nodes, 14), dtype=np.float32)
+    y_raw = np.zeros((n_nodes, forecast_horizon), dtype=np.float32)
 
     for i, node in enumerate(nodes):
         spatial = node["spatial_metrics"]
@@ -381,11 +343,10 @@ def construct_spatiotemporal_tensors(
             x_array[i, t, 7] = dghs_pressure
 
         eip_lag_days = min(float(bio["extrinsic_incubation_eip_days"]), 12.0)
-        # Incorporate slight spatial variation per node so each ward reflects unique micro-topography
         node_variation = ((i % 7) - 3) * 0.032
         base_prob = np.clip(0.42 * vii_score + 0.33 * retention_ratio + 0.25 * dghs_pressure + node_variation, 0.12, 0.95)
 
-        for k in range(14):
+        for k in range(forecast_horizon):
             day_horizon = k + 1
             incubation_wave = 1.0 / (1.0 + math.exp(-(day_horizon - (eip_lag_days * 0.65)) / 2.2))
             structural_boost = 0.06 if ndbi_val > -0.05 else 0.02
@@ -395,19 +356,16 @@ def construct_spatiotemporal_tensors(
     y_tensor = torch.matmul(adj_norm, torch.tensor(y_raw, dtype=torch.float32, device=DEVICE)).clamp(0.05, 0.98)
     return x_tensor, y_tensor
 
-
 async def execute_phase4_stgnn_training_and_forecast(
     lat: float = 23.8103,
     lon: float = 90.4125,
     epochs: int = 120,
-    learning_rate: float = 0.012,
+    learning_rate: float = 0.008,
     district: str | None = None,
-    ward_filter: str | None = None
+    ward_filter: str | None = None,
+    horizon_days: int = 14
 ) -> dict:
-    """
-    Phase 4 Master Orchestrator supporting all 8 Divisions, 64 Districts, and 12 Municipal
-    Wards per District across Bangladesh.
-    """
+    """Phase 4 Master Orchestrator supporting custom forecast horizons (1-14 days) and 300+ epoch precision."""
     torch.manual_seed(42)
     np.random.seed(42)
 
@@ -423,12 +381,10 @@ async def execute_phase4_stgnn_training_and_forecast(
     isolated_nodes = phase3_output["spatiotemporal_waterlogging_synchronization"]["prioritized_rooftop_and_alley_nodes"]
     dghs_admissions, dghs_pressure = parse_dghs_baseline_factor(dghs_payload)
 
-    # Distribute nodes across all 12 Municipal Wards of the selected District/City
     active_nodes = []
     for w_idx, ward_ref in enumerate(district_wards):
         if w_idx < len(isolated_nodes):
             base_node = isolated_nodes[w_idx]
-            # Anchor node inside the specific ward's micro-neighborhood
             jitter_lat = ((w_idx % 3) - 1) * 0.0012
             jitter_lon = (((w_idx // 3) % 3) - 1) * 0.0012
             node_copy = {
@@ -472,12 +428,14 @@ async def execute_phase4_stgnn_training_and_forecast(
         nodes=active_nodes,
         nasa_payload=nasa_payload,
         dghs_pressure=dghs_pressure,
-        adj_norm=adj_norm
+        adj_norm=adj_norm,
+        forecast_horizon=horizon_days
     )
 
-    model = EpiGridSTGNN(num_features=8, hidden_dim=32, forecast_horizon=14).to(DEVICE)
-    criterion = EpidemiologicalObjectiveFunction(lambda_mse=0.25, lambda_laplacian=0.08).to(DEVICE)
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
+    model = EpiGridSTGNN(num_features=8, hidden_dim=64, forecast_horizon=horizon_days).to(DEVICE)
+    criterion = EpidemiologicalObjectiveFunction(lambda_mse=0.35, lambda_laplacian=0.05).to(DEVICE)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1e-3)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-5)
 
     model.train()
     initial_loss_val = None
@@ -489,13 +447,14 @@ async def execute_phase4_stgnn_training_and_forecast(
         y_pred = model(x_tensor, adj_norm)
         loss, breakdown = criterion(y_pred, y_target, adj_norm)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.5)
         optimizer.step()
+        scheduler.step()
 
         if epoch == 1:
-            initial_loss_val = round(float(loss.item()), 5)
+            initial_loss_val = round(float(loss.item()), 6)
         if epoch in {1, int(epochs * 0.25), int(epochs * 0.5), int(epochs * 0.75), epochs}:
-            loss_trajectory.append({"epoch": epoch, "total_loss": round(float(loss.item()), 5)})
+            loss_trajectory.append({"epoch": epoch, "total_loss": round(float(loss.item()), 6)})
         if epoch == epochs:
             final_loss_breakdown = breakdown
 
@@ -503,7 +462,8 @@ async def execute_phase4_stgnn_training_and_forecast(
     torch.save({
         "model_state_dict": model.state_dict(),
         "timestamp_utc": datetime.utcnow().isoformat(),
-        "final_loss": final_loss_breakdown
+        "final_loss": final_loss_breakdown,
+        "forecast_horizon": horizon_days
     }, MODEL_WEIGHTS_PATH)
 
     model.eval()
@@ -513,7 +473,7 @@ async def execute_phase4_stgnn_training_and_forecast(
     start_forecast_date = datetime.utcnow().date() + timedelta(days=1)
     forecast_dates = [
         (start_forecast_date + timedelta(days=d)).strftime("%Y-%m-%d")
-        for d in range(14)
+        for d in range(horizon_days)
     ]
 
     ward_forecasts = []
@@ -522,14 +482,14 @@ async def execute_phase4_stgnn_training_and_forecast(
         if ward_filter and ward_filter != "ALL" and ward_info["ward_id"] != ward_filter:
             continue
 
-        probs_14d = [round(float(p), 4) for p in predicted_matrix[idx]]
-        day_14_prob = probs_14d[-1]
-        mean_14d_prob = round(float(np.mean(probs_14d)), 4)
+        probs_h = [round(float(p), 4) for p in predicted_matrix[idx]]
+        final_prob = probs_h[-1]
+        mean_prob = round(float(np.mean(probs_h)), 4)
 
-        if day_14_prob >= 0.75:
+        if final_prob >= 0.75:
             risk_tier = "CRITICAL_OUTBREAK_IMMINENT"
             preemptive_action = "Immediate Larvicidal Fogging & Rooftop Drainage Dispatch Within 48 Hours"
-        elif day_14_prob >= 0.55:
+        elif final_prob >= 0.55:
             risk_tier = "HIGH_TRANSMISSION_RISK"
             preemptive_action = "Targeted Municipal Larvicide Spraying Within 5 Days"
         else:
@@ -545,19 +505,20 @@ async def execute_phase4_stgnn_training_and_forecast(
             "source_waterlogging_node": node["node_id"],
             "structural_classification": node["structural_classification"],
             "coordinates": node["coordinates"],
-            "day_1_outbreak_probability": probs_14d[0],
-            "day_7_outbreak_probability": probs_14d[6],
-            "day_14_outbreak_probability": day_14_prob,
-            "mean_14d_outbreak_probability": mean_14d_prob,
+            "day_1_outbreak_probability": probs_h[0],
+            "day_7_outbreak_probability": probs_h[min(6, horizon_days - 1)],
+            f"day_{horizon_days}_outbreak_probability": final_prob,
+            "mean_outbreak_probability": mean_prob,
             "outbreak_risk_classification": risk_tier,
             "recommended_municipal_preemption": preemptive_action,
-            "daily_probability_trajectory_14d": dict(zip(forecast_dates, probs_14d))
+            "daily_probability_trajectory": dict(zip(forecast_dates, probs_h)),
+            "forecast_horizon_days": horizon_days
         })
 
-    ward_forecasts.sort(key=lambda item: item["day_14_outbreak_probability"], reverse=True)
+    ward_forecasts.sort(key=lambda item: item[f"day_{horizon_days}_outbreak_probability"], reverse=True)
 
     return {
-        "pipeline_phase": "Phase 4: Predictive Neural Network Training (PyTorch ST-GNN)",
+        "pipeline_phase": f"Phase 4: Predictive Neural Network Training (PyTorch ST-GNN - {horizon_days}-Day Horizon)",
         "execution_timestamp_utc": datetime.utcnow().isoformat(),
         "administrative_region": {
             "division": district_profile["division"],
@@ -572,7 +533,7 @@ async def execute_phase4_stgnn_training_and_forecast(
                 if torch.cuda.is_available()
                 else "AWS EC2 x86_64 Tensor CPU Engine"
             ),
-            "model_class": "EpiGridSTGNN (2-Layer Kipf-Welling Spectral GCN + Temporal GRU + Multi-Head Attention)",
+            "model_class": "EpiGridSTGNN (3-Layer Kipf-Welling Spectral GCN + 2-Layer Residual GRU + Attention)",
             "graph_topology": {
                 "active_vertices_nodes": len(active_nodes),
                 "non_zero_spatial_edges": int(torch.count_nonzero(adj_norm).item()),
@@ -585,7 +546,7 @@ async def execute_phase4_stgnn_training_and_forecast(
                 "normalized_baseline_pressure_index": dghs_pressure
             },
             "training_telemetry": {
-                "optimizer": "Adam (Weight Decay 1e-4, Gradient Clipping 2.0)",
+                "optimizer": "AdamW (Weight Decay 1e-3, CosineAnnealingLR, Gradient Clipping 1.5)",
                 "epochs_completed": epochs,
                 "initial_epoch_1_loss": initial_loss_val,
                 "final_epoch_loss_breakdown": final_loss_breakdown,
@@ -593,9 +554,10 @@ async def execute_phase4_stgnn_training_and_forecast(
                 "saved_weights_artifact": MODEL_WEIGHTS_PATH
             }
         },
-        "predictive_14_day_probability_matrix": {
+        "predictive_probability_matrix": {
             "forecast_window_start": forecast_dates[0],
             "forecast_window_end": forecast_dates[-1],
+            "forecast_horizon_days": horizon_days,
             "critical_risk_wards_count": sum(
                 1 for w in ward_forecasts if w["outbreak_risk_classification"] == "CRITICAL_OUTBREAK_IMMINENT"
             ),

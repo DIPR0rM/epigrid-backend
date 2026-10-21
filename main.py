@@ -1,3 +1,4 @@
+# main.py
 import os
 import asyncio
 from datetime import datetime
@@ -20,7 +21,7 @@ app = FastAPI(
         "Complete 5-Phase Architecture across all 8 Divisions, 64 Districts, and Municipal Wards "
         "of Bangladesh."
     ),
-    version="5.1.0"
+    version="5.2.0"
 )
 
 
@@ -90,12 +91,18 @@ async def run_spatiotemporal_pipeline(
 async def run_stgnn_training_and_prediction(
     lat: float = Query(23.8103),
     lon: float = Query(90.4125),
-    epochs: int = Query(120, ge=20, le=500),
+    epochs: int = Query(120, ge=20, le=1000),
+    horizon_days: int = Query(14, ge=1, le=14, description="Selected Temporal Forecast Horizon (Day +1 to Day +14)"),
     district: str | None = Query(None, description="Optional Bangladesh District Name (e.g., Dhaka, Rajshahi, Sherpur, Chattogram)"),
     ward_filter: str | None = Query(None, description="Optional Ward ID filter or ALL")
 ):
     return await execute_phase4_stgnn_training_and_forecast(
-        lat=lat, lon=lon, epochs=epochs, district=district, ward_filter=ward_filter
+        lat=lat,
+        lon=lon,
+        epochs=epochs,
+        district=district,
+        ward_filter=ward_filter,
+        horizon_days=horizon_days
     )
 
 
@@ -103,7 +110,8 @@ async def run_stgnn_training_and_prediction(
 async def evaluate_and_dispatch_municipal_alerts(
     lat: float = Query(23.8103),
     lon: float = Query(90.4125),
-    epochs: int = Query(120, ge=20, le=500),
+    epochs: int = Query(120, ge=20, le=1000),
+    horizon_days: int = Query(14, ge=1, le=14, description="Selected Temporal Forecast Horizon (Day +1 to Day +14)"),
     alert_threshold: float = Query(0.55, ge=0.10, le=0.95),
     district: str | None = Query(None, description="Any of the 64 Districts of Bangladesh"),
     ward_filter: str | None = Query(None, description="Specific Ward ID or ALL")
@@ -114,7 +122,8 @@ async def evaluate_and_dispatch_municipal_alerts(
         epochs=epochs,
         alert_threshold=alert_threshold,
         district=district,
-        ward_filter=ward_filter
+        ward_filter=ward_filter,
+        horizon_days=horizon_days
     )
 
 
