@@ -1,4 +1,3 @@
-# services/alert_dispatcher.py
 import os
 import json
 import uuid
@@ -9,7 +8,10 @@ from datetime import datetime
 import httpx
 from dotenv import load_dotenv
 
-from services.st_gnn_engine import execute_phase4_stgnn_training_and_forecast
+from services.st_gnn_engine import (
+    execute_phase4_stgnn_training_and_forecast,
+    classify_epidemiological_risk
+)
 from services.spatiotemporal_pipeline import execute_spatiotemporal_pipeline
 
 load_dotenv()
@@ -35,14 +37,26 @@ def determine_municipal_authority(ward_forecast: dict) -> dict:
 
 
 def calculate_fogging_resource_allocation(
-    ward_forecast: dict, node_lookup: dict
+    ward_forecast: dict,
+    node_lookup: dict
 ) -> dict:
-    node_id = ward_forecast["source_waterlogging_node"]
+    """
+    Quantifies larvicidal (Temephos 50 EC) and adulticidal thermal fogging (Deltamethrin)
+    requirements using the ward's calibrated surface area and hydrological retention metrics.
+    """
+    node_id = ward_forecast.get("source_waterlogging_node", "EPI-NODE-001")
     node_data = node_lookup.get(node_id, {})
-    spatial_metrics = node_data.get("spatial_metrics", {})
-    bio_status = node_data.get("synchronized_biological_status", {})
 
-    surface_area_m2 = float(spatial_metrics.get("estimated_surface_area_m2", 400))
+    spatial_metrics = (
+        ward_forecast.get("spatial_metrics")
+        or node_data.get("spatial_metrics", {})
+    )
+    bio_status = (
+        ward_forecast.get("synchronized_biological_status")
+        or node_data.get("synchronized_biological_status", {})
+    )
+
+    surface_area_m2 = float(spatial_metrics.get("estimated_surface_area_m2", 400.0))
     retention_days = float(bio_status.get("hydrological_retention_days", 8.2))
     emergence_days = max(float(bio_status.get("required_aquatic_emergence_days", 7.8)), 1.0)
     eip_days = float(bio_status.get("extrinsic_incubation_eip_days", 8.5))
@@ -50,8 +64,11 @@ def calculate_fogging_resource_allocation(
     horizon_days = int(ward_forecast.get("forecast_horizon_days", 14))
     horizon_prob = float(
         ward_forecast.get(
-            f"day_{horizon_days}_outbreak_probability",
-            ward_forecast.get("day_14_outbreak_probability", 0.5)
+            "horizon_outbreak_probability",
+            ward_forecast.get(
+                f"day_{horizon_days}_outbreak_probability",
+                ward_forecast.get("day_14_outbreak_probability", 0.5)
+            )
         )
     )
     trajectory = (
@@ -62,7 +79,7 @@ def calculate_fogging_resource_allocation(
     breach_date = None
     lead_time_days = horizon_days
     for idx, (date_str, prob_val) in enumerate(trajectory.items()):
-        if prob_val >= 0.55:
+        if float(prob_val) >= 0.55:
             breach_date = date_str
             lead_time_days = idx + 1
             break
@@ -74,10 +91,14 @@ def calculate_fogging_resource_allocation(
     crew_hours = round(
         max(1.5, (surface_area_m2 / 150.0) * (retention_days / emergence_days)), 1
     )
-    field_personnel_count = 6 if horizon_prob >= 0.70 else 4
+    field_personnel_count = 6 if horizon_prob >= 0.75 else 4
 
     trajectory_keys = list(trajectory.keys())
-    fallback_date = trajectory_keys[-1] if trajectory_keys else datetime.utcnow().strftime("%Y-%m-%d")
+    fallback_date = (
+        trajectory_keys[min(horizon_days - 1, len(trajectory_keys) - 1)]
+        if trajectory_keys
+        else datetime.utcnow().strftime("%Y-%m-%d")
+    )
 
     return {
         "target_waterlogging_area_m2": surface_area_m2,
@@ -168,6 +189,13 @@ async def execute_phase5_command_and_alerting(
     ward_filter: str | None = None,
     horizon_days: int = 14
 ) -> dict:
+    """
+    Phase 5 Master Orchestrator:
+    Executes calibrated ST-GNN multi-horizon forecasting across all 12 wards of the
+    target Bangladesh district, classifies wards into 4 Risk Tiers (Critical, High,
+    Medium, Normal), and dispatches preemptive work orders only for wards breaching
+    the configured alert threshold.
+    """
     horizon_days = max(1, min(14, int(horizon_days)))
 
     phase4_data = await execute_phase4_stgnn_training_and_forecast(
@@ -200,41 +228,67 @@ async def execute_phase5_command_and_alerting(
     dispatched_alerts = []
     timestamp_utc = datetime.utcnow().isoformat()
 
+    tier_breakdown = {
+        "CRITICAL_OUTBREAK_IMMINENT": 0,
+        "HIGH_TRANSMISSION_RISK": 0,
+        "MEDIUM_ENDEMIC_RISK": 0,
+        "NORMAL_BASELINE_SURVEILLANCE": 0
+    }
+    viable_wards_count = 0
+
     for ward in ward_forecasts:
         trajectory = (
             ward.get("daily_probability_trajectory")
             or ward.get("daily_probability_trajectory_14d", {})
         )
+        traj_values = [float(v) for v in trajectory.values()]
+
+        day_1_prob = float(ward.get("day_1_outbreak_probability", traj_values[0] if traj_values else 0.0))
+        day_7_prob = float(ward.get("day_7_outbreak_probability", traj_values[min(6, len(traj_values) - 1)] if traj_values else 0.0))
+        day_14_prob = float(ward.get("day_14_outbreak_probability", traj_values[-1] if traj_values else 0.0))
+
         horizon_prob = float(
             ward.get(
                 f"day_{horizon_days}_outbreak_probability",
-                ward.get("day_14_outbreak_probability", 0.0)
+                traj_values[min(horizon_days - 1, len(traj_values) - 1)] if traj_values else day_14_prob
             )
         )
-        mean_prob = float(
+        mean_14d_prob = float(
             ward.get(
-                "mean_outbreak_probability",
-                ward.get("mean_14d_outbreak_probability", 0.0)
+                "mean_14d_outbreak_probability",
+                round(sum(traj_values) / len(traj_values), 4) if traj_values else 0.0
             )
         )
 
-        # Normalize keys so both dynamic horizon and legacy dashboard fields work seamlessly
-        ward["horizon_outbreak_probability"] = horizon_prob
-        ward["day_14_outbreak_probability"] = horizon_prob
-        ward["mean_14d_outbreak_probability"] = mean_prob
+        # Ensure 4-tier classification matches the exact horizon probability
+        risk_tier, preemptive_directive = classify_epidemiological_risk(horizon_prob)
+        tier_breakdown[risk_tier] = tier_breakdown.get(risk_tier, 0) + 1
+
+        bio_status = ward.get("synchronized_biological_status", {})
+        if bio_status.get("larval_metamorphosis_viable", False):
+            viable_wards_count += 1
+
+        # Preserve authentic Day 1, Day 7, Day 14, and Dynamic Horizon fields without overwriting Day 14
+        ward["day_1_outbreak_probability"] = round(day_1_prob, 4)
+        ward["day_7_outbreak_probability"] = round(day_7_prob, 4)
+        ward["day_14_outbreak_probability"] = round(day_14_prob, 4)
+        ward[f"day_{horizon_days}_outbreak_probability"] = round(horizon_prob, 4)
+        ward["horizon_outbreak_probability"] = round(horizon_prob, 4)
+        ward["mean_14d_outbreak_probability"] = round(mean_14d_prob, 4)
+        ward["outbreak_risk_classification"] = risk_tier
+        ward["recommended_municipal_preemption"] = preemptive_directive
         ward["daily_probability_trajectory_14d"] = trajectory
         ward["daily_probability_trajectory"] = trajectory
         ward["forecast_horizon_days"] = horizon_days
 
-        peak_prob = max(horizon_prob, mean_prob)
-
-        if peak_prob >= alert_threshold:
+        # Trigger automated municipal fogging work orders strictly for wards breaching alert_threshold
+        if horizon_prob >= alert_threshold:
             authority = determine_municipal_authority(ward)
             resources = calculate_fogging_resource_allocation(ward, node_lookup)
 
             severity = (
                 "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)"
-                if horizon_prob >= 0.70
+                if horizon_prob >= 0.75
                 else "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)"
             )
 
@@ -261,13 +315,13 @@ async def execute_phase5_command_and_alerting(
                 "epidemiological_risk_metrics": {
                     "day_1_probability": ward["day_1_outbreak_probability"],
                     "day_7_probability": ward["day_7_outbreak_probability"],
-                    f"day_{horizon_days}_probability": horizon_prob,
-                    "day_14_probability": horizon_prob,
-                    "mean_14d_probability": mean_prob,
-                    "risk_classification": ward["outbreak_risk_classification"]
+                    f"day_{horizon_days}_probability": ward["horizon_outbreak_probability"],
+                    "day_14_probability": ward["day_14_outbreak_probability"],
+                    "mean_14d_probability": ward["mean_14d_outbreak_probability"],
+                    "risk_classification": risk_tier
                 },
                 "preemptive_fogging_work_order": {
-                    "directive": ward["recommended_municipal_preemption"],
+                    "directive": preemptive_directive,
                     "resource_quantification": resources
                 }
             }
@@ -284,6 +338,12 @@ async def execute_phase5_command_and_alerting(
 
     if dispatched_alerts:
         append_alerts_to_ledger(dispatched_alerts)
+
+    prob_matrix_block["critical_risk_wards_count"] = tier_breakdown["CRITICAL_OUTBREAK_IMMINENT"]
+    prob_matrix_block["high_risk_wards_count"] = tier_breakdown["HIGH_TRANSMISSION_RISK"]
+    prob_matrix_block["medium_risk_wards_count"] = tier_breakdown["MEDIUM_ENDEMIC_RISK"]
+    prob_matrix_block["normal_risk_wards_count"] = tier_breakdown["NORMAL_BASELINE_SURVEILLANCE"]
+    prob_matrix_block["risk_tier_distribution"] = tier_breakdown
 
     return {
         "pipeline_phase": f"Phase 5: Output Interface and Automated Municipal Alerting ({horizon_days}-Day Horizon)",
@@ -302,7 +362,7 @@ async def execute_phase5_command_and_alerting(
                 .get("spectral_matrix_summary", {})
             ),
             "total_nodes_isolated": len(ward_forecasts),
-            "viable_breeding_nodes": len(ward_forecasts)
+            "viable_breeding_nodes": viable_wards_count
         },
         "st_gnn_neural_network_telemetry": phase4_data.get(
             "neural_network_architecture", {}
@@ -314,6 +374,7 @@ async def execute_phase5_command_and_alerting(
             "forecast_horizon_days": horizon_days,
             "total_wards_evaluated": len(ward_forecasts),
             "automated_alerts_triggered_count": len(dispatched_alerts),
+            "risk_tier_breakdown": tier_breakdown,
             "authority_name": region_meta.get("municipal_authority", "Municipal Authority"),
             "ledger_artifact_path": ALERT_LEDGER_PATH,
             "active_municipal_dispatch_manifest": dispatched_alerts
