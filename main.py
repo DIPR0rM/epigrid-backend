@@ -1,5 +1,6 @@
 import os
 import asyncio
+import torch
 from datetime import datetime
 from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
@@ -10,7 +11,8 @@ from services.dghs_client import fetch_dghs_dengue_baseline
 from services.spatiotemporal_pipeline import execute_spatiotemporal_pipeline
 from services.st_gnn_engine import (
     execute_phase4_stgnn_training_and_forecast,
-    get_full_bangladesh_hierarchy
+    get_full_bangladesh_hierarchy,
+    MODEL_WEIGHTS_PATH
 )
 from services.alert_dispatcher import (
     execute_phase5_command_and_alerting,
@@ -21,10 +23,10 @@ app = FastAPI(
     title="EpiGrid: Epidemiological Preemption Engine (All 64 Districts of Bangladesh)",
     description=(
         "Complete 5-Phase Calibrated Architecture across all 8 Divisions, 64 Districts, "
-        "and 768 Municipal Wards of Bangladesh with 4-Tier Risk Classification and "
-        "Zero-Floor Bregman KL-Divergence ST-GNN Convergence."
+        "and 768 Municipal Wards of Bangladesh featuring Persistent Incremental Transfer Learning, "
+        "PyTorch Autograd Explainable AI (XAI), and 4-Tier Risk Preemption."
     ),
-    version="5.4.0"
+    version="6.0.0"
 )
 
 
@@ -32,7 +34,7 @@ app = FastAPI(
 async def root():
     return {
         "project": "EpiGrid: Epidemiological Preemption Engine",
-        "phase": "Phase 5: All-Bangladesh 4-Tier Calibrated Geospatial Command Center Active",
+        "phase": "Phase 5: All-Bangladesh Transfer-Learned ST-GNN & Explainable AI (XAI) Active",
         "interactive_geospatial_dashboard_url": "/dashboard",
         "swagger_api_documentation_url": "/docs",
         "timestamp_utc": datetime.utcnow().isoformat()
@@ -64,6 +66,39 @@ async def serve_geospatial_dashboard():
 async def get_bangladesh_locations():
     """Returns all 8 Divisions, 64 Districts, and 768 Municipal Wards of Bangladesh."""
     return get_full_bangladesh_hierarchy()
+
+
+@app.get("/api/v1/ai/transfer-learning-status")
+async def get_transfer_learning_status():
+    """
+    Returns live telemetry on the persistent PyTorch ST-GNN weight checkpoint
+    (`models/epigrid_stgnn_weights.pt`), cumulative epochs trained, and districts learned.
+    """
+    if not os.path.exists(MODEL_WEIGHTS_PATH):
+        return {
+            "checkpoint_exists": False,
+            "transfer_learning_mode": "COLD_START_READY",
+            "cumulative_training_sessions": 0,
+            "cumulative_epochs_trained": 0,
+            "districts_learned_history": []
+        }
+    try:
+        ckpt = torch.load(MODEL_WEIGHTS_PATH, map_location="cpu", weights_only=False)
+        return {
+            "checkpoint_exists": True,
+            "artifact_path": MODEL_WEIGHTS_PATH,
+            "last_updated_utc": ckpt.get("timestamp_utc"),
+            "last_district_trained": ckpt.get("district"),
+            "cumulative_training_sessions": ckpt.get("cumulative_training_sessions", 1),
+            "cumulative_epochs_trained": ckpt.get("cumulative_epochs_trained", ckpt.get("epochs", 120)),
+            "districts_learned_history": ckpt.get("districts_learned_history", []),
+            "final_loss_metrics": ckpt.get("final_loss", {})
+        }
+    except Exception as exc:
+        return {
+            "checkpoint_exists": True,
+            "status": f"Checkpoint_Read_Notice ({type(exc).__name__})"
+        }
 
 
 @app.get("/api/v1/ingest/sentinel2")

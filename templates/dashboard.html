@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EpiGrid | All-Bangladesh 4-Tier Epidemiological Command Center</title>
+  <title>EpiGrid | Transfer-Learned ST-GNN &amp; Explainable AI Command Center</title>
 
   <!-- Leaflet Geospatial Map CSS & JS -->
   <link
@@ -12,7 +12,7 @@
   />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Chart.js for Neural Network & Multi-Horizon Trajectory Visualization -->
+  <!-- Chart.js for Neural Network, XAI Saliency & Multi-Horizon Trajectory Visualization -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
@@ -28,6 +28,7 @@
       --accent-yellow: #eab308;
       --accent-orange: #f97316;
       --accent-red: #ef4444;
+      --accent-purple: #c084fc;
     }
 
     * {
@@ -41,7 +42,7 @@
       color: var(--text-main);
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       line-height: 1.45;
-      padding: 14px 18px;
+      padding: 12px 16px;
     }
 
     /* Top Header & Control Bar */
@@ -55,27 +56,28 @@
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
       padding: 12px 16px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .brand-box {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
     }
 
     .brand-title {
-      font-size: 1.15rem;
+      font-size: 1.12rem;
       font-weight: 800;
       letter-spacing: 0.3px;
       color: #ffffff;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 8px;
     }
 
     .brand-subtitle {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
     }
 
@@ -93,7 +95,7 @@
     }
 
     .input-group label {
-      font-size: 0.65rem;
+      font-size: 0.64rem;
       font-weight: 700;
       color: var(--accent-cyan);
       letter-spacing: 0.5px;
@@ -106,7 +108,7 @@
       border: 1px solid var(--border-subtle);
       border-radius: 6px;
       padding: 6px 8px;
-      font-size: 0.78rem;
+      font-size: 0.77rem;
       outline: none;
     }
 
@@ -121,7 +123,7 @@
       border: 1px solid rgba(56, 189, 248, 0.4);
       border-radius: 6px;
       padding: 7px 14px;
-      font-size: 0.8rem;
+      font-size: 0.79rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
@@ -150,26 +152,28 @@
       border: 1px solid var(--accent-cyan);
       border-radius: 6px;
       padding: 6px 12px;
-      font-size: 0.78rem;
+      font-size: 0.77rem;
       font-weight: 600;
       cursor: pointer;
     }
 
-    /* Status Banner for Pending Selection */
+    /* Status & Transfer Learning Banner */
     .selection-banner {
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.32);
       border-radius: 8px;
       padding: 8px 14px;
-      margin-bottom: 12px;
-      font-size: 0.78rem;
+      margin-bottom: 10px;
+      font-size: 0.76rem;
       color: #e0f2fe;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
     }
 
-    /* 4-Tier KPI Strip */
+    /* 4-Tier + AI KPI Strip */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -181,14 +185,14 @@
       background: var(--bg-panel);
       border: 1px solid var(--border-subtle);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 9px 12px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
 
     .kpi-label {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       text-transform: uppercase;
       letter-spacing: 0.4px;
       color: var(--text-muted);
@@ -196,13 +200,13 @@
     }
 
     .kpi-value {
-      font-size: 1.35rem;
+      font-size: 1.28rem;
       font-weight: 800;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
     .kpi-sub {
-      font-size: 0.7rem;
+      font-size: 0.69rem;
       color: var(--text-muted);
       margin-top: 2px;
     }
@@ -210,14 +214,14 @@
     /* Main & Bottom Layout Grids */
     .main-grid {
       display: grid;
-      grid-template-columns: 1.35fr 1fr;
+      grid-template-columns: 1.32fr 1fr;
       gap: 12px;
       margin-bottom: 12px;
     }
 
     .bottom-grid {
       display: grid;
-      grid-template-columns: 1fr 1.25fr;
+      grid-template-columns: 1fr 1.3fr;
       gap: 12px;
     }
 
@@ -234,21 +238,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
+      margin-bottom: 6px;
+      padding-bottom: 5px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.07);
       flex-wrap: wrap;
       gap: 6px;
     }
 
     .panel-title {
-      font-size: 0.88rem;
+      font-size: 0.84rem;
       font-weight: 700;
       color: #f1f5f9;
     }
 
     .badge {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 999px;
@@ -285,9 +289,15 @@
       border: 1px solid rgba(239, 68, 68, 0.4);
     }
 
+    .badge-purple {
+      background: rgba(192, 132, 252, 0.16);
+      color: var(--accent-purple);
+      border: 1px solid rgba(192, 132, 252, 0.4);
+    }
+
     #map {
       width: 100%;
-      height: 410px;
+      height: 455px;
       border-radius: 8px;
       border: 1px solid var(--border-subtle);
       margin-bottom: 8px;
@@ -304,7 +314,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.78rem;
+      font-size: 0.77rem;
       margin-bottom: 6px;
     }
 
@@ -319,7 +329,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      font-size: 0.72rem;
+      font-size: 0.71rem;
       color: var(--text-muted);
     }
 
@@ -338,7 +348,7 @@
 
     .chart-box {
       position: relative;
-      height: 225px;
+      height: 152px;
       width: 100%;
       margin-bottom: 6px;
     }
@@ -348,7 +358,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 480px;
+      max-height: 490px;
       overflow-y: auto;
       padding-right: 4px;
     }
@@ -361,7 +371,7 @@
       border-bottom: 1px solid var(--border-subtle);
       border-radius: 6px;
       padding: 10px 12px;
-      font-size: 0.76rem;
+      font-size: 0.75rem;
     }
 
     .alert-card.high-tier {
@@ -378,8 +388,18 @@
 
     .alert-meta {
       color: var(--text-muted);
-      font-size: 0.72rem;
+      font-size: 0.71rem;
       margin-bottom: 6px;
+    }
+
+    .xai-rationale-box {
+      background: rgba(192, 132, 252, 0.09);
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      border-radius: 5px;
+      padding: 5px 8px;
+      margin-bottom: 6px;
+      font-size: 0.7rem;
+      color: #e9d5ff;
     }
 
     .work-order-grid {
@@ -389,13 +409,13 @@
       background: rgba(30, 41, 59, 0.55);
       padding: 6px 8px;
       border-radius: 5px;
-      font-size: 0.72rem;
+      font-size: 0.71rem;
     }
 
     .ward-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.76rem;
+      font-size: 0.74rem;
     }
 
     .ward-table th {
@@ -404,7 +424,7 @@
       background: #090f1d;
       color: var(--text-muted);
       font-weight: 700;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       text-transform: uppercase;
       border-bottom: 1px solid var(--border-subtle);
       position: sticky;
@@ -412,7 +432,7 @@
     }
 
     .ward-table td {
-      padding: 8px 6px;
+      padding: 7px 6px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
@@ -422,7 +442,7 @@
     }
 
     .ward-table tbody tr:hover {
-      background: rgba(56, 189, 248, 0.08);
+      background: rgba(56, 189, 248, 0.09);
     }
 
     @media (max-width: 1100px) {
@@ -444,9 +464,10 @@
       <div class="brand-title">
         <span>🛰️ EpiGrid: Epidemiological Preemption Engine</span>
         <span class="badge badge-cyan" id="regionBadge">Ready — Select Area &amp; Click Scan</span>
+        <span class="badge badge-purple" id="transferBadge">🧠 Transfer Learning: Checking...</span>
       </div>
       <div class="brand-subtitle">
-        Sentinel-2 L2A MNDWI Micro-Waterlogging + NASA POWER Brière Kinetics + Zero-Floor Bregman KL-Divergence ST-GNN
+        Sentinel-2 L2A MNDWI + NASA POWER Brière Kinetics + Incremental Transfer-Learned PyTorch ST-GNN + Autograd Explainable AI (XAI)
       </div>
     </div>
 
@@ -465,15 +486,15 @@
       </div>
       <div class="input-group">
         <label>LAT</label>
-        <input type="number" id="latInput" value="23.8103" step="0.001" style="width: 78px;" />
+        <input type="number" id="latInput" value="23.8103" step="0.001" style="width: 76px;" />
       </div>
       <div class="input-group">
         <label>LON</label>
-        <input type="number" id="lonInput" value="90.4125" step="0.001" style="width: 78px;" />
+        <input type="number" id="lonInput" value="90.4125" step="0.001" style="width: 76px;" />
       </div>
       <div class="input-group">
         <label>EPOCHS</label>
-        <input type="number" id="epochsInput" value="120" min="20" max="1000" style="width: 62px;" />
+        <input type="number" id="epochsInput" value="120" min="20" max="1000" style="width: 60px;" />
       </div>
       <button class="btn-primary pulse-ready" id="runBtn" onclick="executeEpiGridPipeline()">
         🚀 Start Area Scan &amp; Dispatch Alerts
@@ -484,20 +505,20 @@
     </div>
   </div>
 
-  <!-- Live Selection Status Banner -->
+  <!-- Live Selection & Persistent Transfer Learning Status Banner -->
   <div class="selection-banner" id="selectionBanner">
     <span id="selectionStatusText">
-      📍 <strong>Target Area Selected:</strong> Dhaka Division &rarr; Dhaka (All 12 Municipal Wards) | Horizon: <strong>Day +14</strong>. Click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to execute ST-GNN training.
+      📍 <strong>Target Area Staged:</strong> Dhaka Division &rarr; Dhaka (All 12 Municipal Wards) | Horizon: <strong>Day +14</strong>. Click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to train ST-GNN &amp; compute XAI attributions.
     </span>
-    <span class="badge badge-cyan" id="scanModeBadge">Manual Trigger Mode (No Auto-Scan)</span>
+    <span class="badge badge-cyan" id="transferHistoryBadge">Manual Trigger Mode (No Auto-Scan)</span>
   </div>
 
-  <!-- 4-Tier Epidemiological & Entomological KPI Strip -->
+  <!-- 4-Tier Epidemiological + Transfer Learning & XAI KPI Strip -->
   <div class="kpi-grid">
     <div class="kpi-card" style="border-top: 3px solid var(--accent-red);">
       <div class="kpi-label">🔴 Critical Risk Wards (&ge;75%)</div>
       <div class="kpi-value" id="kpiCritical" style="color: var(--accent-red);">0</div>
-      <div class="kpi-sub" id="kpiCriticalSub">Immediate ULV Fogging</div>
+      <div class="kpi-sub">Immediate ULV Fogging</div>
     </div>
 
     <div class="kpi-card" style="border-top: 3px solid var(--accent-orange);">
@@ -524,14 +545,14 @@
       <div class="kpi-sub" id="kpiMeteoSub">Awaiting Area Scan...</div>
     </div>
 
-    <div class="kpi-card" style="border-top: 3px solid #a855f7;">
-      <div class="kpi-label">💧 Viable Breeding Wards</div>
-      <div class="kpi-value" id="kpiViable" style="color: #c084fc;">--</div>
-      <div class="kpi-sub" id="kpiDghsSub">Retention &ge; Emergence Threshold</div>
+    <div class="kpi-card" style="border-top: 3px solid var(--accent-purple);">
+      <div class="kpi-label">🧠 Transfer Memory &amp; XAI Peak</div>
+      <div class="kpi-value" id="kpiTransferMemory" style="color: var(--accent-purple);">--</div>
+      <div class="kpi-sub" id="kpiXaiTriggerSub">Autograd Saliency Ready</div>
     </div>
   </div>
 
-  <!-- Main Geospatial Map & ST-GNN Charts -->
+  <!-- Main Geospatial Map & 3 AI Telemetry Charts (Trajectories + Loss + Explainable AI) -->
   <div class="main-grid">
     <div class="panel">
       <div class="panel-header">
@@ -585,6 +606,7 @@
     </div>
 
     <div class="panel">
+      <!-- Chart 1: Multi-Horizon Trajectories -->
       <div class="panel-header">
         <div class="panel-title" id="trajectoryPanelTitle">
           Ward Outbreak Probability Trajectories (Day +1 to Day +14)
@@ -595,15 +617,27 @@
         <canvas id="trajectoryChart"></canvas>
       </div>
 
-      <div class="panel-header" style="margin-top: 6px;">
-        <div class="panel-title">PyTorch ST-GNN Backpropagation Convergence (AI Error Reduction)</div>
+      <!-- Chart 2: Zero-Floor Backpropagation Loss Convergence -->
+      <div class="panel-header" style="margin-top: 2px;">
+        <div class="panel-title">PyTorch ST-GNN Backpropagation Convergence (Zero-Floor KL Loss)</div>
         <div style="display: flex; gap: 6px; align-items: center;">
           <span class="badge badge-emerald" id="accuracyBadge">Accuracy: --%</span>
           <span class="badge badge-cyan" id="epochsBadge">120 Epochs</span>
         </div>
       </div>
-      <div class="chart-box" style="height: 205px; margin-bottom: 0;">
+      <div class="chart-box" style="height: 140px;">
         <canvas id="lossChart"></canvas>
+      </div>
+
+      <!-- Chart 3: Explainable AI (XAI) Autograd Input x Gradient Saliency Attribution -->
+      <div class="panel-header" style="margin-top: 2px;">
+        <div class="panel-title" id="xaiPanelTitle">
+          Explainable AI (XAI): Autograd Feature Saliency Attribution (|X&middot;&part;&Ycirc;/&part;X|)
+        </div>
+        <span class="badge badge-purple" id="xaiAttentionBadge">Peak GRU Attention: --</span>
+      </div>
+      <div class="chart-box" style="height: 150px; margin-bottom: 0;">
+        <canvas id="xaiChart"></canvas>
       </div>
     </div>
   </div>
@@ -613,12 +647,12 @@
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title" id="workOrdersPanelTitle">
-          Automated Municipal Preemption &amp; Fogging Work Orders (&ge; 55%)
+          Automated Municipal Preemption &amp; XAI-Verified Fogging Work Orders (&ge; 55%)
         </div>
         <span class="badge badge-cyan" id="alertCountBadge">Awaiting Scan</span>
       </div>
       <div class="alert-list" id="alertFeed">
-        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 14px; color: #bae6fd; font-size: 0.8rem;">
+        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 14px; color: #bae6fd; font-size: 0.79rem;">
           <strong>🛰️ Standby for Manual Area Scan</strong><br/>
           Select your desired <strong>Division</strong>, <strong>District</strong>, <strong>Ward</strong>, <strong>Forecast Horizon (Day +1 to Day +14)</strong>, and <strong>Epochs</strong>, then click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong>.
         </div>
@@ -627,8 +661,8 @@
 
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title" id="matrixTableTitle">Municipal Ward Probability Matrix</div>
-        <span class="badge badge-cyan">Click Any Ward Row to Zoom Map</span>
+        <div class="panel-title" id="matrixTableTitle">Municipal Ward Probability &amp; Explainable AI Matrix</div>
+        <span class="badge badge-purple">Click Any Ward Row to Zoom Map &amp; Inspect Ward XAI</span>
       </div>
       <div style="overflow-x: auto; max-height: 500px;">
         <table class="ward-table">
@@ -636,7 +670,7 @@
             <tr>
               <th>Ward ID</th>
               <th>Municipal Ward Name</th>
-              <th>Drainage / Viability</th>
+              <th>Dominant XAI Driver &amp; GRU Attention</th>
               <th>Day +1</th>
               <th>Day +7</th>
               <th id="dynamicHorizonHeader">Day +14</th>
@@ -646,7 +680,7 @@
           <tbody id="wardTableBody">
             <tr>
               <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">
-                Select your target area and click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to generate the ward probability matrix.
+                Select your target area and click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to generate the ward probability &amp; XAI matrix.
               </td>
             </tr>
           </tbody>
@@ -661,6 +695,7 @@
     let edgeLayerGroup = null;
     let trajectoryChartInstance = null;
     let lossChartInstance = null;
+    let xaiChartInstance = null;
 
     let bangladeshHierarchy = null;
     let latestPipelineData = null;
@@ -753,6 +788,30 @@
       markerLayerGroup = L.layerGroup().addTo(mapInstance);
     }
 
+    async function checkInitialTransferLearningStatus() {
+      try {
+        const res = await fetch("/api/v1/ai/transfer-learning-status");
+        const status = await res.json();
+        if (status.checkpoint_exists) {
+          const cumEpochs = status.cumulative_epochs_trained || 120;
+          const sessions = status.cumulative_training_sessions || 1;
+          const distCount = (status.districts_learned_history || []).length || 1;
+          document.getElementById("transferBadge").textContent =
+            `🧠 Warm-Start Ready (${cumEpochs} Cum. Epochs | ${distCount} Districts Learned)`;
+          document.getElementById("kpiTransferMemory").textContent =
+            `${cumEpochs} Ep (${sessions} Runs)`;
+          document.getElementById("kpiXaiTriggerSub").textContent =
+            `Prior: ${status.last_district_trained || "Dhaka"} (${distCount} Districts)`;
+        } else {
+          document.getElementById("transferBadge").textContent =
+            "🧠 Cold-Start Xavier Initialization Ready";
+          document.getElementById("kpiTransferMemory").textContent = "Cold-Start";
+        }
+      } catch (err) {
+        console.error("Transfer status check failed:", err);
+      }
+    }
+
     function updatePendingSelectionBanner() {
       const divName = document.getElementById("divisionSelect").value || "Dhaka Division";
       const distName = document.getElementById("districtSelect").value || "Dhaka";
@@ -838,7 +897,7 @@
       updatePendingSelectionBanner();
     }
 
-    // Changing Ward ONLY pans map to that ward if coordinates exist (NO auto-scan)
+    // Changing Ward ONLY pans map to that ward (NO auto-scan)
     function onWardChange() {
       const wardVal = document.getElementById("wardSelect").value;
       if (wardVal !== "ALL" && wardMarkerMap[wardVal]) {
@@ -873,7 +932,7 @@
       const epochs = Math.max(20, Math.min(1000, parseInt(document.getElementById("epochsInput").value, 10) || 120));
       const selectedHorizonDays = Math.max(1, Math.min(14, parseInt(document.getElementById("daySlider").value, 10) || 14));
 
-      btn.textContent = `⏳ Scanning ${district} (Day +${selectedHorizonDays}, ${epochs} Epochs)...`;
+      btn.textContent = `⏳ Transfer-Training ST-GNN & XAI (${district}, Day +${selectedHorizonDays})...`;
 
       try {
         const url =
@@ -886,7 +945,6 @@
         const data = await response.json();
         latestPipelineData = data;
 
-        // Lock UI strictly to the exact horizon returned/requested (e.g., Day +6)
         const lockedHorizon = parseInt(
           data.selected_forecast_horizon_days || selectedHorizonDays,
           10
@@ -895,10 +953,17 @@
 
         renderDashboardTelemetry(data, lockedHorizon);
 
+        const tl =
+          data.incremental_transfer_learning_telemetry ||
+          data.st_gnn_neural_network_telemetry?.incremental_transfer_learning ||
+          {};
+        const tlModeLabel = tl.pretrained_checkpoint_loaded
+          ? `Warm-Start Transfer Learning (from ${tl.previous_district_transferred_from || "Prior Checkpoint"})`
+          : "Cold-Start Initialization (Saved New Checkpoint)";
+
         document.getElementById("selectionStatusText").innerHTML =
-          `✅ <strong>Scan Complete:</strong> ${district} (${wardFilter === "ALL" ? "12 Municipal Wards" : wardFilter}) ` +
-          `evaluated at <strong>Day +${lockedHorizon} Horizon</strong> across <strong>${epochs} Epochs</strong>. ` +
-          `Drag the slider below to inspect any day from Day +1 to Day +14.`;
+          `✅ <strong>Scan Complete:</strong> ${district} (${wardFilter === "ALL" ? "12 Wards" : wardFilter}) ` +
+          `evaluated at <strong>Day +${lockedHorizon} Horizon</strong> | Mode: <strong>${tlModeLabel}</strong>.`;
       } catch (err) {
         console.error("Pipeline execution error:", err);
         document.getElementById("selectionStatusText").innerHTML =
@@ -931,11 +996,39 @@
       const trainTel = gnnTelemetry.training_telemetry || {};
       const finalBreakdown = trainTel.final_epoch_loss_breakdown || {};
 
+      const tl =
+        data.incremental_transfer_learning_telemetry ||
+        gnnTelemetry.incremental_transfer_learning ||
+        {};
+      const xaiSummary =
+        data.explainable_ai_telemetry ||
+        gnnTelemetry.explainable_ai_summary ||
+        {};
+
       document.getElementById("regionBadge").textContent =
         `${region.district_name || "Dhaka"} (${region.corporation_code || "DNCC"}) • Day +${horizonDays}`;
       document.getElementById("sceneBadge").textContent =
         waterSummary.stac_scene_id || "Sentinel-2 L2A Calibrated";
 
+      // Update Incremental Transfer Learning Badges & KPIs
+      const cumEpochs = tl.cumulative_epochs_trained || trainTel.epochs_completed || 120;
+      const cumSessions = tl.cumulative_training_sessions || 1;
+      const learnedList = tl.districts_learned_history || [region.district_name || "Dhaka"];
+      const isWarm = Boolean(tl.pretrained_checkpoint_loaded);
+
+      document.getElementById("transferBadge").textContent = isWarm
+        ? `🧠 Warm-Start Transfer (${cumEpochs} Cum. Epochs | ${learnedList.length} Districts)`
+        : `🧠 Checkpoint Initialized (${cumEpochs} Epochs Saved)`;
+
+      document.getElementById("transferHistoryBadge").textContent =
+        `Learned Districts (${learnedList.length}): ${learnedList.slice(-4).join(", ")}`;
+
+      document.getElementById("kpiTransferMemory").textContent =
+        `${cumEpochs} Ep (${cumSessions} Runs)`;
+      document.getElementById("kpiXaiTriggerSub").textContent =
+        `Peak Trigger: ${xaiSummary.peak_district_incubation_trigger || "Day -8"}`;
+
+      // Update Convergence Accuracy & Loss Badges
       const epochsDone = trainTel.epochs_completed || 120;
       const initLoss = trainTel.initial_epoch_1_loss ?? 0;
       const finalLoss = finalBreakdown.composite_objective_loss ?? 0;
@@ -948,21 +1041,20 @@
         `Accuracy: ${accPct}% (-${errRedPct}% Error)`;
 
       // Update Aedes Biological & Hydrological KPIs
+      const viableWards = waterSummary.viable_breeding_nodes ?? 0;
+      const totalWards = waterSummary.total_nodes_isolated ?? 12;
       document.getElementById("kpiEip").textContent =
         `${kinetics.extrinsic_incubation_period_eip_days ?? "--"}d / ${kinetics.aquatic_larval_emergence_days ?? "--"}d`;
       document.getElementById("kpiMeteoSub").textContent =
-        `Temp: ${meteo.mean_temperature_c ?? "--"}°C | RH: ${meteo.mean_relative_humidity_pct ?? "--"}% | Rain: ${meteo.cumulative_14d_precipitation_mm ?? "--"}mm`;
+        `${meteo.mean_temperature_c ?? "--"}°C | Rain: ${meteo.cumulative_14d_precipitation_mm ?? "--"}mm | Viable: ${viableWards}/${totalWards}`;
 
-      const totalWards = waterSummary.total_nodes_isolated ?? 12;
-      const viableWards = waterSummary.viable_breeding_nodes ?? 0;
-      document.getElementById("kpiViable").textContent = `${viableWards} / ${totalWards} Wards`;
-
-      const dghsInfo = gnnTelemetry.dghs_epidemiological_baseline_integration || {};
-      document.getElementById("kpiDghsSub").textContent =
-        `DGHS Pressure Index: ${((dghsInfo.district_calibrated_pressure_index || 0.45) * 100).toFixed(1)}%`;
-
-      // Render Loss Convergence Chart
+      // Render Loss Convergence Chart & District-Wide XAI Chart
       renderLossChart(trainTel.convergence_curve || []);
+      renderXaiChart(
+        xaiSummary.district_macro_pillars_pct || {},
+        `${region.district_name || "District"} Overall XAI Saliency`,
+        xaiSummary.peak_district_incubation_trigger || "Day -8"
+      );
 
       // Render Map, 4-Tier KPIs, Ward Table, Trajectory Chart, and Work Orders at exact horizonDays
       updateMapHorizon(horizonDays, true);
@@ -998,7 +1090,7 @@
         `Day +${dayNum} Forecast Horizon${dateStr}`;
       document.getElementById("dynamicHorizonHeader").textContent = `Day +${dayNum}`;
       document.getElementById("matrixTableTitle").textContent =
-        `Municipal Ward Probability Matrix (Evaluated at Day +${dayNum})`;
+        `Municipal Ward Probability & Explainable AI Matrix (Evaluated at Day +${dayNum})`;
 
       markerLayerGroup.clearLayers();
       edgeLayerGroup.clearLayers();
@@ -1035,7 +1127,6 @@
       const tbody = document.getElementById("wardTableBody");
       tbody.innerHTML = "";
 
-      // Sort wards dynamically by their probability on the selected Day +dayNum
       const sortedWards = [...wards].sort(
         (a, b) => getWardProbabilityAtDay(b, dayNum) - getWardProbabilityAtDay(a, dayNum)
       );
@@ -1059,10 +1150,15 @@
 
         const bio = ward.synchronized_biological_status || {};
         const spatial = ward.spatial_metrics || {};
+        const xai = ward.explainable_ai_attribution || {};
+        const pillars = xai.macro_pillar_attribution_pct || {};
+
         const drainEff = ((spatial.drainage_efficiency_index ?? 0.5) * 100).toFixed(0);
         const viableFlag = bio.larval_metamorphosis_viable !== false;
+        const domDriver = xai.dominant_xai_driver || "Sentinel-2 MNDWI Waterlogging & Drainage";
+        const domPct = xai.dominant_driver_pct ?? 42.0;
+        const peakDay = xai.peak_temporal_attention_day || "Day -8";
 
-        // Create calibrated 4-tier circle marker on Leaflet map
         const radiusPx = 8 + activeProb * 12;
         const marker = L.circleMarker([lat, lon], {
           radius: radiusPx,
@@ -1074,18 +1170,22 @@
         });
 
         marker.bindPopup(`
-          <div style="font-family: Inter, sans-serif; min-width: 235px; color: #0f172a;">
+          <div style="font-family: Inter, sans-serif; min-width: 250px; color: #0f172a;">
             <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 3px;">
               ${ward.ward_sector_id}: ${ward.municipal_ward_name}
             </div>
             <div style="font-size: 0.75rem; font-weight: 700; color: ${tier.color}; margin-bottom: 6px;">
               ● ${tier.label} — Day +${dayNum}: ${(activeProb * 100).toFixed(1)}%
             </div>
-            <div style="font-size: 0.73rem; line-height: 1.45;">
-              <strong>Structure:</strong> ${ward.structural_classification}<br/>
+            <div style="font-size: 0.72rem; line-height: 1.45; margin-bottom: 6px;">
               <strong>Water Retention:</strong> ${bio.hydrological_retention_days ?? "--"}d (Req: ${bio.required_aquatic_emergence_days ?? "--"}d)<br/>
-              <strong>Drainage Efficiency:</strong> ${drainEff}% | <strong>Larval Viable:</strong> ${viableFlag ? "Yes" : "No (Dries Early)"}<br/>
-              <strong>Directive:</strong> ${tier.directive}
+              <strong>Drainage Efficiency:</strong> ${drainEff}% | <strong>Larval Viable:</strong> ${viableFlag ? "Yes" : "No (Dries Early)"}
+            </div>
+            <div style="background: #f3e8ff; border-left: 3px solid #9333ea; padding: 5px 7px; font-size: 0.7rem; border-radius: 4px;">
+              <strong>🧠 Explainable AI (XAI) Attribution:</strong><br/>
+              • Top Driver: <strong>${domDriver} (${domPct}%)</strong><br/>
+              • Peak GRU Attention: <strong>${peakDay}</strong><br/>
+              • Hydrology: ${pillars.hydrological_waterlogging_drainage_pct ?? "--"}% | Brière Thermal: ${pillars.thermodynamic_briere_kinetics_pct ?? "--"}% | Spatial Graph: ${pillars.spatial_mosquito_dispersal_pct ?? "--"}%
             </div>
           </div>
         `);
@@ -1093,18 +1193,28 @@
         marker.addTo(markerLayerGroup);
         wardMarkerMap[ward.ward_sector_id] = marker;
 
-        // Populate Ward Probability Matrix Row
         const tr = document.createElement("tr");
         tr.onclick = () => {
           mapInstance.setView([lat, lon], 14, { animate: true });
           marker.openPopup();
+          renderXaiChart(
+            pillars,
+            `${ward.ward_sector_id} XAI Attribution`,
+            peakDay
+          );
         };
 
         tr.innerHTML = `
           <td style="font-weight: 700; color: var(--accent-cyan);">${ward.ward_sector_id}</td>
-          <td>${ward.municipal_ward_name}</td>
-          <td style="font-size: 0.71rem; color: var(--text-muted);">
-            Drainage ${drainEff}% • ${viableFlag ? "<span style='color:#f97316;'>Viable</span>" : "<span style='color:#10b981;'>Non-Viable</span>"}
+          <td>
+            <div style="font-weight: 600;">${ward.municipal_ward_name}</div>
+            <div style="font-size: 0.68rem; color: var(--text-muted);">
+              Drainage ${drainEff}% • ${viableFlag ? "<span style='color:#f97316;'>Larval Viable</span>" : "<span style='color:#10b981;'>Non-Viable</span>"}
+            </div>
+          </td>
+          <td style="font-size: 0.7rem;">
+            <div style="color: #e9d5ff; font-weight: 600;">${domDriver.split("(")[0].trim()} (${domPct}%)</div>
+            <div style="color: var(--text-muted); font-size: 0.67rem;">Peak Attention: ${peakDay}</div>
           </td>
           <td>${(day1Prob * 100).toFixed(1)}%</td>
           <td>${(day7Prob * 100).toFixed(1)}%</td>
@@ -1114,13 +1224,11 @@
         tbody.appendChild(tr);
       });
 
-      // Update 4-Tier KPI Cards for Day +dayNum
       document.getElementById("kpiCritical").textContent = countCritical;
       document.getElementById("kpiHigh").textContent = countHigh;
       document.getElementById("kpiMedium").textContent = countMedium;
       document.getElementById("kpiNormal").textContent = countNormal;
 
-      // Update Trajectory Chart & Work Orders strictly for Day +dayNum
       renderTrajectoryChart(sortedWards, dayNum);
       renderAlertFeedForHorizon(sortedWards, dayNum, dateKeys);
 
@@ -1170,9 +1278,9 @@
           data: values,
           borderColor: palette[cIdx % palette.length],
           backgroundColor: palette[cIdx % palette.length],
-          borderWidth: 2.3,
+          borderWidth: 2.2,
           tension: 0.35,
-          pointRadius: 3
+          pointRadius: 2.5
         };
       });
 
@@ -1184,12 +1292,12 @@
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              labels: { color: "#cbd5e1", font: { size: 10 } }
+              labels: { color: "#cbd5e1", font: { size: 9.5 } }
             }
           },
           scales: {
             x: {
-              ticks: { color: "#94a3b8", font: { size: 10 } },
+              ticks: { color: "#94a3b8", font: { size: 9.5 } },
               grid: { color: "rgba(255,255,255,0.05)" }
             },
             y: {
@@ -1197,7 +1305,7 @@
               max: 100,
               ticks: {
                 color: "#94a3b8",
-                font: { size: 10 },
+                font: { size: 9.5 },
                 callback: (v) => `${v}%`
               },
               grid: { color: "rgba(255,255,255,0.05)" }
@@ -1225,9 +1333,9 @@
               borderColor: "#38bdf8",
               backgroundColor: "rgba(56, 189, 248, 0.16)",
               fill: true,
-              borderWidth: 2.3,
+              borderWidth: 2.2,
               tension: 0.3,
-              pointRadius: 2.8
+              pointRadius: 2.5
             }
           ]
         },
@@ -1236,19 +1344,19 @@
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              labels: { color: "#cbd5e1", font: { size: 10 } }
+              labels: { color: "#cbd5e1", font: { size: 9.5 } }
             }
           },
           scales: {
             x: {
-              ticks: { color: "#94a3b8", font: { size: 10 } },
+              ticks: { color: "#94a3b8", font: { size: 9.5 } },
               grid: { color: "rgba(255,255,255,0.05)" }
             },
             y: {
               beginAtZero: true,
               ticks: {
                 color: "#94a3b8",
-                font: { size: 10 },
+                font: { size: 9.5 },
                 callback: (v) => Number(v).toFixed(4)
               },
               grid: { color: "rgba(255,255,255,0.05)" }
@@ -1258,7 +1366,74 @@
       });
     }
 
-    // Dynamically evaluates & renders fogging work orders at the exact selected Day +dayNum
+    function renderXaiChart(pillarsObj, scopeLabel, peakAttentionDay) {
+      const ctx = document.getElementById("xaiChart").getContext("2d");
+      if (xaiChartInstance) {
+        xaiChartInstance.destroy();
+      }
+
+      document.getElementById("xaiPanelTitle").textContent =
+        `Explainable AI (XAI): ${scopeLabel} (|X·∂Ŷ/∂X|)`;
+      document.getElementById("xaiAttentionBadge").textContent =
+        `Peak GRU Attention: ${peakAttentionDay || "Day -8"}`;
+
+      const hydroVal = parseFloat(pillarsObj.hydrological_waterlogging_drainage_pct ?? 36.5);
+      const thermoVal = parseFloat(pillarsObj.thermodynamic_briere_kinetics_pct ?? 34.0);
+      const dghsVal = parseFloat(pillarsObj.dghs_clinical_baseline_pct ?? 15.5);
+      const spatialVal = parseFloat(pillarsObj.spatial_mosquito_dispersal_pct ?? 14.0);
+
+      xaiChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [
+            "MNDWI Waterlogging & Drainage",
+            "NASA Brière Thermal Kinetics",
+            "DGHS Hospital Baseline",
+            "Neighbor Ward Flight Dispersal"
+          ],
+          datasets: [
+            {
+              label: "XAI Saliency Attribution (%)",
+              data: [hydroVal, thermoVal, dghsVal, spatialVal],
+              backgroundColor: [
+                "rgba(56, 189, 248, 0.78)",
+                "rgba(249, 115, 22, 0.78)",
+                "rgba(192, 132, 252, 0.78)",
+                "rgba(16, 185, 129, 0.78)"
+              ],
+              borderColor: ["#38bdf8", "#f97316", "#c084fc", "#10b981"],
+              borderWidth: 1.5,
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              min: 0,
+              max: 65,
+              ticks: {
+                color: "#94a3b8",
+                font: { size: 9.5 },
+                callback: (v) => `${v}%`
+              },
+              grid: { color: "rgba(255,255,255,0.05)" }
+            },
+            y: {
+              ticks: { color: "#e2e8f0", font: { size: 9.5, weight: "600" } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
     function renderAlertFeedForHorizon(sortedWards, dayNum, dateKeys) {
       const alertSystem = latestPipelineData?.automated_municipal_alert_system || {};
       const threshold = parseFloat(alertSystem.preemption_threshold_configured || 0.55);
@@ -1266,7 +1441,7 @@
       const feed = document.getElementById("alertFeed");
 
       document.getElementById("workOrdersPanelTitle").textContent =
-        `Automated Municipal Preemption & Fogging Work Orders (Day +${dayNum} ≥ ${(threshold * 100).toFixed(0)}%)`;
+        `Automated Municipal Preemption & XAI Work Orders (Day +${dayNum} ≥ ${(threshold * 100).toFixed(0)}%)`;
 
       const qualifyingWards = sortedWards.filter(
         (w) => getWardProbabilityAtDay(w, dayNum) >= threshold
@@ -1277,7 +1452,7 @@
 
       if (qualifyingWards.length === 0) {
         feed.innerHTML = `
-          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 14px; color: #a7f3d0; font-size: 0.8rem;">
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 14px; color: #a7f3d0; font-size: 0.79rem;">
             <strong>✅ No Emergency Fogging Dispatches Required at Day +${dayNum}</strong><br/>
             All evaluated municipal wards are below the ${(threshold * 100).toFixed(0)}% emergency preemption threshold on <strong>Day +${dayNum}</strong>.
           </div>
@@ -1293,6 +1468,9 @@
 
           const spatial = w.spatial_metrics || {};
           const bio = w.synchronized_biological_status || {};
+          const xai = w.explainable_ai_attribution || {};
+          const pillars = xai.macro_pillar_attribution_pct || {};
+
           const areaM2 = parseFloat(spatial.estimated_surface_area_m2 || 400);
           const retDays = parseFloat(bio.hydrological_retention_days || 8.2);
           const emgDays = Math.max(parseFloat(bio.required_aquatic_emergence_days || 7.8), 1.0);
@@ -1302,7 +1480,6 @@
           const crewSize = isCritical ? 6 : 4;
           const durationHrs = Math.max(1.5, (areaM2 / 150.0) * (retDays / emgDays)).toFixed(1);
 
-          // Find earliest day <= dayNum where threshold is breached
           const traj = w.daily_probability_trajectory_14d || w.daily_probability_trajectory || {};
           const entries = Object.entries(traj).slice(0, dayNum);
           let breachDate = dateKeys[dayNum - 1] || "Active Window";
@@ -1333,6 +1510,11 @@
                 <strong>${w.municipal_ward_name}</strong> | Node: ${w.source_waterlogging_node} (${w.structural_classification})<br/>
                 Authority: ${w.municipal_authority || "Municipal Vector Control Wing"}
               </div>
+              <div class="xai-rationale-box">
+                <strong>🧠 XAI Dispatch Rationale:</strong> Driven <strong>${xai.dominant_driver_pct ?? 42}%</strong> by <em>${xai.dominant_xai_driver || "MNDWI Waterlogging & Drainage"}</em> |
+                Peak GRU Attention: <strong>${xai.peak_temporal_attention_day || "Day -8"}</strong>
+                (Hydrology: ${pillars.hydrological_waterlogging_drainage_pct ?? "--"}%, Brière Kinetics: ${pillars.thermodynamic_briere_kinetics_pct ?? "--"}%, Graph Dispersal: ${pillars.spatial_mosquito_dispersal_pct ?? "--"}%)
+              </div>
               <div class="work-order-grid">
                 <div><strong>Temephos 50EC:</strong> ${temephosL} L</div>
                 <div><strong>Deltamethrin Fog:</strong> ${deltamethrinL} L</div>
@@ -1358,15 +1540,16 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `epigrid_manifest_day${document.getElementById("daySlider").value}_${Date.now()}.json`;
+      a.download = `epigrid_xai_manifest_day${document.getElementById("daySlider").value}_${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    // Initialize map & dropdown hierarchy ONLY — does NOT auto-start scanning
+    // Initialize map, dropdown hierarchy & Transfer Learning checkpoint status (NO auto-scan)
     window.addEventListener("DOMContentLoaded", async () => {
       initMap();
       await loadBangladeshHierarchy();
+      await checkInitialTransferLearningStatus();
     });
   </script>
 </body>

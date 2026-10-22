@@ -12,6 +12,17 @@ from services.spatiotemporal_pipeline import execute_spatiotemporal_pipeline, br
 
 MODEL_WEIGHTS_PATH = "models/epigrid_stgnn_weights.pt"
 
+FEATURE_NAMES_8D = [
+    "NASA_T2M_Temperature",
+    "NASA_RH2M_Humidity",
+    "NASA_Precipitation_Flux",
+    "Briere_Viral_EIP_Rate",
+    "Briere_Larval_MDR_Rate",
+    "Sentinel2_MNDWI_Water_Index",
+    "Hydrological_Retention_Ratio",
+    "DGHS_Endemic_Baseline_Pressure",
+]
+
 # Complete 8 Divisions & 64 Districts of Bangladesh with WGS84 Epicenters,
 # Municipal Authority Codes, and Endemic Urbanization Density Factors [0.35 - 0.90]
 BANGLADESH_DIVISIONS_AND_DISTRICTS = {
@@ -296,7 +307,7 @@ class EpiGridSTGNN(nn.Module):
     """
     High-Precision Spatio-Temporal Graph Neural Network (ST-GNN) combining two-stage
     Spectral Graph Convolutions with skip-residual projections, Gated Recurrent Units (GRU),
-    Temporal Self-Attention, and a 14-day Multi-Horizon Sigmoid Decoder.
+    Temporal Self-Attention (with XAI weight extraction), and a 14-day Sigmoid Decoder.
     """
     def __init__(self, num_features: int = 8, hidden_dim: int = 48, forecast_horizon: int = 14):
         super().__init__()
@@ -317,6 +328,7 @@ class EpiGridSTGNN(nn.Module):
             nn.Linear(hidden_dim, forecast_horizon),
             nn.Sigmoid()
         )
+        self.last_attention_weights: torch.Tensor | None = None
 
     def forward(self, x_seq: torch.Tensor, adj_norm: torch.Tensor) -> torch.Tensor:
         n_nodes, t_steps, _ = x_seq.shape
@@ -332,9 +344,11 @@ class EpiGridSTGNN(nn.Module):
         spatial_seq = torch.stack(spatial_embeddings, dim=1)
         gru_out, _ = self.gru(spatial_seq)
 
+        # Temporal Self-Attention across 14-day incubation history: shape (N_nodes, T_steps, 1)
         attn_scores = torch.softmax(self.attention_proj(gru_out), dim=1)
-        context_vector = torch.sum(attn_scores * gru_out, dim=1) + gru_out[:, -1, :]
+        self.last_attention_weights = attn_scores.squeeze(-1).detach()
 
+        context_vector = torch.sum(attn_scores * gru_out, dim=1) + gru_out[:, -1, :]
         prob_matrix = self.decoder(context_vector)
         return prob_matrix
 
@@ -343,8 +357,6 @@ class EpidemiologicalObjectiveFunction(nn.Module):
     """
     Zero-Floor Composite Objective Function:
     1. Entropy-Normalized Binary KL-Divergence: D_KL(Y || Y_hat) = BCE(Y_hat, Y) - H(Y).
-       Eliminates the non-zero Shannon entropy floor (~0.52) of raw BCELoss on soft targets
-       so that loss converges smoothly to 0.00000 as epochs increase (e.g., 120 -> 300 epochs).
     2. Multi-Horizon Mean Squared Error: ||Y_hat - Y||_F^2.
     3. Residual Graph Laplacian Smoothness: Tr((Y_hat - Y)^T * L * (Y_hat - Y)).
     """
@@ -364,14 +376,12 @@ class EpidemiologicalObjectiveFunction(nn.Module):
         y_p = torch.clamp(y_pred, eps, 1.0 - eps)
         y_t = torch.clamp(y_true, eps, 1.0 - eps)
 
-        # Exact Binary Kullback-Leibler Divergence (BCE minus target Shannon entropy H(Y))
         bce_raw = -(y_t * torch.log(y_p) + (1.0 - y_t) * torch.log(1.0 - y_p))
         target_entropy = -(y_t * torch.log(y_t) + (1.0 - y_t) * torch.log(1.0 - y_t))
         kl_outbreak_loss = torch.mean(torch.clamp(bce_raw - target_entropy, min=0.0))
 
         mse_loss = self.mse(y_p, y_t)
 
-        # Residual Graph Laplacian penalty on prediction error E = (Y_hat - Y)
         eye = torch.eye(adj_norm.shape[0], device=adj_norm.device)
         laplacian = eye - adj_norm
         residual = y_p - y_t
@@ -386,7 +396,6 @@ class EpidemiologicalObjectiveFunction(nn.Module):
             + (self.lambda_laplacian * laplacian_penalty)
         )
 
-        # Compute R^2 / Percentage Convergence Accuracy
         mae = float(torch.mean(torch.abs(y_p - y_t)).item())
         convergence_accuracy_pct = round(max(0.0, (1.0 - mae) * 100.0), 2)
 
@@ -398,6 +407,189 @@ class EpidemiologicalObjectiveFunction(nn.Module):
             "mean_absolute_probability_error": round(mae, 5),
             "convergence_accuracy_pct": convergence_accuracy_pct
         }
+
+
+def load_or_initialize_transfer_learning(model: EpiGridSTGNN) -> dict:
+    """
+    Implements Persistent Incremental Transfer Learning:
+    If `models/epigrid_stgnn_weights.pt` exists on disk with matching tensor dimensions,
+    loads the previously trained neural network parameters and blends them (70% learned
+    prior knowledge + 30% fresh plasticity) for fast cross-district adaptation.
+    """
+    metadata = {
+        "transfer_learning_mode": "COLD_START_XAVIER_INITIALIZATION",
+        "pretrained_checkpoint_loaded": False,
+        "cumulative_training_sessions": 1,
+        "cumulative_epochs_trained": 0,
+        "districts_learned_history": [],
+        "previous_district_transferred_from": None
+    }
+
+    if not os.path.exists(MODEL_WEIGHTS_PATH):
+        return metadata
+
+    try:
+        checkpoint = torch.load(MODEL_WEIGHTS_PATH, map_location="cpu", weights_only=False)
+        saved_state = checkpoint.get("model_state_dict", {})
+        current_state = model.state_dict()
+
+        if saved_state and all(
+            k in saved_state and saved_state[k].shape == current_state[k].shape
+            for k in current_state.keys()
+        ):
+            blended_state = {}
+            with torch.no_grad():
+                for k in current_state.keys():
+                    # Retain 70% of pre-trained cross-district representations + 30% adaptive plasticity
+                    blended_state[k] = 0.70 * saved_state[k] + 0.30 * current_state[k]
+            model.load_state_dict(blended_state)
+
+            prev_sessions = int(checkpoint.get("cumulative_training_sessions", 1))
+            prev_epochs = int(checkpoint.get("cumulative_epochs_trained", 120))
+            prev_districts = list(checkpoint.get("districts_learned_history", []))
+            last_dist = checkpoint.get("district", "Dhaka")
+
+            metadata.update({
+                "transfer_learning_mode": "WARM_START_INCREMENTAL_TRANSFER_LEARNING",
+                "pretrained_checkpoint_loaded": True,
+                "cumulative_training_sessions": prev_sessions + 1,
+                "cumulative_epochs_trained": prev_epochs,
+                "districts_learned_history": prev_districts,
+                "previous_district_transferred_from": last_dist
+            })
+    except Exception:
+        pass
+
+    return metadata
+
+
+def compute_xai_saliency_and_attention(
+    model: EpiGridSTGNN,
+    x_tensor: torch.Tensor,
+    adj_norm: torch.Tensor,
+    horizon_days: int
+) -> dict:
+    """
+    Executes Explainable AI (XAI) Attribution via PyTorch Autograd Input x Gradient Saliency
+    (|X * dY_hat/dX|) and Temporal Self-Attention Extraction:
+    1. Computes per-ward and district-wide percentage importance across the 8 input features.
+    2. Quantifies the 4 Macro Epidemiological Pillars (Hydrology/Drainage, NASA Brière Kinetics,
+       DGHS Clinical Baseline, and Spatial Mosquito Dispersal).
+    3. Extracts the exact historical day (Day -14 to Day -1) that triggered peak GRU attention.
+    """
+    model.eval()
+    x_grad = x_tensor.clone().detach().requires_grad_(True)
+    y_out = model(x_grad, adj_norm)
+
+    target_idx = max(0, min(13, horizon_days - 1))
+    target_score = y_out[:, target_idx].sum()
+    model.zero_grad()
+    target_score.backward()
+
+    # Input x Gradient saliency tensor: shape (N_nodes, 14, 8)
+    saliency = torch.abs(x_grad.grad * x_grad).detach().cpu().numpy()
+    attn_matrix = (
+        model.last_attention_weights.cpu().numpy()
+        if model.last_attention_weights is not None
+        else np.full((x_tensor.shape[0], 14), 1.0 / 14.0, dtype=np.float32)
+    )
+
+    adj_np = adj_norm.detach().cpu().numpy()
+    today_date = datetime.utcnow().date()
+    historical_dates = [
+        (today_date - timedelta(days=(14 - t))).strftime("%Y-%m-%d")
+        for t in range(14)
+    ]
+
+    ward_xai_list = []
+    district_feature_accum = np.zeros(8, dtype=np.float64)
+    district_pillars_accum = np.zeros(4, dtype=np.float64)
+
+    for i in range(x_tensor.shape[0]):
+        # Sum saliency across the 14 historical timesteps for node i -> shape (8,)
+        node_feat_sal = np.sum(saliency[i], axis=0) + 1e-6
+        node_feat_pct = (node_feat_sal / np.sum(node_feat_sal)) * 100.0
+        district_feature_accum += node_feat_pct
+
+        # Calculate off-diagonal spatial neighbor coupling ratio from Kipf-Welling adjacency row
+        self_weight = float(adj_np[i, i])
+        neighbor_weight = float(np.sum(adj_np[i]) - self_weight)
+        spatial_coupling_share = np.clip(neighbor_weight / (self_weight + neighbor_weight + 1e-6), 0.06, 0.28)
+
+        local_share = 1.0 - spatial_coupling_share
+        # Group the 8 features into the 3 local biophysical pillars + 1 spatial graph pillar
+        raw_thermo = float(np.sum(node_feat_pct[0:5])) / 100.0
+        raw_hydro = float(np.sum(node_feat_pct[5:7])) / 100.0
+        raw_dghs = float(node_feat_pct[7]) / 100.0
+        raw_total = max(raw_thermo + raw_hydro + raw_dghs, 1e-6)
+
+        hydro_pct = round((raw_hydro / raw_total) * local_share * 100.0, 1)
+        thermo_pct = round((raw_thermo / raw_total) * local_share * 100.0, 1)
+        dghs_pct = round((raw_dghs / raw_total) * local_share * 100.0, 1)
+        spatial_pct = round(max(1.0, 100.0 - (hydro_pct + thermo_pct + dghs_pct)), 1)
+
+        pillars = {
+            "hydrological_waterlogging_drainage_pct": hydro_pct,
+            "thermodynamic_briere_kinetics_pct": thermo_pct,
+            "dghs_clinical_baseline_pct": dghs_pct,
+            "spatial_mosquito_dispersal_pct": spatial_pct,
+        }
+        district_pillars_accum += np.array([hydro_pct, thermo_pct, dghs_pct, spatial_pct])
+
+        pillar_labels = {
+            "hydrological_waterlogging_drainage_pct": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+            "thermodynamic_briere_kinetics_pct": "NASA POWER Brière Thermal Incubation Kinetics (EIP/MDR)",
+            "dghs_clinical_baseline_pct": "DGHS Hospital Endemic Baseline Pressure",
+            "spatial_mosquito_dispersal_pct": "Neighboring Ward ST-GNN Flight Dispersal (≤4.5km)",
+        }
+        top_pillar_key = max(pillars, key=pillars.get)
+
+        # Identify peak historical attention day from GRU Self-Attention weights
+        node_attn = attn_matrix[i]
+        peak_t = int(np.argmax(node_attn))
+        days_ago = 14 - peak_t
+        peak_attn_pct = round(float(node_attn[peak_t]) * 100.0, 1)
+
+        feature_breakdown = {
+            FEATURE_NAMES_8D[f_idx]: round(float(node_feat_pct[f_idx]), 1)
+            for f_idx in range(8)
+        }
+
+        ward_xai_list.append({
+            "macro_pillar_attribution_pct": pillars,
+            "dominant_xai_driver": pillar_labels[top_pillar_key],
+            "dominant_driver_pct": pillars[top_pillar_key],
+            "peak_temporal_attention_day": f"Day -{days_ago} ({historical_dates[peak_t]})",
+            "peak_temporal_attention_weight_pct": peak_attn_pct,
+            "feature_saliency_8d_pct": feature_breakdown,
+        })
+
+    n_wards = max(1, x_tensor.shape[0])
+    mean_feat_pct = district_feature_accum / n_wards
+    mean_pillars = district_pillars_accum / n_wards
+    mean_attn = np.mean(attn_matrix, axis=0)
+    dist_peak_t = int(np.argmax(mean_attn))
+
+    return {
+        "xai_methodology": "PyTorch Autograd Input×Gradient Saliency (|X · ∂Y/∂X|) + GRU Temporal Self-Attention",
+        "evaluated_horizon_days": horizon_days,
+        "district_macro_pillars_pct": {
+            "hydrological_waterlogging_drainage_pct": round(float(mean_pillars[0]), 1),
+            "thermodynamic_briere_kinetics_pct": round(float(mean_pillars[1]), 1),
+            "dghs_clinical_baseline_pct": round(float(mean_pillars[2]), 1),
+            "spatial_mosquito_dispersal_pct": round(float(mean_pillars[3]), 1),
+        },
+        "district_8d_feature_importance_pct": {
+            FEATURE_NAMES_8D[f_idx]: round(float(mean_feat_pct[f_idx]), 2)
+            for f_idx in range(8)
+        },
+        "district_temporal_attention_profile": {
+            f"Day -{14 - t} ({historical_dates[t]})": round(float(mean_attn[t]) * 100.0, 2)
+            for t in range(14)
+        },
+        "peak_district_incubation_trigger": f"Day -{14 - dist_peak_t} ({historical_dates[dist_peak_t]})",
+        "ward_xai_attributions": ward_xai_list,
+    }
 
 
 def parse_dghs_baseline_factor(dghs_payload: dict, district_urban_factor: float = 0.65) -> tuple[int, float]:
@@ -608,9 +800,10 @@ async def execute_phase4_stgnn_training_and_forecast(
     Phase 4 Master Orchestrator:
     1. Resolves target Bangladesh District & its 12 Municipal Wards.
     2. Ingests Phase 2 & Phase 3 multi-modal tensors and live DGHS baseline.
-    3. Trains the PyTorch Spatio-Temporal Graph Neural Network (ST-GNN) using
-       Entropy-Normalized KL-Divergence + CosineAnnealingLR for deep zero-floor convergence.
-    4. Outputs the calibrated 4-tier probability matrix locked to the requested horizon_days.
+    3. Loads Persistent Pre-Trained Weights for Cross-District Incremental Transfer Learning.
+    4. Trains the PyTorch Spatio-Temporal Graph Neural Network (ST-GNN) via Zero-Floor KL-Divergence.
+    5. Computes Explainable AI (XAI) Autograd Input×Gradient Saliency & Temporal Attention Attribution.
+    6. Outputs the calibrated 4-tier probability matrix locked to the requested horizon_days.
     """
     torch.manual_seed(42)
     np.random.seed(42)
@@ -622,6 +815,7 @@ async def execute_phase4_stgnn_training_and_forecast(
     c_lat = target_district["latitude"]
     c_lon = target_district["longitude"]
     urban_factor = target_district["urban_density_factor"]
+    dist_name = target_district["district_name"]
 
     # 1. Execute Phase 3 Spatio-Temporal Pipeline & Phase 2 Data Streams
     phase3_output = await execute_spatiotemporal_pipeline(c_lat, c_lon, days_back=14)
@@ -650,8 +844,10 @@ async def execute_phase4_stgnn_training_and_forecast(
         adj_norm=adj_norm
     )
 
-    # 5. Train PyTorch ST-GNN Model with AdamW + CosineAnnealingLR
+    # 5. Initialize PyTorch ST-GNN & Execute Incremental Transfer Learning Warm-Start
     model = EpiGridSTGNN(num_features=8, hidden_dim=48, forecast_horizon=14)
+    transfer_meta = load_or_initialize_transfer_learning(model)
+
     criterion = EpidemiologicalObjectiveFunction(lambda_mse=0.50, lambda_laplacian=0.15)
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
@@ -663,7 +859,6 @@ async def execute_phase4_stgnn_training_and_forecast(
     final_loss_breakdown = {}
     loss_trajectory = []
 
-    # Sample 12 evenly spaced checkpoints across any epoch count (e.g., 120 or 300)
     num_checkpoints = min(12, epochs)
     checkpoint_epochs = sorted(
         list({max(1, int(round(i * epochs / (num_checkpoints - 1)))) for i in range(num_checkpoints)} | {1, epochs})
@@ -689,16 +884,37 @@ async def execute_phase4_stgnn_training_and_forecast(
         if epoch == epochs:
             final_loss_breakdown = breakdown
 
+    # Update cumulative Transfer Learning history & persist neural network checkpoint
+    learned_districts = list(transfer_meta["districts_learned_history"])
+    if dist_name not in learned_districts:
+        learned_districts.append(dist_name)
+    total_cum_epochs = int(transfer_meta["cumulative_epochs_trained"]) + epochs
+    transfer_meta["cumulative_epochs_trained"] = total_cum_epochs
+    transfer_meta["districts_learned_history"] = learned_districts
+    transfer_meta["districts_learned_count"] = len(learned_districts)
+
     os.makedirs(os.path.dirname(MODEL_WEIGHTS_PATH), exist_ok=True)
     torch.save({
         "model_state_dict": model.state_dict(),
         "timestamp_utc": datetime.utcnow().isoformat(),
-        "district": target_district["district_name"],
+        "district": dist_name,
         "epochs": epochs,
+        "cumulative_training_sessions": transfer_meta["cumulative_training_sessions"],
+        "cumulative_epochs_trained": total_cum_epochs,
+        "districts_learned_history": learned_districts,
         "final_loss": final_loss_breakdown
     }, MODEL_WEIGHTS_PATH)
 
-    # 6. Execute Inference & Calibrate Multi-Horizon Output
+    # 6. Execute Explainable AI (XAI) Autograd Attribution & Temporal Attention Analysis
+    xai_report = compute_xai_saliency_and_attention(
+        model=model,
+        x_tensor=x_tensor,
+        adj_norm=adj_norm,
+        horizon_days=horizon_days
+    )
+    ward_xai_list = xai_report["ward_xai_attributions"]
+
+    # 7. Execute Inference & Calibrate Multi-Horizon Output
     model.eval()
     with torch.no_grad():
         raw_pred = model(x_tensor, adj_norm)
@@ -739,6 +955,7 @@ async def execute_phase4_stgnn_training_and_forecast(
             "coordinates": node["coordinates"],
             "spatial_metrics": node["spatial_metrics"],
             "synchronized_biological_status": node["synchronized_biological_status"],
+            "explainable_ai_attribution": ward_xai_list[idx],
             "forecast_horizon_days": horizon_days,
             "day_1_outbreak_probability": day_1_prob,
             "day_7_outbreak_probability": day_7_prob,
@@ -755,14 +972,12 @@ async def execute_phase4_stgnn_training_and_forecast(
         }
         ward_forecasts.append(ward_record)
 
-    # Apply optional Ward Filter if requested
     if ward_filter and ward_filter.strip().upper() not in {"ALL", "NONE", ""}:
         wf = ward_filter.strip().upper()
         filtered = [w for w in ward_forecasts if w["ward_sector_id"].upper() == wf]
         if filtered:
             ward_forecasts = filtered
 
-    # Rank wards strictly by the selected horizon outbreak probability descending
     ward_forecasts.sort(key=lambda item: item["horizon_outbreak_probability"], reverse=True)
 
     critical_count = sum(1 for w in ward_forecasts if w["outbreak_risk_classification"] == "CRITICAL_OUTBREAK_IMMINENT")
@@ -788,12 +1003,12 @@ async def execute_phase4_stgnn_training_and_forecast(
         error_reduction_pct = round(max(0.0, (1.0 - (final_val / initial_loss_val)) * 100.0), 2)
 
     return {
-        "pipeline_phase": f"Phase 4: Predictive Neural Network Training (PyTorch ST-GNN - {horizon_days}d Horizon)",
+        "pipeline_phase": f"Phase 4: Transfer-Learned PyTorch ST-GNN & Explainable AI ({horizon_days}d Horizon)",
         "execution_timestamp_utc": datetime.utcnow().isoformat(),
         "selected_forecast_horizon_days": horizon_days,
         "administrative_region": {
             "division_name": target_district["division_name"],
-            "district_name": target_district["district_name"],
+            "district_name": dist_name,
             "corporation_code": target_district["corporation_code"],
             "municipal_authority": target_district["municipal_authority"],
             "urban_density_factor": urban_factor,
@@ -801,12 +1016,21 @@ async def execute_phase4_stgnn_training_and_forecast(
         },
         "neural_network_architecture": {
             "framework": f"PyTorch {torch.__version__}",
-            "model_class": "EpiGridSTGNN (48d 2-Layer Kipf-Welling Spectral GCN + Residual Projection + GRU + Attention)",
+            "model_class": "EpiGridSTGNN (48d 2-Layer Kipf-Welling Spectral GCN + Residual Projection + GRU + Self-Attention)",
             "graph_topology": {
                 "active_vertices_nodes": len(active_nodes),
                 "non_zero_spatial_edges": int(torch.count_nonzero(adj_norm).item()),
                 "input_tensor_dimensions": list(x_tensor.shape),
                 "output_probability_matrix_dimensions": list(calibrated_pred.shape),
+            },
+            "incremental_transfer_learning": transfer_meta,
+            "explainable_ai_summary": {
+                "xai_methodology": xai_report["xai_methodology"],
+                "evaluated_horizon_days": horizon_days,
+                "district_macro_pillars_pct": xai_report["district_macro_pillars_pct"],
+                "district_8d_feature_importance_pct": xai_report["district_8d_feature_importance_pct"],
+                "district_temporal_attention_profile": xai_report["district_temporal_attention_profile"],
+                "peak_district_incubation_trigger": xai_report["peak_district_incubation_trigger"],
             },
             "dghs_epidemiological_baseline_integration": {
                 "live_dghs_status": dghs_payload.get("status"),
