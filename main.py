@@ -21,9 +21,10 @@ app = FastAPI(
     title="EpiGrid: Epidemiological Preemption Engine (All 64 Districts of Bangladesh)",
     description=(
         "Complete 5-Phase Calibrated Architecture across all 8 Divisions, 64 Districts, "
-        "and 768 Municipal Wards of Bangladesh with 4-Tier Risk Classification."
+        "and 768 Municipal Wards of Bangladesh with 4-Tier Risk Classification and "
+        "Zero-Floor Bregman KL-Divergence ST-GNN Convergence."
     ),
-    version="5.3.0"
+    version="5.4.0"
 )
 
 
@@ -48,7 +49,15 @@ async def health_check():
 async def serve_geospatial_dashboard():
     template_path = os.path.join("templates", "dashboard.html")
     with open(template_path, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read(), status_code=200)
+        html_content = f.read()
+    return HTMLResponse(
+        content=html_content,
+        status_code=200,
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache"
+        }
+    )
 
 
 @app.get("/api/v1/locations/bangladesh")
@@ -115,7 +124,7 @@ async def run_spatiotemporal_pipeline(
 async def run_stgnn_training_and_prediction(
     lat: float = Query(23.8103),
     lon: float = Query(90.4125),
-    epochs: int = Query(120, ge=20, le=1000),
+    epochs: int = Query(120, ge=20, le=1000, description="Training epochs (20 to 1000)"),
     horizon_days: int = Query(
         14, ge=1, le=14, description="Selected Temporal Forecast Horizon (Day +1 to Day +14)"
     ),
@@ -138,7 +147,7 @@ async def run_stgnn_training_and_prediction(
 async def evaluate_and_dispatch_municipal_alerts(
     lat: float = Query(23.8103),
     lon: float = Query(90.4125),
-    epochs: int = Query(120, ge=20, le=1000),
+    epochs: int = Query(120, ge=20, le=1000, description="Training epochs (20 to 1000)"),
     horizon_days: int = Query(
         14, ge=1, le=14, description="Selected Temporal Forecast Horizon (Day +1 to Day +14)"
     ),
