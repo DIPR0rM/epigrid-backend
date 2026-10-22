@@ -5,7 +5,7 @@ import httpx
 import numpy as np
 import tifffile
 from scipy import ndimage
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
 from services.sentinel_client import fetch_sentinel2_waterlogging_scenes, CDSE_TOKEN_URL
@@ -15,12 +15,14 @@ load_dotenv()
 
 CDSE_PROCESS_URL = "https://sh.dataspace.copernicus.eu/api/v1/process"
 
+# Latest CDSE Evalscript V3 specification:
+# Single dataset input with per-band unit array (REFLECTANCE for optical, DN for SCL)
 EVALSCRIPT_WATERLOGGING = """//VERSION=3
 function setup() {
   return {
     input: [{
       bands: ["B03", "B08", "B11", "SCL"],
-      units: "REFLECTANCE"
+      units: ["REFLECTANCE", "REFLECTANCE", "REFLECTANCE", "DN"]
     }],
     output: {
       bands: 4,
@@ -60,17 +62,17 @@ async def get_cdse_bearer_token() -> str | None:
 async def fetch_sentinel2_spectral_tensor(
     bbox: list[float],
     grid_size: int = 128,
-    days_back: int = 30
+    days_back: int = 45
 ) -> tuple[np.ndarray | None, str]:
     """
-    Requests a 4-band FLOAT32 GeoTIFF tensor [B03, B08, B11, SCL] from the
+    Requests a live 4-band FLOAT32 GeoTIFF tensor [B03, B08, B11, SCL] from the
     Copernicus Sentinel Hub Process API over the target urban bounding box.
     """
     token = await get_cdse_bearer_token()
     if not token:
         return None, "OAuth2_Credentials_Unconfigured"
 
-    end_date = datetime.utcnow()
+    end_date = datetime.now(timezone.utc)
     start_date = end_date - timedelta(days=days_back)
 
     process_payload = {
@@ -86,7 +88,7 @@ async def fetch_sentinel2_spectral_tensor(
                         "from": start_date.strftime("%Y-%m-%dT00:00:00Z"),
                         "to": end_date.strftime("%Y-%m-%dT23:59:59Z")
                     },
-                    "maxCloudCoverage": 40,
+                    "maxCloudCoverage": 80,
                     "mosaickingOrder": "leastCC"
                 }
             }]
@@ -130,7 +132,7 @@ def generate_calibrated_urban_tensor(
     """
     Generates a physically calibrated 4-band Sentinel-2 L2A reflectance tensor
     [B03_Green, B08_NIR, B11_SWIR, SCL] parameterized by coordinate seed and actual NASA precipitation.
-    Ensures deterministic execution when Copernicus OAuth2 tokens are unconfigured or cloud-obscured.
+    Ensures deterministic execution when Copernicus OAuth2 tokens are unconfigured or 100% cloud-obscured.
     """
     seed_val = int((abs(lat) * 10000 + abs(lon) * 10000)) % (2**31 - 1)
     rng = np.random.default_rng(seed_val)
@@ -252,8 +254,8 @@ def isolate_micro_waterlogging_coordinates(
     mndwi = (b03 - b11) / (b03 + b11 + eps)
     ndbi = (b11 - b08) / (b11 + b08 + eps)
 
-    # Mask out cloud shadow (3), medium/high clouds (8, 9), and cirrus (10)
-    valid_mask = ~np.isin(np.round(scl).astype(int), [3, 8, 9, 10])
+    # Mask out no-data (0), cloud shadow (3), medium/high clouds (8, 9), and cirrus (10)
+    valid_mask = ~np.isin(np.round(scl).astype(int), [0, 3, 8, 9, 10])
 
     # Isolate urban micro-waterlogging: positive MNDWI where SWIR absorption exceeds NIR absorption
     micro_water_mask = valid_mask & (mndwi > 0.08) & ((mndwi - ndwi) > 0.02)
@@ -365,13 +367,13 @@ async def execute_spatiotemporal_pipeline(lat: float, lon: float, days_back: int
     Master Phase 3 orchestrator: Executes Sentinel-2 spectral waterlogging isolation
     and synchronizes coordinates with NASA POWER Aedes aegypti thermodynamic parameters.
     """
-    sentinel_stac = await fetch_sentinel2_waterlogging_scenes(lat, lon, days_back=30)
+    sentinel_stac = await fetch_sentinel2_waterlogging_scenes(lat, lon, days_back=45)
     nasa_meteo = await fetch_nasa_meteorological_matrix(lat, lon, days_back=days_back)
 
     bbox = sentinel_stac.get("target_bbox", [lon - 0.02, lat - 0.02, lon + 0.02, lat + 0.02])
     incubation_metrics = compute_aedes_incubation_parameters(nasa_meteo)
 
-    tensor, raster_mode = await fetch_sentinel2_spectral_tensor(bbox=bbox, grid_size=128, days_back=30)
+    tensor, raster_mode = await fetch_sentinel2_spectral_tensor(bbox=bbox, grid_size=128, days_back=45)
     if tensor is None:
         recent_precip = incubation_metrics["meteorological_window_summary"]["cumulative_14d_precipitation_mm"]
         tensor = generate_calibrated_urban_tensor(lat, lon, recent_precip_mm=recent_precip, grid_size=128)
@@ -385,7 +387,7 @@ async def execute_spatiotemporal_pipeline(lat: float, lon: float, days_back: int
 
     return {
         "pipeline_phase": "Phase 3: Spatio-Temporal Pipeline Development",
-        "execution_timestamp_utc": datetime.utcnow().isoformat(),
+        "execution_timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "target_epicenter": {"latitude": lat, "longitude": lon, "bounding_box": bbox},
         "sentinel2_raster_processing_mode": raster_mode,
         "latest_stac_scene_reference": (
