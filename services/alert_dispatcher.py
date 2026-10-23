@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import time
 import hashlib
 import smtplib
 from email.message import EmailMessage
@@ -194,10 +195,13 @@ async def execute_phase5_command_and_alerting(
 ) -> dict:
     """
     Phase 5 Master Orchestrator:
-    Executes Transfer-Learned PyTorch ST-GNN forecasting & Explainable AI (XAI) saliency
-    attribution strictly locked to `horizon_days` (Day +1 to Day +14), classifies all wards
-    into 4 Risk Tiers, and dispatches XAI-verified work orders for wards breaching `alert_threshold`.
+    1. Executes Phase 4 (which concurrently ingests 100% live Sentinel-2, NASA POWER, and DGHS
+       data, performs fast-convergence Warm-Start Transfer Learning, and computes XAI saliency).
+    2. Reuses the fresh live Phase 3 payload directly without redundant duplicate HTTP calls.
+    3. Classifies all wards into 4 Risk Tiers at `Day +horizon_days` and dispatches XAI-verified
+       work orders for wards breaching `alert_threshold`.
     """
+    t_pipeline_start = time.perf_counter()
     horizon_days = max(1, min(14, int(horizon_days)))
     epochs = max(20, min(1000, int(epochs)))
 
@@ -214,7 +218,10 @@ async def execute_phase5_command_and_alerting(
     c_lat = region_meta.get("center_coordinates", {}).get("latitude", lat)
     c_lon = region_meta.get("center_coordinates", {}).get("longitude", lon)
 
-    phase3_data = await execute_spatiotemporal_pipeline(lat=c_lat, lon=c_lon, days_back=14)
+    # Reuse the 100% fresh live Phase 3 data already ingested seconds ago in Phase 4
+    phase3_data = phase4_data.get("live_phase3_pipeline_data")
+    if not phase3_data:
+        phase3_data = await execute_spatiotemporal_pipeline(lat=c_lat, lon=c_lon, days_back=14)
 
     nodes_list = (
         phase3_data.get("spatiotemporal_waterlogging_synchronization", {})
@@ -375,6 +382,9 @@ async def execute_phase5_command_and_alerting(
 
     if dispatched_alerts:
         append_alerts_to_ledger(dispatched_alerts)
+
+    total_pipeline_wall_time_ms = round((time.perf_counter() - t_pipeline_start) * 1000.0, 1)
+    transfer_learning_info["total_pipeline_wall_time_ms"] = total_pipeline_wall_time_ms
 
     prob_matrix_block["selected_horizon_days"] = horizon_days
     prob_matrix_block["critical_risk_wards_count"] = tier_breakdown["CRITICAL_OUTBREAK_IMMINENT"]
