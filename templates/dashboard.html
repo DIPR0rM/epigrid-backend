@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EpiGrid | Transfer-Learned ST-GNN &amp; Explainable AI Command Center</title>
+  <title>EpiGrid | Zonal ST-GNN, Custom GPS &amp; Explainable AI Command Center</title>
 
   <!-- Leaflet Geospatial Map CSS & JS -->
   <link
@@ -77,7 +77,7 @@
     }
 
     .brand-subtitle {
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
 
@@ -95,7 +95,7 @@
     }
 
     .input-group label {
-      font-size: 0.64rem;
+      font-size: 0.63rem;
       font-weight: 700;
       color: var(--accent-cyan);
       letter-spacing: 0.5px;
@@ -108,13 +108,30 @@
       border: 1px solid var(--border-subtle);
       border-radius: 6px;
       padding: 6px 8px;
-      font-size: 0.77rem;
+      font-size: 0.76rem;
       outline: none;
+      transition: all 0.2s;
     }
 
     .input-group select:focus,
     .input-group input:focus {
       border-color: var(--accent-cyan);
+    }
+
+    /* Locked / Disabled State for Mutually Exclusive Mode */
+    .input-group select:disabled,
+    .input-group input:disabled {
+      opacity: 0.35;
+      background: #04070e;
+      color: #64748b;
+      border-color: #1e293b;
+      cursor: not-allowed;
+    }
+
+    .mode-select {
+      border-color: var(--accent-emerald) !important;
+      font-weight: 700;
+      color: #a7f3d0 !important;
     }
 
     .btn-primary {
@@ -458,7 +475,7 @@
 </head>
 <body>
 
-  <!-- Top Navigation & Manual Scan Control Bar -->
+  <!-- Top Navigation & Mutually Exclusive Scan Mode Control Bar -->
   <div class="top-nav">
     <div class="brand-box">
       <div class="brand-title">
@@ -467,11 +484,18 @@
         <span class="badge badge-purple" id="transferBadge">🧠 Transfer Learning: Checking...</span>
       </div>
       <div class="brand-subtitle">
-        Sentinel-2 L2A MNDWI + NASA POWER Brière Kinetics + Incremental Transfer-Learned PyTorch ST-GNN + Autograd Explainable AI (XAI)
+        Full-Ward Zonal MNDWI Aggregation + NASA POWER Brière Kinetics + Transfer-Learned PyTorch ST-GNN + Autograd Explainable AI (XAI)
       </div>
     </div>
 
     <div class="control-bar">
+      <div class="input-group">
+        <label style="color: var(--accent-emerald);">SCAN TARGET MODE</label>
+        <select id="scanModeSelect" class="mode-select" onchange="onScanModeChange()">
+          <option value="dropdown">🏛️ By Division / District / Ward</option>
+          <option value="custom_latlon">📍 By Custom LAT &amp; LON (Single Area)</option>
+        </select>
+      </div>
       <div class="input-group">
         <label>DIVISION</label>
         <select id="divisionSelect" onchange="onDivisionChange()"></select>
@@ -486,15 +510,31 @@
       </div>
       <div class="input-group">
         <label>LAT</label>
-        <input type="number" id="latInput" value="23.8103" step="0.001" style="width: 76px;" />
+        <input
+          type="number"
+          id="latInput"
+          value="23.8103"
+          step="0.0001"
+          style="width: 82px;"
+          disabled
+          oninput="onCustomLatLonInput()"
+        />
       </div>
       <div class="input-group">
         <label>LON</label>
-        <input type="number" id="lonInput" value="90.4125" step="0.001" style="width: 76px;" />
+        <input
+          type="number"
+          id="lonInput"
+          value="90.4125"
+          step="0.0001"
+          style="width: 82px;"
+          disabled
+          oninput="onCustomLatLonInput()"
+        />
       </div>
       <div class="input-group">
         <label>EPOCHS</label>
-        <input type="number" id="epochsInput" value="120" min="20" max="1000" style="width: 60px;" />
+        <input type="number" id="epochsInput" value="120" min="20" max="1000" style="width: 58px;" />
       </div>
       <button class="btn-primary pulse-ready" id="runBtn" onclick="executeEpiGridPipeline()">
         🚀 Start Area Scan &amp; Dispatch Alerts
@@ -508,27 +548,27 @@
   <!-- Live Selection & Persistent Transfer Learning Status Banner -->
   <div class="selection-banner" id="selectionBanner">
     <span id="selectionStatusText">
-      📍 <strong>Target Area Staged:</strong> Dhaka Division &rarr; Dhaka (All 12 Municipal Wards) | Horizon: <strong>Day +14</strong>. Click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to train ST-GNN &amp; compute XAI attributions.
+      📍 <strong>Target Area Staged (Dropdown Mode):</strong> Dhaka Division &rarr; Dhaka (All 12 Municipal Wards) | Horizon: <strong>Day +14</strong>. Click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to run.
     </span>
-    <span class="badge badge-cyan" id="transferHistoryBadge">Manual Trigger Mode (No Auto-Scan)</span>
+    <span class="badge badge-cyan" id="transferHistoryBadge">5-Subsector Full-Ward Zonal Scan Active</span>
   </div>
 
   <!-- 4-Tier Epidemiological + Transfer Learning & XAI KPI Strip -->
   <div class="kpi-grid">
     <div class="kpi-card" style="border-top: 3px solid var(--accent-red);">
-      <div class="kpi-label">🔴 Critical Risk Wards (&ge;75%)</div>
+      <div class="kpi-label">🔴 Critical Risk Sectors (&ge;75%)</div>
       <div class="kpi-value" id="kpiCritical" style="color: var(--accent-red);">0</div>
       <div class="kpi-sub">Immediate ULV Fogging</div>
     </div>
 
     <div class="kpi-card" style="border-top: 3px solid var(--accent-orange);">
-      <div class="kpi-label">🟠 High Risk Wards (55%–74%)</div>
+      <div class="kpi-label">🟠 High Risk Sectors (55%–74%)</div>
       <div class="kpi-value" id="kpiHigh" style="color: var(--accent-orange);">0</div>
       <div class="kpi-sub">Preemptive Larvicide</div>
     </div>
 
     <div class="kpi-card" style="border-top: 3px solid var(--accent-yellow);">
-      <div class="kpi-label">🟡 Medium Risk Wards (35%–54%)</div>
+      <div class="kpi-label">🟡 Medium Risk Sectors (35%–54%)</div>
       <div class="kpi-value" id="kpiMedium" style="color: var(--accent-yellow);">0</div>
       <div class="kpi-sub">Active Ovitrap Surveillance</div>
     </div>
@@ -654,22 +694,22 @@
       <div class="alert-list" id="alertFeed">
         <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 14px; color: #bae6fd; font-size: 0.79rem;">
           <strong>🛰️ Standby for Manual Area Scan</strong><br/>
-          Select your desired <strong>Division</strong>, <strong>District</strong>, <strong>Ward</strong>, <strong>Forecast Horizon (Day +1 to Day +14)</strong>, and <strong>Epochs</strong>, then click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong>.
+          Choose either <strong>🏛️ By Division / District / Ward</strong> or <strong>📍 By Custom LAT &amp; LON (Single Area)</strong> in the top bar, select your <strong>Forecast Horizon (Day +1 to Day +14)</strong>, and click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong>.
         </div>
       </div>
     </div>
 
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title" id="matrixTableTitle">Municipal Ward Probability &amp; Explainable AI Matrix</div>
-        <span class="badge badge-purple">Click Any Ward Row to Zoom Map &amp; Inspect Ward XAI</span>
+        <div class="panel-title" id="matrixTableTitle">Full-Ward Zonal Probability &amp; Explainable AI Matrix</div>
+        <span class="badge badge-purple">Click Any Row to Zoom Map &amp; Inspect Sector XAI</span>
       </div>
       <div style="overflow-x: auto; max-height: 500px;">
         <table class="ward-table">
           <thead>
             <tr>
-              <th>Ward ID</th>
-              <th>Municipal Ward Name</th>
+              <th>Sector ID</th>
+              <th>Municipal Ward / Custom Sector Name</th>
               <th>Dominant XAI Driver &amp; GRU Attention</th>
               <th>Day +1</th>
               <th>Day +7</th>
@@ -680,7 +720,7 @@
           <tbody id="wardTableBody">
             <tr>
               <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">
-                Select your target area and click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to generate the ward probability &amp; XAI matrix.
+                Select your target mode and click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to generate the zonal probability &amp; XAI matrix.
               </td>
             </tr>
           </tbody>
@@ -693,6 +733,7 @@
     let mapInstance = null;
     let markerLayerGroup = null;
     let edgeLayerGroup = null;
+    let customPinMarker = null;
     let trajectoryChartInstance = null;
     let lossChartInstance = null;
     let xaiChartInstance = null;
@@ -754,30 +795,60 @@
     }
 
     function initMap() {
-      const osmStreet = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap"
-      });
-
-      const esriSatellite = L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      // 1. Google Maps Hybrid (Satellite HD + Roads, Bangla/English Labels & Landmarks)
+      const googleHybrid = L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
         {
-          maxZoom: 19,
-          attribution: "Tiles &copy; Esri"
+          maxNativeZoom: 20,
+          maxZoom: 22,
+          attribution: "&copy; Google Maps Hybrid HD"
+        }
+      );
+
+      // 2. Google Maps Street View (Updated Roads, Upazilas & Local Bazars)
+      const googleStreets = L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+        {
+          maxNativeZoom: 20,
+          maxZoom: 22,
+          attribution: "&copy; Google Maps"
+        }
+      );
+
+      // 3. Google Satellite Pure HD (No Labels)
+      const googleSatellite = L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+        {
+          maxNativeZoom: 20,
+          maxZoom: 22,
+          attribution: "&copy; Google Satellite HD"
+        }
+      );
+
+      // 4. OpenStreetMap Standard
+      const osmStreet = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxNativeZoom: 19,
+          maxZoom: 22,
+          attribution: "&copy; OpenStreetMap"
         }
       );
 
       mapInstance = L.map("map", {
         center: [23.8103, 90.4125],
         zoom: 12,
-        layers: [osmStreet]
+        maxZoom: 22,
+        layers: [googleHybrid] // Default to Google Hybrid HD (Satellite + Labels)
       });
 
       L.control
         .layers(
           {
-            "Street Map (OSM)": osmStreet,
-            "Esri Satellite Imagery": esriSatellite
+            "Google Hybrid HD (Satellite + Labels)": googleHybrid,
+            "Google Streets HD (Best for Upazilas)": googleStreets,
+            "Google Satellite Pure HD": googleSatellite,
+            "OpenStreetMap": osmStreet
           },
           null,
           { position: "topright" }
@@ -786,6 +857,80 @@
 
       edgeLayerGroup = L.layerGroup().addTo(mapInstance);
       markerLayerGroup = L.layerGroup().addTo(mapInstance);
+
+      // In Custom LAT & LON mode, clicking anywhere on the map sets LAT/LON to that exact point
+      mapInstance.on("click", (e) => {
+        const mode = document.getElementById("scanModeSelect").value;
+        if (mode === "custom_latlon") {
+          const clickedLat = e.latlng.lat.toFixed(4);
+          const clickedLon = e.latlng.lng.toFixed(4);
+          document.getElementById("latInput").value = clickedLat;
+          document.getElementById("lonInput").value = clickedLon;
+          placeCustomPreviewPin(parseFloat(clickedLat), parseFloat(clickedLon));
+          updatePendingSelectionBanner();
+        }
+      });
+    }
+
+    function placeCustomPreviewPin(lat, lon) {
+      if (!mapInstance) return;
+      if (customPinMarker) {
+        mapInstance.removeLayer(customPinMarker);
+      }
+      customPinMarker = L.circleMarker([lat, lon], {
+        radius: 9,
+        fillColor: "#38bdf8",
+        color: "#ffffff",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.9
+      })
+        .addTo(mapInstance)
+        .bindPopup(
+          `<div style="color:#0f172a; font-family:Inter,sans-serif; font-size:0.76rem;">` +
+            `<strong>📍 Custom Target Epicenter</strong><br/>LAT: ${lat.toFixed(4)}°N, LON: ${lon.toFixed(4)}°E<br/>Click <em>Start Area Scan</em> to analyze.` +
+          `</div>`
+        )
+        .openPopup();
+    }
+
+    // Mutually Exclusive Toggle: Dropdowns vs. Custom LAT & LON
+    function onScanModeChange() {
+      const mode = document.getElementById("scanModeSelect").value;
+      const isCustom = mode === "custom_latlon";
+
+      // Lock/unlock controls mutually exclusively
+      document.getElementById("divisionSelect").disabled = isCustom;
+      document.getElementById("districtSelect").disabled = isCustom;
+      document.getElementById("wardSelect").disabled = isCustom;
+
+      document.getElementById("latInput").disabled = !isCustom;
+      document.getElementById("lonInput").disabled = !isCustom;
+
+      if (isCustom) {
+        const lat = parseFloat(document.getElementById("latInput").value) || 23.8103;
+        const lon = parseFloat(document.getElementById("lonInput").value) || 90.4125;
+        placeCustomPreviewPin(lat, lon);
+      } else {
+        if (customPinMarker && mapInstance) {
+          mapInstance.removeLayer(customPinMarker);
+          customPinMarker = null;
+        }
+        onDistrictChange();
+      }
+      updatePendingSelectionBanner();
+    }
+
+    function onCustomLatLonInput() {
+      const mode = document.getElementById("scanModeSelect").value;
+      if (mode !== "custom_latlon") return;
+      const lat = parseFloat(document.getElementById("latInput").value);
+      const lon = parseFloat(document.getElementById("lonInput").value);
+      if (!isNaN(lat) && !isNaN(lon) && mapInstance) {
+        mapInstance.setView([lat, lon], 14, { animate: true });
+        placeCustomPreviewPin(lat, lon);
+      }
+      updatePendingSelectionBanner();
     }
 
     async function checkInitialTransferLearningStatus() {
@@ -813,19 +958,27 @@
     }
 
     function updatePendingSelectionBanner() {
-      const divName = document.getElementById("divisionSelect").value || "Dhaka Division";
-      const distName = document.getElementById("districtSelect").value || "Dhaka";
-      const wardVal = document.getElementById("wardSelect").value || "ALL";
+      const mode = document.getElementById("scanModeSelect").value;
       const dayNum = parseInt(document.getElementById("daySlider").value, 10) || 14;
       const epochs = parseInt(document.getElementById("epochsInput").value, 10) || 120;
 
       const runBtn = document.getElementById("runBtn");
       runBtn.classList.add("pulse-ready");
 
-      document.getElementById("selectionStatusText").innerHTML =
-        `📍 <strong>Target Area Staged:</strong> ${divName} &rarr; <strong>${distName}</strong> (${wardVal === "ALL" ? "All 12 Wards" : wardVal}) | ` +
-        `Selected Horizon: <strong>Day +${dayNum}</strong> | Epochs: <strong>${epochs}</strong>. ` +
-        `Click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to run.`;
+      if (mode === "custom_latlon") {
+        const lat = parseFloat(document.getElementById("latInput").value) || 23.8103;
+        const lon = parseFloat(document.getElementById("lonInput").value) || 90.4125;
+        document.getElementById("selectionStatusText").innerHTML =
+          `📍 <strong>Custom Single-Area Mode Active (Dropdowns Disabled):</strong> Target Coordinates <strong>(${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E)</strong> ` +
+          `[Tip: Click anywhere on the map to move pin] | Horizon: <strong>Day +${dayNum}</strong> | Epochs: <strong>${epochs}</strong>.`;
+      } else {
+        const divName = document.getElementById("divisionSelect").value || "Dhaka Division";
+        const distName = document.getElementById("districtSelect").value || "Dhaka";
+        const wardVal = document.getElementById("wardSelect").value || "ALL";
+        document.getElementById("selectionStatusText").innerHTML =
+          `🏛️ <strong>Administrative Dropdown Mode Active (LAT/LON Locked):</strong> ${divName} &rarr; <strong>${distName}</strong> (${wardVal === "ALL" ? "All Municipal Wards" : wardVal}) | ` +
+          `Selected Horizon: <strong>Day +${dayNum}</strong> | Epochs: <strong>${epochs}</strong>.`;
+      }
     }
 
     async function loadBangladeshHierarchy() {
@@ -850,7 +1003,6 @@
       }
     }
 
-    // Changing Division ONLY updates District dropdown & map preview (NO auto-scan)
     function onDivisionChange() {
       if (!bangladeshHierarchy) return;
       const divName = document.getElementById("divisionSelect").value;
@@ -869,7 +1021,6 @@
       onDistrictChange();
     }
 
-    // Changing District ONLY updates coordinates, Ward dropdown & pans map preview (NO auto-scan)
     function onDistrictChange() {
       if (!bangladeshHierarchy) return;
       const divName = document.getElementById("divisionSelect").value;
@@ -883,8 +1034,9 @@
       document.getElementById("lonInput").value = distObj.longitude.toFixed(4);
 
       const wardSelect = document.getElementById("wardSelect");
-      wardSelect.innerHTML = `<option value="ALL">All 12 Municipal Wards</option>`;
-      (distObj.wards || []).forEach((w) => {
+      const wardList = distObj.wards || [];
+      wardSelect.innerHTML = `<option value="ALL">All ${wardList.length} Municipal Wards</option>`;
+      wardList.forEach((w) => {
         const opt = document.createElement("option");
         opt.value = w.ward_id;
         opt.textContent = `${w.ward_id} — ${w.ward_name}`;
@@ -897,12 +1049,11 @@
       updatePendingSelectionBanner();
     }
 
-    // Changing Ward ONLY pans map to that ward (NO auto-scan)
     function onWardChange() {
       const wardVal = document.getElementById("wardSelect").value;
       if (wardVal !== "ALL" && wardMarkerMap[wardVal]) {
         const m = wardMarkerMap[wardVal];
-        mapInstance.setView(m.getLatLng(), 14, { animate: true });
+        mapInstance.setView(m.getLatLng(), 15, { animate: true });
         m.openPopup();
       } else if (bangladeshHierarchy && wardVal !== "ALL") {
         const divName = document.getElementById("divisionSelect").value;
@@ -913,33 +1064,52 @@
         if (wardObj && mapInstance) {
           document.getElementById("latInput").value = wardObj.lat.toFixed(4);
           document.getElementById("lonInput").value = wardObj.lon.toFixed(4);
-          mapInstance.setView([wardObj.lat, wardObj.lon], 14, { animate: true });
+          mapInstance.setView([wardObj.lat, wardObj.lon], 15, { animate: true });
         }
       }
       updatePendingSelectionBanner();
     }
 
-    // Manual Scan Execution — Only runs when the user clicks "Start Area Scan & Dispatch Alerts"
+    // Manual Scan Execution — Respects Mutually Exclusive Scan Mode
     async function executeEpiGridPipeline() {
       const btn = document.getElementById("runBtn");
       btn.disabled = true;
       btn.classList.remove("pulse-ready");
 
-      const district = document.getElementById("districtSelect").value || "Dhaka";
-      const wardFilter = document.getElementById("wardSelect").value || "ALL";
+      const scanMode = document.getElementById("scanModeSelect").value || "dropdown";
+      const district =
+        scanMode === "custom_latlon"
+          ? "CUSTOM_LATLON"
+          : document.getElementById("districtSelect").value || "Dhaka";
+      const wardFilter =
+        scanMode === "custom_latlon"
+          ? "ALL"
+          : document.getElementById("wardSelect").value || "ALL";
+
       const lat = parseFloat(document.getElementById("latInput").value) || 23.8103;
       const lon = parseFloat(document.getElementById("lonInput").value) || 90.4125;
       const epochs = Math.max(20, Math.min(1000, parseInt(document.getElementById("epochsInput").value, 10) || 120));
       const selectedHorizonDays = Math.max(1, Math.min(14, parseInt(document.getElementById("daySlider").value, 10) || 14));
 
-      btn.textContent = `⏳ Transfer-Training ST-GNN & XAI (${district}, Day +${selectedHorizonDays})...`;
+      const targetLabel =
+        scanMode === "custom_latlon"
+          ? `GPS (${lat.toFixed(4)}, ${lon.toFixed(4)})`
+          : district;
+
+      btn.textContent = `⏳ Scanning ${targetLabel} (Day +${selectedHorizonDays})...`;
 
       try {
+        if (customPinMarker && mapInstance) {
+          mapInstance.removeLayer(customPinMarker);
+          customPinMarker = null;
+        }
+
         const url =
           `/api/v1/alerts/evaluate-and-dispatch?lat=${lat}&lon=${lon}` +
           `&epochs=${epochs}&horizon_days=${selectedHorizonDays}` +
           `&district=${encodeURIComponent(district)}` +
-          `&ward_filter=${encodeURIComponent(wardFilter)}`;
+          `&ward_filter=${encodeURIComponent(wardFilter)}` +
+          `&scan_mode=${encodeURIComponent(scanMode)}`;
 
         const response = await fetch(url);
         const data = await response.json();
@@ -962,7 +1132,7 @@
           : "Cold-Start Initialization (Saved New Checkpoint)";
 
         document.getElementById("selectionStatusText").innerHTML =
-          `✅ <strong>Scan Complete:</strong> ${district} (${wardFilter === "ALL" ? "12 Wards" : wardFilter}) ` +
+          `✅ <strong>Zonal Scan Complete:</strong> ${targetLabel} ` +
           `evaluated at <strong>Day +${lockedHorizon} Horizon</strong> | Mode: <strong>${tlModeLabel}</strong>.`;
       } catch (err) {
         console.error("Pipeline execution error:", err);
@@ -1010,7 +1180,6 @@
       document.getElementById("sceneBadge").textContent =
         waterSummary.stac_scene_id || "Sentinel-2 L2A Calibrated";
 
-      // Update Incremental Transfer Learning Badges & KPIs
       const cumEpochs = tl.cumulative_epochs_trained || trainTel.epochs_completed || 120;
       const cumSessions = tl.cumulative_training_sessions || 1;
       const learnedList = tl.districts_learned_history || [region.district_name || "Dhaka"];
@@ -1021,14 +1190,13 @@
         : `🧠 Checkpoint Initialized (${cumEpochs} Epochs Saved)`;
 
       document.getElementById("transferHistoryBadge").textContent =
-        `Learned Districts (${learnedList.length}): ${learnedList.slice(-4).join(", ")}`;
+        `Learned Districts (${learnedList.length}): ${learnedList.slice(-4).join(", ") || "Active"}`;
 
       document.getElementById("kpiTransferMemory").textContent =
         `${cumEpochs} Ep (${cumSessions} Runs)`;
       document.getElementById("kpiXaiTriggerSub").textContent =
         `Peak Trigger: ${xaiSummary.peak_district_incubation_trigger || "Day -8"}`;
 
-      // Update Convergence Accuracy & Loss Badges
       const epochsDone = trainTel.epochs_completed || 120;
       const initLoss = trainTel.initial_epoch_1_loss ?? 0;
       const finalLoss = finalBreakdown.composite_objective_loss ?? 0;
@@ -1040,7 +1208,6 @@
       document.getElementById("accuracyBadge").textContent =
         `Accuracy: ${accPct}% (-${errRedPct}% Error)`;
 
-      // Update Aedes Biological & Hydrological KPIs
       const viableWards = waterSummary.viable_breeding_nodes ?? 0;
       const totalWards = waterSummary.total_nodes_isolated ?? 12;
       document.getElementById("kpiEip").textContent =
@@ -1048,15 +1215,13 @@
       document.getElementById("kpiMeteoSub").textContent =
         `${meteo.mean_temperature_c ?? "--"}°C | Rain: ${meteo.cumulative_14d_precipitation_mm ?? "--"}mm | Viable: ${viableWards}/${totalWards}`;
 
-      // Render Loss Convergence Chart & District-Wide XAI Chart
       renderLossChart(trainTel.convergence_curve || []);
       renderXaiChart(
         xaiSummary.district_macro_pillars_pct || {},
-        `${region.district_name || "District"} Overall XAI Saliency`,
+        `${region.district_name || "Region"} Overall XAI Saliency`,
         xaiSummary.peak_district_incubation_trigger || "Day -8"
       );
 
-      // Render Map, 4-Tier KPIs, Ward Table, Trajectory Chart, and Work Orders at exact horizonDays
       updateMapHorizon(horizonDays, true);
     }
 
@@ -1085,18 +1250,17 @@
       document.getElementById("regionBadge").textContent =
         `${region.district_name || "Dhaka"} (${region.corporation_code || "DNCC"}) • Day +${dayNum}`;
       document.getElementById("mapHeaderTitle").textContent =
-        `${region.district_name || "Municipal"} Ward Predictive Outbreak Heat Map (Day +${dayNum} Horizon)`;
+        `${region.district_name || "Municipal"} Full-Ward Zonal Outbreak Heat Map (Day +${dayNum} Horizon)`;
       document.getElementById("scrubberLabel").textContent =
         `Day +${dayNum} Forecast Horizon${dateStr}`;
       document.getElementById("dynamicHorizonHeader").textContent = `Day +${dayNum}`;
       document.getElementById("matrixTableTitle").textContent =
-        `Municipal Ward Probability & Explainable AI Matrix (Evaluated at Day +${dayNum})`;
+        `Full-Ward Zonal Probability & Explainable AI Matrix (Evaluated at Day +${dayNum})`;
 
       markerLayerGroup.clearLayers();
       edgeLayerGroup.clearLayers();
       wardMarkerMap = {};
 
-      // Draw ST-GNN Spatial Dispersal Edges (d <= 4.5 km)
       for (let i = 0; i < wards.length; i++) {
         for (let j = i + 1; j < wards.length; j++) {
           const c1 = wards[i].coordinates;
@@ -1153,11 +1317,24 @@
         const xai = ward.explainable_ai_attribution || {};
         const pillars = xai.macro_pillar_attribution_pct || {};
 
+        const subSectors = spatial.zonal_subsectors_scanned ?? 5;
         const drainEff = ((spatial.drainage_efficiency_index ?? 0.5) * 100).toFixed(0);
         const viableFlag = bio.larval_metamorphosis_viable !== false;
         const domDriver = xai.dominant_xai_driver || "Sentinel-2 MNDWI Waterlogging & Drainage";
         const domPct = xai.dominant_driver_pct ?? 42.0;
         const peakDay = xai.peak_temporal_attention_day || "Day -8";
+
+	// Draw Full-Ward Zonal Coverage Boundary Ring (in meters)
+        const zonalRadiusM = parseFloat(spatial.zonal_radius_m || 650);
+        L.circle([lat, lon], {
+          radius: zonalRadiusM,
+          color: tier.color,
+          weight: 1.2,
+          dashArray: "4, 4",
+          fillColor: tier.color,
+          fillOpacity: 0.10,
+          interactive: false
+        }).addTo(edgeLayerGroup);
 
         const radiusPx = 8 + activeProb * 12;
         const marker = L.circleMarker([lat, lon], {
@@ -1170,7 +1347,7 @@
         });
 
         marker.bindPopup(`
-          <div style="font-family: Inter, sans-serif; min-width: 250px; color: #0f172a;">
+          <div style="font-family: Inter, sans-serif; min-width: 255px; color: #0f172a;">
             <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 3px;">
               ${ward.ward_sector_id}: ${ward.municipal_ward_name}
             </div>
@@ -1178,6 +1355,8 @@
               ● ${tier.label} — Day +${dayNum}: ${(activeProb * 100).toFixed(1)}%
             </div>
             <div style="font-size: 0.72rem; line-height: 1.45; margin-bottom: 6px;">
+              <strong>Zonal Coverage:</strong> ${subSectors} Sub-Sectors Aggregated (${spatial.estimated_surface_area_m2 ?? 400} m²)<br/>
+              <strong>GPS Center:</strong> ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E<br/>
               <strong>Water Retention:</strong> ${bio.hydrological_retention_days ?? "--"}d (Req: ${bio.required_aquatic_emergence_days ?? "--"}d)<br/>
               <strong>Drainage Efficiency:</strong> ${drainEff}% | <strong>Larval Viable:</strong> ${viableFlag ? "Yes" : "No (Dries Early)"}
             </div>
@@ -1195,7 +1374,7 @@
 
         const tr = document.createElement("tr");
         tr.onclick = () => {
-          mapInstance.setView([lat, lon], 14, { animate: true });
+          mapInstance.setView([lat, lon], 15, { animate: true });
           marker.openPopup();
           renderXaiChart(
             pillars,
@@ -1209,7 +1388,7 @@
           <td>
             <div style="font-weight: 600;">${ward.municipal_ward_name}</div>
             <div style="font-size: 0.68rem; color: var(--text-muted);">
-              Drainage ${drainEff}% • ${viableFlag ? "<span style='color:#f97316;'>Larval Viable</span>" : "<span style='color:#10b981;'>Non-Viable</span>"}
+              ${subSectors} Sub-Sectors • Drainage ${drainEff}% • ${viableFlag ? "<span style='color:#f97316;'>Larval Viable</span>" : "<span style='color:#10b981;'>Non-Viable</span>"}
             </div>
           </td>
           <td style="font-size: 0.7rem;">
@@ -1233,7 +1412,7 @@
       renderAlertFeedForHorizon(sortedWards, dayNum, dateKeys);
 
       if (recenterMap && bounds.length > 0) {
-        mapInstance.fitBounds(bounds, { padding: [32, 32], maxZoom: 13 });
+        mapInstance.fitBounds(bounds, { padding: [36, 36], maxZoom: 14 });
       }
     }
 
@@ -1245,14 +1424,14 @@
       if (!wards.length) return;
 
       document.getElementById("trajectoryPanelTitle").textContent =
-        `Ward Outbreak Probability Trajectories (Day +1 to Day +${activeHorizonDays})`;
+        `Zonal Outbreak Probability Trajectories (Day +1 to Day +${activeHorizonDays})`;
       document.getElementById("trajectoryHorizonBadge").textContent =
         `Day +${activeHorizonDays} Active Window`;
 
       const indices = [
         0,
+        Math.min(1, wards.length - 1),
         Math.min(3, wards.length - 1),
-        Math.min(7, wards.length - 1),
         wards.length - 1
       ];
       const uniqueIndices = [...new Set(indices)];
@@ -1441,7 +1620,7 @@
       const feed = document.getElementById("alertFeed");
 
       document.getElementById("workOrdersPanelTitle").textContent =
-        `Automated Municipal Preemption & XAI Work Orders (Day +${dayNum} ≥ ${(threshold * 100).toFixed(0)}%)`;
+        `Automated Preemption & XAI Work Orders (Day +${dayNum} ≥ ${(threshold * 100).toFixed(0)}%)`;
 
       const qualifyingWards = sortedWards.filter(
         (w) => getWardProbabilityAtDay(w, dayNum) >= threshold
@@ -1454,7 +1633,7 @@
         feed.innerHTML = `
           <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 14px; color: #a7f3d0; font-size: 0.79rem;">
             <strong>✅ No Emergency Fogging Dispatches Required at Day +${dayNum}</strong><br/>
-            All evaluated municipal wards are below the ${(threshold * 100).toFixed(0)}% emergency preemption threshold on <strong>Day +${dayNum}</strong>.
+            All evaluated zonal sectors are below the ${(threshold * 100).toFixed(0)}% emergency preemption threshold on <strong>Day +${dayNum}</strong>.
           </div>
         `;
         return;
@@ -1471,6 +1650,7 @@
           const xai = w.explainable_ai_attribution || {};
           const pillars = xai.macro_pillar_attribution_pct || {};
 
+          const subSectors = spatial.zonal_subsectors_scanned ?? 5;
           const areaM2 = parseFloat(spatial.estimated_surface_area_m2 || 400);
           const retDays = parseFloat(bio.hydrological_retention_days || 8.2);
           const emgDays = Math.max(parseFloat(bio.required_aquatic_emergence_days || 7.8), 1.0);
@@ -1507,7 +1687,7 @@
                 </span>
               </div>
               <div class="alert-meta">
-                <strong>${w.municipal_ward_name}</strong> | Node: ${w.source_waterlogging_node} (${w.structural_classification})<br/>
+                <strong>${w.municipal_ward_name}</strong> | Zonal Node: ${w.source_waterlogging_node} (${subSectors} Sub-Sectors Aggregated)<br/>
                 Authority: ${w.municipal_authority || "Municipal Vector Control Wing"}
               </div>
               <div class="xai-rationale-box">
@@ -1518,7 +1698,7 @@
               <div class="work-order-grid">
                 <div><strong>Temephos 50EC:</strong> ${temephosL} L</div>
                 <div><strong>Deltamethrin Fog:</strong> ${deltamethrinL} L</div>
-                <div><strong>Waterlogging Area:</strong> ${areaM2} m²</div>
+                <div><strong>Zonal Water Area:</strong> ${areaM2} m² (${subSectors} Zones)</div>
                 <div><strong>Breach Date:</strong> ${breachDate} (${leadDays}d lead)</div>
                 <div><strong>Mobile Crew Size:</strong> ${crewSize} Personnel</div>
                 <div><strong>Est. Duration:</strong> ${durationHrs} Hours</div>
@@ -1540,12 +1720,11 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `epigrid_xai_manifest_day${document.getElementById("daySlider").value}_${Date.now()}.json`;
+      a.download = `epigrid_zonal_manifest_day${document.getElementById("daySlider").value}_${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    // Initialize map, dropdown hierarchy & Transfer Learning checkpoint status (NO auto-scan)
     window.addEventListener("DOMContentLoaded", async () => {
       initMap();
       await loadBangladeshHierarchy();

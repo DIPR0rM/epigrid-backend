@@ -20,13 +20,13 @@ from services.alert_dispatcher import (
 )
 
 app = FastAPI(
-    title="EpiGrid: Epidemiological Preemption Engine (All 64 Districts of Bangladesh)",
+    title="EpiGrid: Epidemiological Preemption Engine (All 64 Districts & Custom GPS)",
     description=(
         "Complete 5-Phase Calibrated Architecture across all 8 Divisions, 64 Districts, "
-        "and 768 Municipal Wards of Bangladesh featuring Persistent Incremental Transfer Learning, "
-        "PyTorch Autograd Explainable AI (XAI), and 4-Tier Risk Preemption."
+        "Authentic Municipal Wards, and Custom GPS Coordinate Sectors featuring "
+        "Full-Ward Zonal Aggregation, Incremental Transfer Learning, and Explainable AI (XAI)."
     ),
-    version="6.0.0"
+    version="6.1.0"
 )
 
 
@@ -34,7 +34,7 @@ app = FastAPI(
 async def root():
     return {
         "project": "EpiGrid: Epidemiological Preemption Engine",
-        "phase": "Phase 5: All-Bangladesh Transfer-Learned ST-GNN & Explainable AI (XAI) Active",
+        "phase": "Phase 5: All-Bangladesh & Custom GPS Zonal ST-GNN Command Center Active",
         "interactive_geospatial_dashboard_url": "/dashboard",
         "swagger_api_documentation_url": "/docs",
         "timestamp_utc": datetime.utcnow().isoformat()
@@ -64,7 +64,7 @@ async def serve_geospatial_dashboard():
 
 @app.get("/api/v1/locations/bangladesh")
 async def get_bangladesh_locations():
-    """Returns all 8 Divisions, 64 Districts, and 768 Municipal Wards of Bangladesh."""
+    """Returns all 8 Divisions, 64 Districts, and Municipal Wards of Bangladesh."""
     return get_full_bangladesh_hierarchy()
 
 
@@ -166,7 +166,11 @@ async def run_stgnn_training_and_prediction(
     district: str | None = Query(
         None, description="Optional Bangladesh District Name (e.g., Dhaka, Rajshahi, Sherpur, Chattogram)"
     ),
-    ward_filter: str | None = Query(None, description="Optional Ward ID filter or ALL")
+    ward_filter: str | None = Query(None, description="Optional Ward ID filter or ALL"),
+    scan_mode: str = Query(
+        "dropdown",
+        description="Targeting mode: 'dropdown' (Division/District/Ward) or 'custom_latlon' (Direct GPS Coordinates)"
+    )
 ):
     return await execute_phase4_stgnn_training_and_forecast(
         lat=lat,
@@ -174,7 +178,8 @@ async def run_stgnn_training_and_prediction(
         epochs=epochs,
         district=district,
         ward_filter=ward_filter,
-        horizon_days=horizon_days
+        horizon_days=horizon_days,
+        scan_mode=scan_mode
     )
 
 
@@ -188,7 +193,11 @@ async def evaluate_and_dispatch_municipal_alerts(
     ),
     alert_threshold: float = Query(0.55, ge=0.10, le=0.95),
     district: str | None = Query(None, description="Any of the 64 Districts of Bangladesh"),
-    ward_filter: str | None = Query(None, description="Specific Ward ID or ALL")
+    ward_filter: str | None = Query(None, description="Specific Ward ID or ALL"),
+    scan_mode: str = Query(
+        "dropdown",
+        description="Targeting mode: 'dropdown' (Division/District/Ward) or 'custom_latlon' (Direct GPS Coordinates)"
+    )
 ):
     return await execute_phase5_command_and_alerting(
         lat=lat,
@@ -197,7 +206,8 @@ async def evaluate_and_dispatch_municipal_alerts(
         alert_threshold=alert_threshold,
         district=district,
         ward_filter=ward_filter,
-        horizon_days=horizon_days
+        horizon_days=horizon_days,
+        scan_mode=scan_mode
     )
 
 

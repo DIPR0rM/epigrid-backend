@@ -21,7 +21,7 @@ ALERT_LEDGER_PATH = "logs/municipal_alerts_ledger.json"
 
 
 def determine_municipal_authority(ward_forecast: dict) -> dict:
-    """Maps any Bangladesh District/City Ward to its responsible Municipal Authority."""
+    """Maps any Bangladesh District/City Ward or Custom GPS Sector to its responsible Authority."""
     ward_id = ward_forecast.get("ward_sector_id", "BD-W01")
     code = ward_id.split("-")[0]
     authority_title = ward_forecast.get(
@@ -44,9 +44,9 @@ def calculate_fogging_resource_allocation(
 ) -> dict:
     """
     Quantifies larvicidal (Temephos 50 EC) and adulticidal thermal fogging (Deltamethrin)
-    requirements strictly within the user-selected forecast_horizon_days window.
+    requirements across all aggregated zonal sub-sectors within the selected horizon window.
     """
-    node_id = ward_forecast.get("source_waterlogging_node", "EPI-NODE-001")
+    node_id = ward_forecast.get("source_waterlogging_node", "ZONAL-W01")
     node_data = node_lookup.get(node_id, {})
 
     spatial_metrics = (
@@ -58,6 +58,7 @@ def calculate_fogging_resource_allocation(
         or node_data.get("synchronized_biological_status", {})
     )
 
+    zonal_subsectors = int(spatial_metrics.get("zonal_subsectors_scanned", 5))
     surface_area_m2 = float(spatial_metrics.get("estimated_surface_area_m2", 400.0))
     retention_days = float(bio_status.get("hydrological_retention_days", 8.2))
     emergence_days = max(float(bio_status.get("required_aquatic_emergence_days", 7.8)), 1.0)
@@ -105,6 +106,7 @@ def calculate_fogging_resource_allocation(
 
     return {
         "evaluated_horizon_days": horizon_days,
+        "zonal_subsectors_scanned": zonal_subsectors,
         "target_waterlogging_area_m2": surface_area_m2,
         "hydrological_retention_days": retention_days,
         "aedes_extrinsic_incubation_eip_days": eip_days,
@@ -191,15 +193,14 @@ async def execute_phase5_command_and_alerting(
     alert_threshold: float = 0.55,
     district: str | None = None,
     ward_filter: str | None = None,
-    horizon_days: int = 14
+    horizon_days: int = 14,
+    scan_mode: str = "dropdown"
 ) -> dict:
     """
     Phase 5 Master Orchestrator:
-    1. Executes Phase 4 (which concurrently ingests 100% live Sentinel-2, NASA POWER, and DGHS
-       data, performs fast-convergence Warm-Start Transfer Learning, and computes XAI saliency).
-    2. Reuses the fresh live Phase 3 payload directly without redundant duplicate HTTP calls.
-    3. Classifies all wards into 4 Risk Tiers at `Day +horizon_days` and dispatches XAI-verified
-       work orders for wards breaching `alert_threshold`.
+    Supports both Administrative Dropdown Mode (`scan_mode="dropdown"`) and Custom Coordinate
+    Single-Area Mode (`scan_mode="custom_latlon"`), reusing live Phase 3 data without duplicate
+    HTTP requests and embedding Explainable AI (XAI) rationale into every work order.
     """
     t_pipeline_start = time.perf_counter()
     horizon_days = max(1, min(14, int(horizon_days)))
@@ -211,14 +212,15 @@ async def execute_phase5_command_and_alerting(
         epochs=epochs,
         district=district,
         ward_filter=ward_filter,
-        horizon_days=horizon_days
+        horizon_days=horizon_days,
+        scan_mode=scan_mode
     )
 
+    active_scan_mode = phase4_data.get("scan_mode", scan_mode)
     region_meta = phase4_data.get("administrative_region", {})
     c_lat = region_meta.get("center_coordinates", {}).get("latitude", lat)
     c_lon = region_meta.get("center_coordinates", {}).get("longitude", lon)
 
-    # Reuse the 100% fresh live Phase 3 data already ingested seconds ago in Phase 4
     phase3_data = phase4_data.get("live_phase3_pipeline_data")
     if not phase3_data:
         phase3_data = await execute_spatiotemporal_pipeline(lat=c_lat, lon=c_lon, days_back=14)
@@ -303,7 +305,6 @@ async def execute_phase5_command_and_alerting(
         ward["daily_probability_trajectory_14d"] = full_trajectory
         ward["daily_probability_trajectory_horizon"] = horizon_trajectory
 
-        # Dispatch alert strictly when the selected Day +horizon_days probability >= alert_threshold
         if horizon_prob >= alert_threshold:
             authority = determine_municipal_authority(ward)
             resources = calculate_fogging_resource_allocation(ward, node_lookup, alert_threshold)
@@ -387,6 +388,7 @@ async def execute_phase5_command_and_alerting(
     transfer_learning_info["total_pipeline_wall_time_ms"] = total_pipeline_wall_time_ms
 
     prob_matrix_block["selected_horizon_days"] = horizon_days
+    prob_matrix_block["scan_mode"] = active_scan_mode
     prob_matrix_block["critical_risk_wards_count"] = tier_breakdown["CRITICAL_OUTBREAK_IMMINENT"]
     prob_matrix_block["high_risk_wards_count"] = tier_breakdown["HIGH_TRANSMISSION_RISK"]
     prob_matrix_block["medium_risk_wards_count"] = tier_breakdown["MEDIUM_ENDEMIC_RISK"]
@@ -400,6 +402,7 @@ async def execute_phase5_command_and_alerting(
         ),
         "execution_timestamp_utc": timestamp_utc,
         "selected_forecast_horizon_days": horizon_days,
+        "scan_mode": active_scan_mode,
         "administrative_region": region_meta,
         "target_epicenter": {"latitude": c_lat, "longitude": c_lon},
         "aedes_biological_incubation_summary": phase3_data.get(
@@ -423,6 +426,7 @@ async def execute_phase5_command_and_alerting(
         "automated_municipal_alert_system": {
             "preemption_threshold_configured": alert_threshold,
             "forecast_horizon_days": horizon_days,
+            "scan_mode": active_scan_mode,
             "total_wards_evaluated": len(ward_forecasts),
             "automated_alerts_triggered_count": len(dispatched_alerts),
             "risk_tier_breakdown": tier_breakdown,

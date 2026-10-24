@@ -1,5 +1,1448 @@
 [
   {
+    "alert_dispatch_id": "EPI-ALT-133B14FB",
+    "dispatched_at_utc": "2026-10-24T15:37:57.437864",
+    "sha256_cryptographic_receipt": "92e30219688cb21b6dbfcfa58d25569719c0abc3d51d1a46fce8e47c5ef1223d",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W12",
+    "municipal_ward_name": "Shaheb Bazar & Boalia Commercial Hub (RCC Ward 12)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W12",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3642,
+      "longitude": 88.6004
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8666,
+      "day_14_probability": 0.8666,
+      "day_1_probability": 0.559,
+      "day_7_probability": 0.7661,
+      "mean_horizon_probability": 0.7487,
+      "mean_14d_probability": 0.7487,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 40.3,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 10.8,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 40.3,
+        "thermodynamic_briere_kinetics_pct": 26.3,
+        "dghs_clinical_baseline_pct": 5.3,
+        "spatial_mosquito_dispersal_pct": 28.1
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 700.0,
+        "hydrological_retention_days": 14.5,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-10-25",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 5.88,
+        "deltamethrin_thermal_fog_liters": 5.12,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 7.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-56944062",
+    "dispatched_at_utc": "2026-10-24T15:37:57.437864",
+    "sha256_cryptographic_receipt": "1541d513adcb3cb5dc577963e95f238d8549caed1de80822b296a222dda5dd23",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W15",
+    "municipal_ward_name": "Shiroil Bus Terminal & Railway Corridor (RCC Ward 15)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W15",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3748,
+      "longitude": 88.6085
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8534,
+      "day_14_probability": 0.8534,
+      "day_1_probability": 0.5486,
+      "day_7_probability": 0.753,
+      "mean_horizon_probability": 0.7364,
+      "mean_14d_probability": 0.7364,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 40.7,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 10.6,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 40.7,
+        "thermodynamic_briere_kinetics_pct": 26.1,
+        "dghs_clinical_baseline_pct": 5.1,
+        "spatial_mosquito_dispersal_pct": 28.1
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 700.0,
+        "hydrological_retention_days": 13.43,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 5.84,
+        "deltamethrin_thermal_fog_liters": 4.89,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 7.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-B5BA6489",
+    "dispatched_at_utc": "2026-10-24T15:37:57.437864",
+    "sha256_cryptographic_receipt": "30e128398bfde7cef285225dc23c8cc73321db39030b38fd83af3bd8cc669d93",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W09",
+    "municipal_ward_name": "Dargapara & Hetemkhan Dense Cluster (RCC Ward 09)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W09",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3665,
+      "longitude": 88.5912
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8419,
+      "day_14_probability": 0.8419,
+      "day_1_probability": 0.5444,
+      "day_7_probability": 0.7432,
+      "mean_horizon_probability": 0.727,
+      "mean_14d_probability": 0.727,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 40.5,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 11.0,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 40.5,
+        "thermodynamic_briere_kinetics_pct": 26.3,
+        "dghs_clinical_baseline_pct": 5.2,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 600.0,
+        "hydrological_retention_days": 12.38,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 4.97,
+        "deltamethrin_thermal_fog_liters": 4.0,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 5.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-6DA311DF",
+    "dispatched_at_utc": "2026-10-24T15:37:57.437864",
+    "sha256_cryptographic_receipt": "d1a2621260869b8d5e3c16c2f7f01a239067f4afb0b5d885671cd5168f1db6ca",
+    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W18",
+    "municipal_ward_name": "Nawdapara & BSCIC Industrial Sector (RCC Ward 18)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W18",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3965,
+      "longitude": 88.6062
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.7467,
+      "day_14_probability": 0.7467,
+      "day_1_probability": 0.4882,
+      "day_7_probability": 0.659,
+      "mean_horizon_probability": 0.6457,
+      "mean_14d_probability": 0.6457,
+      "risk_classification": "HIGH_TRANSMISSION_RISK"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 39.9,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 11.4,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 39.9,
+        "thermodynamic_briere_kinetics_pct": 26.6,
+        "dghs_clinical_baseline_pct": 5.5,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 500.0,
+        "hydrological_retention_days": 10.87,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-10-28",
+        "preemption_lead_time_days": 4,
+        "temephos_larvicide_50ec_liters": 3.93,
+        "deltamethrin_thermal_fog_liters": 3.09,
+        "mobile_fogging_crew_size": 4,
+        "estimated_operation_duration_hours": 4.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-4C4567DD",
+    "dispatched_at_utc": "2026-10-24T15:37:57.437864",
+    "sha256_cryptographic_receipt": "62360871d85eb116df61de8e73405d8685b755257b477f5b86f80b7db98a11ae",
+    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W07",
+    "municipal_ward_name": "Rajshahi Medical College & Laxmipur Zone (RCC Ward 07)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W07",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3712,
+      "longitude": 88.5842
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.5549,
+      "day_14_probability": 0.5549,
+      "day_1_probability": 0.3731,
+      "day_7_probability": 0.4929,
+      "mean_horizon_probability": 0.4847,
+      "mean_14d_probability": 0.4847,
+      "risk_classification": "HIGH_TRANSMISSION_RISK"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 38.3,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 11.2,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 38.3,
+        "thermodynamic_briere_kinetics_pct": 27.9,
+        "dghs_clinical_baseline_pct": 5.8,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 400.0,
+        "hydrological_retention_days": 9.52,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-11-06",
+        "preemption_lead_time_days": 13,
+        "temephos_larvicide_50ec_liters": 2.8,
+        "deltamethrin_thermal_fog_liters": 2.31,
+        "mobile_fogging_crew_size": 4,
+        "estimated_operation_duration_hours": 2.8
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-8ACABD18",
+    "dispatched_at_utc": "2026-10-24T09:33:05.347175",
+    "sha256_cryptographic_receipt": "52b40526ae84183c45297d476311f69d08ce2a27b723e9d2373b779cfc52b5ff",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "GPS",
+      "authority_name": "Localized Vector Response Unit (Bogura Zone) - Vector Control & Public Health Wing",
+      "emergency_control_room": "GPS-HEOC-Custom Coordinates (24.6320, 89.4057)",
+      "dispatch_channel": "gps-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Custom GPS Scan (Near Bogura)",
+    "district_name": "Custom Coordinates (24.6320, 89.4057)",
+    "ward_sector_id": "GPS-CORE",
+    "municipal_ward_name": "Custom Target Epicenter (24.6320\u00b0N, 89.4057\u00b0E)",
+    "target_waterlogging_node_id": "ZONAL-GPS-CORE",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.632,
+      "longitude": 89.4057
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8325,
+      "day_14_probability": 0.8325,
+      "day_1_probability": 0.5368,
+      "day_7_probability": 0.7378,
+      "mean_horizon_probability": 0.7203,
+      "mean_14d_probability": 0.7203,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 35.1,
+      "peak_temporal_attention_day": "Day -13 (2026-10-11)",
+      "peak_temporal_attention_weight_pct": 24.1,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 35.1,
+        "thermodynamic_briere_kinetics_pct": 28.1,
+        "dghs_clinical_baseline_pct": 8.8,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 600.0,
+        "hydrological_retention_days": 13.12,
+        "aedes_extrinsic_incubation_eip_days": 7.65,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 4.95,
+        "deltamethrin_thermal_fog_liters": 4.2,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 6.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-EC7062AD",
+    "dispatched_at_utc": "2026-10-24T09:33:05.347175",
+    "sha256_cryptographic_receipt": "deb3ff81759ae7c423cb6240cc1ad9c6300c1f5592246882ae4d53aeeeb21977",
+    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
+    "recipient_authority": {
+      "corporation_code": "GPS",
+      "authority_name": "Localized Vector Response Unit (Bogura Zone) - Vector Control & Public Health Wing",
+      "emergency_control_room": "GPS-HEOC-Custom Coordinates (24.6320, 89.4057)",
+      "dispatch_channel": "gps-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Custom GPS Scan (Near Bogura)",
+    "district_name": "Custom Coordinates (24.6320, 89.4057)",
+    "ward_sector_id": "GPS-NE",
+    "municipal_ward_name": "North-East Perimeter Sector (~600m of 24.6320\u00b0N)",
+    "target_waterlogging_node_id": "ZONAL-GPS-NE",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.6362,
+      "longitude": 89.4099
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.6697,
+      "day_14_probability": 0.6697,
+      "day_1_probability": 0.4323,
+      "day_7_probability": 0.591,
+      "mean_horizon_probability": 0.5773,
+      "mean_14d_probability": 0.5773,
+      "risk_classification": "HIGH_TRANSMISSION_RISK"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 38.0,
+      "peak_temporal_attention_day": "Day -13 (2026-10-11)",
+      "peak_temporal_attention_weight_pct": 24.9,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 38.0,
+        "thermodynamic_briere_kinetics_pct": 27.3,
+        "dghs_clinical_baseline_pct": 6.7,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 500.0,
+        "hydrological_retention_days": 10.41,
+        "aedes_extrinsic_incubation_eip_days": 7.65,
+        "projected_threshold_breach_date": "2026-10-30",
+        "preemption_lead_time_days": 6,
+        "temephos_larvicide_50ec_liters": 3.76,
+        "deltamethrin_thermal_fog_liters": 3.06,
+        "mobile_fogging_crew_size": 4,
+        "estimated_operation_duration_hours": 4.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-0E0BD2B5",
+    "dispatched_at_utc": "2026-10-24T09:09:28.629953",
+    "sha256_cryptographic_receipt": "d360bf43b187e433ff5402aefb6e0547fb0c5ca8fbb0396ddc0ce78dacf91b02",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "GPS",
+      "authority_name": "Localized Vector Response Unit (Bogura Zone) - Vector Control & Public Health Wing",
+      "emergency_control_room": "GPS-HEOC-Custom Coordinates (24.6320, 89.4057)",
+      "dispatch_channel": "gps-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Custom GPS Scan (Near Bogura)",
+    "district_name": "Custom Coordinates (24.6320, 89.4057)",
+    "ward_sector_id": "GPS-CORE",
+    "municipal_ward_name": "Custom Target Epicenter (24.6320\u00b0N, 89.4057\u00b0E)",
+    "target_waterlogging_node_id": "ZONAL-GPS-CORE",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.632,
+      "longitude": 89.4057
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8222,
+      "day_14_probability": 0.8222,
+      "day_1_probability": 0.5239,
+      "day_7_probability": 0.7293,
+      "mean_horizon_probability": 0.7126,
+      "mean_14d_probability": 0.7126,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 39.6,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 22.1,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 39.6,
+        "thermodynamic_briere_kinetics_pct": 24.8,
+        "dghs_clinical_baseline_pct": 7.6,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 600.0,
+        "hydrological_retention_days": 13.12,
+        "aedes_extrinsic_incubation_eip_days": 7.65,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 4.92,
+        "deltamethrin_thermal_fog_liters": 4.2,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 6.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-5032BB47",
+    "dispatched_at_utc": "2026-10-24T09:09:28.629953",
+    "sha256_cryptographic_receipt": "135b10bea7b32e495a9ac7ae771f8c057cb4d79516b5d092d1b97676b9f3ea42",
+    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
+    "recipient_authority": {
+      "corporation_code": "GPS",
+      "authority_name": "Localized Vector Response Unit (Bogura Zone) - Vector Control & Public Health Wing",
+      "emergency_control_room": "GPS-HEOC-Custom Coordinates (24.6320, 89.4057)",
+      "dispatch_channel": "gps-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Custom GPS Scan (Near Bogura)",
+    "district_name": "Custom Coordinates (24.6320, 89.4057)",
+    "ward_sector_id": "GPS-NE",
+    "municipal_ward_name": "North-East Perimeter Sector (~600m of 24.6320\u00b0N)",
+    "target_waterlogging_node_id": "ZONAL-GPS-NE",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.6362,
+      "longitude": 89.4099
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.6497,
+      "day_14_probability": 0.6497,
+      "day_1_probability": 0.4097,
+      "day_7_probability": 0.5725,
+      "mean_horizon_probability": 0.5614,
+      "mean_14d_probability": 0.5614,
+      "risk_classification": "HIGH_TRANSMISSION_RISK"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 40.0,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 22.6,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 40.0,
+        "thermodynamic_briere_kinetics_pct": 25.3,
+        "dghs_clinical_baseline_pct": 6.7,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 500.0,
+        "hydrological_retention_days": 10.41,
+        "aedes_extrinsic_incubation_eip_days": 7.65,
+        "projected_threshold_breach_date": "2026-10-31",
+        "preemption_lead_time_days": 7,
+        "temephos_larvicide_50ec_liters": 3.71,
+        "deltamethrin_thermal_fog_liters": 3.06,
+        "mobile_fogging_crew_size": 4,
+        "estimated_operation_duration_hours": 4.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-314144D2",
+    "dispatched_at_utc": "2026-10-24T09:07:00.766599",
+    "sha256_cryptographic_receipt": "e2fec6c016c0be79f5881ac3c5c14cff278e31b5b3ad3f14069d7154461bf2d1",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W12",
+    "municipal_ward_name": "Shaheb Bazar & Boalia Commercial Hub (RCC Ward 12)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W12",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3642,
+      "longitude": 88.6004
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.889,
+      "day_14_probability": 0.889,
+      "day_1_probability": 0.5721,
+      "day_7_probability": 0.7835,
+      "mean_horizon_probability": 0.7653,
+      "mean_14d_probability": 0.7653,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 33.2,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 8.6,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 33.2,
+        "thermodynamic_briere_kinetics_pct": 32.0,
+        "dghs_clinical_baseline_pct": 6.8,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 700.0,
+        "hydrological_retention_days": 14.5,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-10-25",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 5.95,
+        "deltamethrin_thermal_fog_liters": 5.12,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 7.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-E3F42B4D",
+    "dispatched_at_utc": "2026-10-24T09:07:00.766599",
+    "sha256_cryptographic_receipt": "88ddf1e49e2494666d30221cfe7e062e6d2f0c3bb6bc557b4ebdd95a4a012539",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W09",
+    "municipal_ward_name": "Dargapara & Hetemkhan Dense Cluster (RCC Ward 09)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W09",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3665,
+      "longitude": 88.5912
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8379,
+      "day_14_probability": 0.8379,
+      "day_1_probability": 0.5407,
+      "day_7_probability": 0.7391,
+      "mean_horizon_probability": 0.723,
+      "mean_14d_probability": 0.723,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 39.3,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 8.3,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 39.3,
+        "thermodynamic_briere_kinetics_pct": 26.6,
+        "dghs_clinical_baseline_pct": 6.1,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 600.0,
+        "hydrological_retention_days": 12.38,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 4.96,
+        "deltamethrin_thermal_fog_liters": 4.0,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 5.5
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-B6E52A0F",
+    "dispatched_at_utc": "2026-10-24T09:07:00.766599",
+    "sha256_cryptographic_receipt": "406dd12b72e9c96fa88fec6e91122d54155423941a64e105876290d7883ff04d",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W15",
+    "municipal_ward_name": "Shiroil Bus Terminal & Railway Corridor (RCC Ward 15)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W15",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3748,
+      "longitude": 88.6085
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8332,
+      "day_14_probability": 0.8332,
+      "day_1_probability": 0.5371,
+      "day_7_probability": 0.7337,
+      "mean_horizon_probability": 0.7201,
+      "mean_14d_probability": 0.7201,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 40.7,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 8.0,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 40.7,
+        "thermodynamic_briere_kinetics_pct": 25.1,
+        "dghs_clinical_baseline_pct": 6.2,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 700.0,
+        "hydrological_retention_days": 13.43,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 5.77,
+        "deltamethrin_thermal_fog_liters": 4.89,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 7.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-9BCFE6AC",
+    "dispatched_at_utc": "2026-10-24T09:07:00.766599",
+    "sha256_cryptographic_receipt": "467bf86564089e0e944919a5b53eb976d57e340faf234010ab3fbab8358ac5cb",
+    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
+    "recipient_authority": {
+      "corporation_code": "RCC",
+      "authority_name": "Rajshahi City Corporation (RCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "RCC-HEOC-Rajshahi",
+      "dispatch_channel": "rcc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Rajshahi",
+    "ward_sector_id": "RCC-W18",
+    "municipal_ward_name": "Nawdapara & BSCIC Industrial Sector (RCC Ward 18)",
+    "target_waterlogging_node_id": "ZONAL-RCC-W18",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.3965,
+      "longitude": 88.6062
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.7429,
+      "day_14_probability": 0.7429,
+      "day_1_probability": 0.4879,
+      "day_7_probability": 0.6631,
+      "mean_horizon_probability": 0.6483,
+      "mean_14d_probability": 0.6483,
+      "risk_classification": "HIGH_TRANSMISSION_RISK"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 41.4,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 7.9,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 41.4,
+        "thermodynamic_briere_kinetics_pct": 24.9,
+        "dghs_clinical_baseline_pct": 5.8,
+        "spatial_mosquito_dispersal_pct": 27.9
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "zonal_subsectors_scanned": 5,
+        "target_waterlogging_area_m2": 500.0,
+        "hydrological_retention_days": 10.87,
+        "aedes_extrinsic_incubation_eip_days": 7.82,
+        "projected_threshold_breach_date": "2026-10-28",
+        "preemption_lead_time_days": 4,
+        "temephos_larvicide_50ec_liters": 3.92,
+        "deltamethrin_thermal_fog_liters": 3.09,
+        "mobile_fogging_crew_size": 4,
+        "estimated_operation_duration_hours": 4.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-35A406C1",
+    "dispatched_at_utc": "2026-10-24T05:47:59.820767",
+    "sha256_cryptographic_receipt": "af532631786c701a632feb10e1af084f16a5f07588bfe90ab222b9bd4b946b63",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Dhaka",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Dhaka Division",
+    "district_name": "Dhaka",
+    "ward_sector_id": "DNCC-W01",
+    "municipal_ward_name": "Uttara Commercial Hub (DNCC Ward 01)",
+    "target_waterlogging_node_id": "EPI-NODE-001",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.8153,
+      "longitude": 90.4165
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.9016,
+      "day_14_probability": 0.9016,
+      "day_1_probability": 0.5971,
+      "day_7_probability": 0.8189,
+      "mean_horizon_probability": 0.7944,
+      "mean_14d_probability": 0.7944,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "NASA POWER Bri\u00e8re Thermal Incubation Kinetics (EIP/MDR)",
+      "dominant_driver_pct": 28.5,
+      "peak_temporal_attention_day": "Day -13 (2026-10-11)",
+      "peak_temporal_attention_weight_pct": 42.6,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 24.0,
+        "thermodynamic_briere_kinetics_pct": 28.5,
+        "dghs_clinical_baseline_pct": 19.4,
+        "spatial_mosquito_dispersal_pct": 28.1
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 700.0,
+        "hydrological_retention_days": 14.5,
+        "aedes_extrinsic_incubation_eip_days": 7.43,
+        "projected_threshold_breach_date": "2026-10-25",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 5.99,
+        "deltamethrin_thermal_fog_liters": 5.31,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 8.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-73CCB847",
+    "dispatched_at_utc": "2026-10-24T05:47:59.820767",
+    "sha256_cryptographic_receipt": "a1a6fa05bfa736a4258566a9fd4367b057e7494bfa6c2c36c075a05d6d337826",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Dhaka",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Dhaka Division",
+    "district_name": "Dhaka",
+    "ward_sector_id": "DNCC-W02",
+    "municipal_ward_name": "Jatrabari-Sayedabad Terminal (DSCC Ward 50)",
+    "target_waterlogging_node_id": "EPI-NODE-003",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.8033,
+      "longitude": 90.4225
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8897,
+      "day_14_probability": 0.8897,
+      "day_1_probability": 0.5805,
+      "day_7_probability": 0.7977,
+      "mean_horizon_probability": 0.7758,
+      "mean_14d_probability": 0.7758,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Neighboring Ward ST-GNN Flight Dispersal (\u22644.5km)",
+      "dominant_driver_pct": 28.0,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 42.3,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 25.1,
+        "thermodynamic_briere_kinetics_pct": 27.7,
+        "dghs_clinical_baseline_pct": 19.2,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 700.0,
+        "hydrological_retention_days": 14.5,
+        "aedes_extrinsic_incubation_eip_days": 7.43,
+        "projected_threshold_breach_date": "2026-10-25",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 5.95,
+        "deltamethrin_thermal_fog_liters": 5.31,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 8.0
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-836BE6D8",
+    "dispatched_at_utc": "2026-10-24T05:47:59.820767",
+    "sha256_cryptographic_receipt": "e7c2adf122b3fc13ab85da371a3d7251def5af17146a313bae378d6f355da275",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Dhaka",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Dhaka Division",
+    "district_name": "Dhaka",
+    "ward_sector_id": "DNCC-W03",
+    "municipal_ward_name": "Mugda-Maniknagar Dense Cluster (DSCC Ward 06)",
+    "target_waterlogging_node_id": "EPI-NODE-004",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.7993,
+      "longitude": 90.4065
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.867,
+      "day_14_probability": 0.867,
+      "day_1_probability": 0.5672,
+      "day_7_probability": 0.7775,
+      "mean_horizon_probability": 0.7571,
+      "mean_14d_probability": 0.7571,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "NASA POWER Bri\u00e8re Thermal Incubation Kinetics (EIP/MDR)",
+      "dominant_driver_pct": 28.7,
+      "peak_temporal_attention_day": "Day -13 (2026-10-11)",
+      "peak_temporal_attention_weight_pct": 45.8,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 25.1,
+        "thermodynamic_briere_kinetics_pct": 28.7,
+        "dghs_clinical_baseline_pct": 18.2,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 600.0,
+        "hydrological_retention_days": 13.64,
+        "aedes_extrinsic_incubation_eip_days": 7.43,
+        "projected_threshold_breach_date": "2026-10-25",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 5.04,
+        "deltamethrin_thermal_fog_liters": 4.38,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 6.4
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-BA3C7522",
+    "dispatched_at_utc": "2026-10-24T05:47:59.820767",
+    "sha256_cryptographic_receipt": "f941637a3f3cde90b4d486e108b639bc2f0e18db3f446b4b0a6f7a54e72966ee",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Dhaka",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Dhaka Division",
+    "district_name": "Dhaka",
+    "ward_sector_id": "DNCC-W04",
+    "municipal_ward_name": "Tejgaon Industrial Zone (DNCC Ward 24)",
+    "target_waterlogging_node_id": "EPI-NODE-005",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.8203,
+      "longitude": 90.4035
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8435,
+      "day_14_probability": 0.8435,
+      "day_1_probability": 0.5469,
+      "day_7_probability": 0.7498,
+      "mean_horizon_probability": 0.7322,
+      "mean_14d_probability": 0.7322,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Neighboring Ward ST-GNN Flight Dispersal (\u22644.5km)",
+      "dominant_driver_pct": 28.0,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 43.0,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 27.5,
+        "thermodynamic_briere_kinetics_pct": 27.9,
+        "dghs_clinical_baseline_pct": 16.6,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 500.0,
+        "hydrological_retention_days": 12.2,
+        "aedes_extrinsic_incubation_eip_days": 7.43,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 4.15,
+        "deltamethrin_thermal_fog_liters": 3.41,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 4.8
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-4D67D524",
+    "dispatched_at_utc": "2026-10-24T05:47:59.820767",
+    "sha256_cryptographic_receipt": "26a959484692334a01c010fc5e3f909bd4ec15b361ec5dd179e6aa7012e2045f",
+    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
+    "recipient_authority": {
+      "corporation_code": "DNCC",
+      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
+      "emergency_control_room": "DNCC-HEOC-Dhaka",
+      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Dhaka Division",
+    "district_name": "Dhaka",
+    "ward_sector_id": "DNCC-W05",
+    "municipal_ward_name": "Mirpur Pallabi Sector (DNCC Ward 06)",
+    "target_waterlogging_node_id": "EPI-NODE-006",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 23.8133,
+      "longitude": 90.4005
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.6098,
+      "day_14_probability": 0.6098,
+      "day_1_probability": 0.4215,
+      "day_7_probability": 0.5473,
+      "mean_horizon_probability": 0.539,
+      "mean_14d_probability": 0.539,
+      "risk_classification": "HIGH_TRANSMISSION_RISK"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "NASA POWER Bri\u00e8re Thermal Incubation Kinetics (EIP/MDR)",
+      "dominant_driver_pct": 28.2,
+      "peak_temporal_attention_day": "Day -13 (2026-10-11)",
+      "peak_temporal_attention_weight_pct": 54.2,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 26.3,
+        "thermodynamic_briere_kinetics_pct": 28.2,
+        "dghs_clinical_baseline_pct": 17.5,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 500.0,
+        "hydrological_retention_days": 10.71,
+        "aedes_extrinsic_incubation_eip_days": 7.43,
+        "projected_threshold_breach_date": "2026-11-01",
+        "preemption_lead_time_days": 8,
+        "temephos_larvicide_50ec_liters": 3.62,
+        "deltamethrin_thermal_fog_liters": 3.17,
+        "mobile_fogging_crew_size": 4,
+        "estimated_operation_duration_hours": 4.2
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-E78FB979",
+    "dispatched_at_utc": "2026-10-24T00:57:23.678011",
+    "sha256_cryptographic_receipt": "8f303ad916b4b2454e604b81b83bce541f92a1f1341f654fa50b6ec0fb59dfd7",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "BGR",
+      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
+      "emergency_control_room": "BGR-HEOC-Bogura",
+      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Bogura",
+    "ward_sector_id": "BGR-W01",
+    "municipal_ward_name": "Bogura Central Bazar & Commercial Hub (Ward 01)",
+    "target_waterlogging_node_id": "EPI-NODE-001",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.8531,
+      "longitude": 89.377
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8587,
+      "day_14_probability": 0.8587,
+      "day_1_probability": 0.5577,
+      "day_7_probability": 0.7632,
+      "mean_horizon_probability": 0.7444,
+      "mean_14d_probability": 0.7444,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 43.6,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 11.4,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 43.6,
+        "thermodynamic_briere_kinetics_pct": 23.7,
+        "dghs_clinical_baseline_pct": 4.7,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 700.0,
+        "hydrological_retention_days": 14.5,
+        "aedes_extrinsic_incubation_eip_days": 7.72,
+        "projected_threshold_breach_date": "2026-10-25",
+        "preemption_lead_time_days": 1,
+        "temephos_larvicide_50ec_liters": 5.85,
+        "deltamethrin_thermal_fog_liters": 5.17,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 7.6
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-4977DFB1",
+    "dispatched_at_utc": "2026-10-24T00:57:23.678011",
+    "sha256_cryptographic_receipt": "642d7f81c8400140d7557faecc9ba6f2ae3bd181ad3517e72efac22068427aa2",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "BGR",
+      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
+      "emergency_control_room": "BGR-HEOC-Bogura",
+      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Bogura",
+    "ward_sector_id": "BGR-W03",
+    "municipal_ward_name": "Bogura Old Town High-Density Cluster (Ward 03)",
+    "target_waterlogging_node_id": "EPI-NODE-003",
+    "structural_classification": "Concrete_Rooftop_Depression",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.8371,
+      "longitude": 89.367
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.84,
+      "day_14_probability": 0.84,
+      "day_1_probability": 0.5424,
+      "day_7_probability": 0.7429,
+      "mean_horizon_probability": 0.7267,
+      "mean_14d_probability": 0.7267,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "NASA POWER Bri\u00e8re Thermal Incubation Kinetics (EIP/MDR)",
+      "dominant_driver_pct": 35.4,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 11.8,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 25.7,
+        "thermodynamic_briere_kinetics_pct": 35.4,
+        "dghs_clinical_baseline_pct": 10.9,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 600.0,
+        "hydrological_retention_days": 12.28,
+        "aedes_extrinsic_incubation_eip_days": 7.72,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 4.97,
+        "deltamethrin_thermal_fog_liters": 4.01,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 5.6
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-553593C6",
+    "dispatched_at_utc": "2026-10-24T00:57:23.678011",
+    "sha256_cryptographic_receipt": "7be8f2d6e8dfd3c9c53613ba461e4be4c2b7c3f0ac2049548d88ced0c3b918b6",
+    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
+    "recipient_authority": {
+      "corporation_code": "BGR",
+      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
+      "emergency_control_room": "BGR-HEOC-Bogura",
+      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Bogura",
+    "ward_sector_id": "BGR-W02",
+    "municipal_ward_name": "Bogura Bus Terminal & Transport Corridor (Ward 02)",
+    "target_waterlogging_node_id": "EPI-NODE-002",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.8411,
+      "longitude": 89.383
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.8365,
+      "day_14_probability": 0.8365,
+      "day_1_probability": 0.5388,
+      "day_7_probability": 0.7382,
+      "mean_horizon_probability": 0.7229,
+      "mean_14d_probability": 0.7229,
+      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "NASA POWER Bri\u00e8re Thermal Incubation Kinetics (EIP/MDR)",
+      "dominant_driver_pct": 35.3,
+      "peak_temporal_attention_day": "Day -14 (2026-10-10)",
+      "peak_temporal_attention_weight_pct": 12.1,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 23.8,
+        "thermodynamic_briere_kinetics_pct": 35.3,
+        "dghs_clinical_baseline_pct": 12.9,
+        "spatial_mosquito_dispersal_pct": 28.0
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 700.0,
+        "hydrological_retention_days": 13.53,
+        "aedes_extrinsic_incubation_eip_days": 7.72,
+        "projected_threshold_breach_date": "2026-10-26",
+        "preemption_lead_time_days": 2,
+        "temephos_larvicide_50ec_liters": 5.78,
+        "deltamethrin_thermal_fog_liters": 4.96,
+        "mobile_fogging_crew_size": 6,
+        "estimated_operation_duration_hours": 7.1
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
+    "alert_dispatch_id": "EPI-ALT-B5C62005",
+    "dispatched_at_utc": "2026-10-24T00:57:23.678011",
+    "sha256_cryptographic_receipt": "ae48e7e6a4d661e272fab5d88b88b0ef1d4acf4e9d069580829f14d08505e467",
+    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
+    "recipient_authority": {
+      "corporation_code": "BGR",
+      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
+      "emergency_control_room": "BGR-HEOC-Bogura",
+      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
+    },
+    "division_name": "Rajshahi Division",
+    "district_name": "Bogura",
+    "ward_sector_id": "BGR-W04",
+    "municipal_ward_name": "Bogura Industrial & Warehouse Sector (Ward 04)",
+    "target_waterlogging_node_id": "EPI-NODE-004",
+    "structural_classification": "Structural_Alley_Retention_Channel",
+    "gps_dispatch_coordinates": {
+      "latitude": 24.8581,
+      "longitude": 89.364
+    },
+    "forecast_horizon_days": 14,
+    "epidemiological_risk_metrics": {
+      "selected_horizon_days": 14,
+      "horizon_probability": 0.7377,
+      "day_14_probability": 0.7377,
+      "day_1_probability": 0.4742,
+      "day_7_probability": 0.6473,
+      "mean_horizon_probability": 0.6347,
+      "mean_14d_probability": 0.6347,
+      "risk_classification": "HIGH_TRANSMISSION_RISK"
+    },
+    "explainable_ai_rationale": {
+      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
+      "dominant_driver_pct": 35.0,
+      "peak_temporal_attention_day": "Day -11 (2026-10-13)",
+      "peak_temporal_attention_weight_pct": 11.9,
+      "macro_pillar_attribution_pct": {
+        "hydrological_waterlogging_drainage_pct": 35.0,
+        "thermodynamic_briere_kinetics_pct": 26.9,
+        "dghs_clinical_baseline_pct": 10.2,
+        "spatial_mosquito_dispersal_pct": 27.9
+      }
+    },
+    "preemptive_fogging_work_order": {
+      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
+      "resource_quantification": {
+        "evaluated_horizon_days": 14,
+        "target_waterlogging_area_m2": 500.0,
+        "hydrological_retention_days": 10.98,
+        "aedes_extrinsic_incubation_eip_days": 7.72,
+        "projected_threshold_breach_date": "2026-10-28",
+        "preemption_lead_time_days": 4,
+        "temephos_larvicide_50ec_liters": 3.91,
+        "deltamethrin_thermal_fog_liters": 3.14,
+        "mobile_fogging_crew_size": 4,
+        "estimated_operation_duration_hours": 4.1
+      }
+    },
+    "transmission_telemetry": {
+      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
+      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
+      "ledger_persisted": true
+    }
+  },
+  {
     "alert_dispatch_id": "EPI-ALT-3149A5E0",
     "dispatched_at_utc": "2026-10-23T16:57:07.019643",
     "sha256_cryptographic_receipt": "52a0623bd4424eec935660f480b8d8a46d8a96ad9ed197223c6ff4f3182e2d84",
@@ -5071,1436 +6514,6 @@
         "deltamethrin_thermal_fog_liters": 5.55,
         "mobile_fogging_crew_size": 6,
         "estimated_operation_duration_hours": 8.6
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-5E151C2B",
-    "dispatched_at_utc": "2026-10-23T05:23:05.233427",
-    "sha256_cryptographic_receipt": "6516d9757308342fda3705a9e6e1b77934a2e632167067031d9efda192ac80ed",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "CXB",
-      "authority_name": "Cox's Bazar Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "CXB-HEOC-Cox's Bazar",
-      "dispatch_channel": "cxb-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Chattogram Division",
-    "district_name": "Cox's Bazar",
-    "ward_sector_id": "CXB-W04",
-    "municipal_ward_name": "Cox's Bazar Industrial & Warehouse Sector (Ward 04)",
-    "target_waterlogging_node_id": "EPI-NODE-005",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 21.4432,
-      "longitude": 91.9908
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8034,
-      "day_14_probability": 0.8034,
-      "day_1_probability": 0.5304,
-      "day_7_probability": 0.7226,
-      "mean_horizon_probability": 0.7038,
-      "mean_14d_probability": 0.7038,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 38.0,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.4,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 38.0,
-        "thermodynamic_briere_kinetics_pct": 26.5,
-        "dghs_clinical_baseline_pct": 7.5,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 11.17,
-        "aedes_extrinsic_incubation_eip_days": 7.03,
-        "projected_threshold_breach_date": "2026-10-25",
-        "preemption_lead_time_days": 2,
-        "temephos_larvicide_50ec_liters": 4.06,
-        "deltamethrin_thermal_fog_liters": 3.38,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 4.7
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-FBFFA1EA",
-    "dispatched_at_utc": "2026-10-23T05:23:05.233427",
-    "sha256_cryptographic_receipt": "753e43836bd03ca37edd4af87355722bd4a278914e17e4d82e0669bd4a9c603b",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "CXB",
-      "authority_name": "Cox's Bazar Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "CXB-HEOC-Cox's Bazar",
-      "dispatch_channel": "cxb-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Chattogram Division",
-    "district_name": "Cox's Bazar",
-    "ward_sector_id": "CXB-W03",
-    "municipal_ward_name": "Cox's Bazar Old Town High-Density Cluster (Ward 03)",
-    "target_waterlogging_node_id": "EPI-NODE-004",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 21.4092,
-      "longitude": 91.9968
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.7645,
-      "day_14_probability": 0.7645,
-      "day_1_probability": 0.4955,
-      "day_7_probability": 0.6809,
-      "mean_horizon_probability": 0.6643,
-      "mean_14d_probability": 0.6643,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 37.8,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.2,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 37.8,
-        "thermodynamic_briere_kinetics_pct": 26.3,
-        "dghs_clinical_baseline_pct": 7.9,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 600.0,
-        "hydrological_retention_days": 12.49,
-        "aedes_extrinsic_incubation_eip_days": 7.03,
-        "projected_threshold_breach_date": "2026-10-27",
-        "preemption_lead_time_days": 4,
-        "temephos_larvicide_50ec_liters": 4.76,
-        "deltamethrin_thermal_fog_liters": 4.33,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 6.3
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-18CF2FAF",
-    "dispatched_at_utc": "2026-10-23T05:23:05.233427",
-    "sha256_cryptographic_receipt": "f9b650df7775683e28ebdcbcb7c5f44f630a5d145b75da2b6507e6697f952bb7",
-    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
-    "recipient_authority": {
-      "corporation_code": "CXB",
-      "authority_name": "Cox's Bazar Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "CXB-HEOC-Cox's Bazar",
-      "dispatch_channel": "cxb-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Chattogram Division",
-    "district_name": "Cox's Bazar",
-    "ward_sector_id": "CXB-W05",
-    "municipal_ward_name": "Cox's Bazar Hospital & Medical College Zone (Ward 05)",
-    "target_waterlogging_node_id": "EPI-NODE-006",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 21.4312,
-      "longitude": 91.9868
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.7217,
-      "day_14_probability": 0.7217,
-      "day_1_probability": 0.4709,
-      "day_7_probability": 0.6432,
-      "mean_horizon_probability": 0.628,
-      "mean_14d_probability": 0.628,
-      "risk_classification": "HIGH_TRANSMISSION_RISK"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 36.1,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.2,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 36.1,
-        "thermodynamic_briere_kinetics_pct": 28.3,
-        "dghs_clinical_baseline_pct": 7.6,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 9.81,
-        "aedes_extrinsic_incubation_eip_days": 7.03,
-        "projected_threshold_breach_date": "2026-10-27",
-        "preemption_lead_time_days": 4,
-        "temephos_larvicide_50ec_liters": 3.87,
-        "deltamethrin_thermal_fog_liters": 3.14,
-        "mobile_fogging_crew_size": 4,
-        "estimated_operation_duration_hours": 4.1
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-46903E5C",
-    "dispatched_at_utc": "2026-10-23T05:22:33.401869",
-    "sha256_cryptographic_receipt": "35b8cffde5f95b63106e2312d93c5124acdf9c39cd9540913e34b7416295865e",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "DNCC",
-      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "DNCC-HEOC-Dhaka",
-      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Dhaka Division",
-    "district_name": "Dhaka",
-    "ward_sector_id": "DNCC-W02",
-    "municipal_ward_name": "Jatrabari-Sayedabad Terminal (DSCC Ward 50)",
-    "target_waterlogging_node_id": "EPI-NODE-003",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 23.7993,
-      "longitude": 90.4265
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8798,
-      "day_14_probability": 0.8798,
-      "day_1_probability": 0.605,
-      "day_7_probability": 0.799,
-      "mean_horizon_probability": 0.7813,
-      "mean_14d_probability": 0.7813,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 40.0,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 9.7,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 40.0,
-        "thermodynamic_briere_kinetics_pct": 23.4,
-        "dghs_clinical_baseline_pct": 8.6,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 700.0,
-        "hydrological_retention_days": 14.5,
-        "aedes_extrinsic_incubation_eip_days": 7.39,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 5.92,
-        "deltamethrin_thermal_fog_liters": 5.34,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 8.0
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-9DE0C0EB",
-    "dispatched_at_utc": "2026-10-23T05:22:33.401869",
-    "sha256_cryptographic_receipt": "004dc761d893b02d61347036fd6fa688fbd7abda02878acff07213510d9ddeba",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "DNCC",
-      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "DNCC-HEOC-Dhaka",
-      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Dhaka Division",
-    "district_name": "Dhaka",
-    "ward_sector_id": "DNCC-W04",
-    "municipal_ward_name": "Tejgaon Industrial Zone (DNCC Ward 24)",
-    "target_waterlogging_node_id": "EPI-NODE-005",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 23.8263,
-      "longitude": 90.3975
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8551,
-      "day_14_probability": 0.8551,
-      "day_1_probability": 0.5798,
-      "day_7_probability": 0.7732,
-      "mean_horizon_probability": 0.7557,
-      "mean_14d_probability": 0.7557,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 40.6,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 9.5,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 40.6,
-        "thermodynamic_briere_kinetics_pct": 23.4,
-        "dghs_clinical_baseline_pct": 8.0,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 12.2,
-        "aedes_extrinsic_incubation_eip_days": 7.39,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 4.17,
-        "deltamethrin_thermal_fog_liters": 3.43,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 4.8
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-F61C67F8",
-    "dispatched_at_utc": "2026-10-23T05:22:33.401869",
-    "sha256_cryptographic_receipt": "f690a43e09ae44d8113ac57332201c225e9c4dca1c462b871d0e5be701634824",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "DNCC",
-      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "DNCC-HEOC-Dhaka",
-      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Dhaka Division",
-    "district_name": "Dhaka",
-    "ward_sector_id": "DNCC-W01",
-    "municipal_ward_name": "Uttara Commercial Hub (DNCC Ward 01)",
-    "target_waterlogging_node_id": "EPI-NODE-001",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 23.8183,
-      "longitude": 90.4185
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8516,
-      "day_14_probability": 0.8516,
-      "day_1_probability": 0.5738,
-      "day_7_probability": 0.7711,
-      "mean_horizon_probability": 0.7525,
-      "mean_14d_probability": 0.7525,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 38.4,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 9.4,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 38.4,
-        "thermodynamic_briere_kinetics_pct": 24.2,
-        "dghs_clinical_baseline_pct": 9.4,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 700.0,
-        "hydrological_retention_days": 14.5,
-        "aedes_extrinsic_incubation_eip_days": 7.39,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 5.83,
-        "deltamethrin_thermal_fog_liters": 5.34,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 8.0
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-4251A209",
-    "dispatched_at_utc": "2026-10-23T05:22:33.401869",
-    "sha256_cryptographic_receipt": "0d229339e8db7a8d6c2863a423e4751ad4faf5c5f2c4158e3176d8028405ea0b",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "DNCC",
-      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "DNCC-HEOC-Dhaka",
-      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Dhaka Division",
-    "district_name": "Dhaka",
-    "ward_sector_id": "DNCC-W03",
-    "municipal_ward_name": "Mugda-Maniknagar Dense Cluster (DSCC Ward 06)",
-    "target_waterlogging_node_id": "EPI-NODE-004",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 23.7923,
-      "longitude": 90.4035
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.7883,
-      "day_14_probability": 0.7883,
-      "day_1_probability": 0.5108,
-      "day_7_probability": 0.7035,
-      "mean_horizon_probability": 0.686,
-      "mean_14d_probability": 0.686,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 38.6,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.9,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 38.6,
-        "thermodynamic_briere_kinetics_pct": 24.4,
-        "dghs_clinical_baseline_pct": 9.0,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 600.0,
-        "hydrological_retention_days": 13.64,
-        "aedes_extrinsic_incubation_eip_days": 7.39,
-        "projected_threshold_breach_date": "2026-10-26",
-        "preemption_lead_time_days": 3,
-        "temephos_larvicide_50ec_liters": 4.83,
-        "deltamethrin_thermal_fog_liters": 4.4,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 6.5
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-EC187601",
-    "dispatched_at_utc": "2026-10-23T05:22:33.401869",
-    "sha256_cryptographic_receipt": "758a77d7d186d9923924a77cb52d6999f4d12b65a049242fac1438acdceac47f",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "DNCC",
-      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "DNCC-HEOC-Dhaka",
-      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Dhaka Division",
-    "district_name": "Dhaka",
-    "ward_sector_id": "DNCC-W05",
-    "municipal_ward_name": "Mirpur Pallabi Sector (DNCC Ward 06)",
-    "target_waterlogging_node_id": "EPI-NODE-006",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 23.8143,
-      "longitude": 90.3935
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.774,
-      "day_14_probability": 0.774,
-      "day_1_probability": 0.5125,
-      "day_7_probability": 0.6948,
-      "mean_horizon_probability": 0.6783,
-      "mean_14d_probability": 0.6783,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 37.6,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 9.1,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 37.6,
-        "thermodynamic_briere_kinetics_pct": 26.0,
-        "dghs_clinical_baseline_pct": 8.4,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 10.71,
-        "aedes_extrinsic_incubation_eip_days": 7.39,
-        "projected_threshold_breach_date": "2026-10-26",
-        "preemption_lead_time_days": 3,
-        "temephos_larvicide_50ec_liters": 3.99,
-        "deltamethrin_thermal_fog_liters": 3.18,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 4.2
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-5B663D19",
-    "dispatched_at_utc": "2026-10-23T05:22:33.401869",
-    "sha256_cryptographic_receipt": "173999be965b52f634614c77e7ac70c20c902eabe874040aa09c220f8b88da12",
-    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
-    "recipient_authority": {
-      "corporation_code": "DNCC",
-      "authority_name": "Dhaka North & South City Corporation (DNCC/DSCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "DNCC-HEOC-Dhaka",
-      "dispatch_channel": "dncc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Dhaka Division",
-    "district_name": "Dhaka",
-    "ward_sector_id": "DNCC-W06",
-    "municipal_ward_name": "Mirpur Kazipara-Shewrapara (DNCC Ward 14)",
-    "target_waterlogging_node_id": "EPI-NODE-007",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 23.8343,
-      "longitude": 90.4165
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.5539,
-      "day_14_probability": 0.5539,
-      "day_1_probability": 0.3509,
-      "day_7_probability": 0.4922,
-      "mean_horizon_probability": 0.4768,
-      "mean_14d_probability": 0.4768,
-      "risk_classification": "HIGH_TRANSMISSION_RISK"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 35.8,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.2,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 35.8,
-        "thermodynamic_briere_kinetics_pct": 27.5,
-        "dghs_clinical_baseline_pct": 8.7,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 400.0,
-        "hydrological_retention_days": 9.3,
-        "aedes_extrinsic_incubation_eip_days": 7.39,
-        "projected_threshold_breach_date": "2026-11-04",
-        "preemption_lead_time_days": 12,
-        "temephos_larvicide_50ec_liters": 2.8,
-        "deltamethrin_thermal_fog_liters": 2.36,
-        "mobile_fogging_crew_size": 4,
-        "estimated_operation_duration_hours": 2.9
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-81A628FC",
-    "dispatched_at_utc": "2026-10-23T05:08:24.230422",
-    "sha256_cryptographic_receipt": "8b20242e0d3fd28addf93f0030509c8bfbfb662d79c9254d89612682323405da",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "BGR",
-      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "BGR-HEOC-Bogura",
-      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Rajshahi Division",
-    "district_name": "Bogura",
-    "ward_sector_id": "BGR-W01",
-    "municipal_ward_name": "Bogura Central Bazar & Commercial Hub (Ward 01)",
-    "target_waterlogging_node_id": "EPI-NODE-001",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 24.8561,
-      "longitude": 89.379
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8511,
-      "day_14_probability": 0.8511,
-      "day_1_probability": 0.5836,
-      "day_7_probability": 0.7652,
-      "mean_horizon_probability": 0.7509,
-      "mean_14d_probability": 0.7509,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 43.2,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 9.3,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 43.2,
-        "thermodynamic_briere_kinetics_pct": 21.3,
-        "dghs_clinical_baseline_pct": 7.5,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 700.0,
-        "hydrological_retention_days": 14.5,
-        "aedes_extrinsic_incubation_eip_days": 7.65,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 5.83,
-        "deltamethrin_thermal_fog_liters": 5.2,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 7.7
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-E80C9459",
-    "dispatched_at_utc": "2026-10-23T05:08:24.230422",
-    "sha256_cryptographic_receipt": "0fb95666b81aded968bf47615e27332d96b11ad7314d75a79d296bbd39075d16",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "BGR",
-      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "BGR-HEOC-Bogura",
-      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Rajshahi Division",
-    "district_name": "Bogura",
-    "ward_sector_id": "BGR-W02",
-    "municipal_ward_name": "Bogura Bus Terminal & Transport Corridor (Ward 02)",
-    "target_waterlogging_node_id": "EPI-NODE-002",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 24.8371,
-      "longitude": 89.387
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8442,
-      "day_14_probability": 0.8442,
-      "day_1_probability": 0.5761,
-      "day_7_probability": 0.7581,
-      "mean_horizon_probability": 0.7437,
-      "mean_14d_probability": 0.7437,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 41.2,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 9.2,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 41.2,
-        "thermodynamic_briere_kinetics_pct": 23.3,
-        "dghs_clinical_baseline_pct": 7.4,
-        "spatial_mosquito_dispersal_pct": 28.1
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 700.0,
-        "hydrological_retention_days": 13.53,
-        "aedes_extrinsic_incubation_eip_days": 7.65,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 5.81,
-        "deltamethrin_thermal_fog_liters": 4.99,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 7.2
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-A40DCAC6",
-    "dispatched_at_utc": "2026-10-23T05:08:24.230422",
-    "sha256_cryptographic_receipt": "bd8fefb15e86aabb3debe93ebac5d4c0c977d01853fd7313ac2862c4003d8054",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "BGR",
-      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "BGR-HEOC-Bogura",
-      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Rajshahi Division",
-    "district_name": "Bogura",
-    "ward_sector_id": "BGR-W03",
-    "municipal_ward_name": "Bogura Old Town High-Density Cluster (Ward 03)",
-    "target_waterlogging_node_id": "EPI-NODE-003",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 24.8301,
-      "longitude": 89.364
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.7858,
-      "day_14_probability": 0.7858,
-      "day_1_probability": 0.5083,
-      "day_7_probability": 0.697,
-      "mean_horizon_probability": 0.6808,
-      "mean_14d_probability": 0.6808,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 41.9,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.8,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 41.9,
-        "thermodynamic_briere_kinetics_pct": 23.0,
-        "dghs_clinical_baseline_pct": 7.1,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 600.0,
-        "hydrological_retention_days": 12.28,
-        "aedes_extrinsic_incubation_eip_days": 7.65,
-        "projected_threshold_breach_date": "2026-10-26",
-        "preemption_lead_time_days": 3,
-        "temephos_larvicide_50ec_liters": 4.82,
-        "deltamethrin_thermal_fog_liters": 4.04,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 5.6
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-78F5F23A",
-    "dispatched_at_utc": "2026-10-23T05:08:24.230422",
-    "sha256_cryptographic_receipt": "7c21b4151fd81bf641279adc35cda3cd577b7fa4a44000a36bab97b05f9d0e14",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "BGR",
-      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "BGR-HEOC-Bogura",
-      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Rajshahi Division",
-    "district_name": "Bogura",
-    "ward_sector_id": "BGR-W04",
-    "municipal_ward_name": "Bogura Industrial & Warehouse Sector (Ward 04)",
-    "target_waterlogging_node_id": "EPI-NODE-004",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 24.8641,
-      "longitude": 89.358
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.7543,
-      "day_14_probability": 0.7543,
-      "day_1_probability": 0.4802,
-      "day_7_probability": 0.6666,
-      "mean_horizon_probability": 0.6501,
-      "mean_14d_probability": 0.6501,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 40.9,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.7,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 40.9,
-        "thermodynamic_briere_kinetics_pct": 24.0,
-        "dghs_clinical_baseline_pct": 7.1,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 10.98,
-        "aedes_extrinsic_incubation_eip_days": 7.65,
-        "projected_threshold_breach_date": "2026-10-27",
-        "preemption_lead_time_days": 4,
-        "temephos_larvicide_50ec_liters": 3.95,
-        "deltamethrin_thermal_fog_liters": 3.15,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 4.2
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-5CD33ADD",
-    "dispatched_at_utc": "2026-10-23T05:08:24.230422",
-    "sha256_cryptographic_receipt": "017a118613caec2bd570c7cb83b5b4ae19e90ae1b2bf1dae67c53e0e26824ce2",
-    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
-    "recipient_authority": {
-      "corporation_code": "BGR",
-      "authority_name": "Bogura Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "BGR-HEOC-Bogura",
-      "dispatch_channel": "bgr-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Rajshahi Division",
-    "district_name": "Bogura",
-    "ward_sector_id": "BGR-W05",
-    "municipal_ward_name": "Bogura Hospital & Medical College Zone (Ward 05)",
-    "target_waterlogging_node_id": "EPI-NODE-005",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 24.8521,
-      "longitude": 89.354
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.6683,
-      "day_14_probability": 0.6683,
-      "day_1_probability": 0.4139,
-      "day_7_probability": 0.5871,
-      "mean_horizon_probability": 0.5705,
-      "mean_14d_probability": 0.5705,
-      "risk_classification": "HIGH_TRANSMISSION_RISK"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 38.6,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.5,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 38.6,
-        "thermodynamic_briere_kinetics_pct": 26.2,
-        "dghs_clinical_baseline_pct": 7.3,
-        "spatial_mosquito_dispersal_pct": 27.9
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 9.64,
-        "aedes_extrinsic_incubation_eip_days": 7.65,
-        "projected_threshold_breach_date": "2026-10-29",
-        "preemption_lead_time_days": 6,
-        "temephos_larvicide_50ec_liters": 3.75,
-        "deltamethrin_thermal_fog_liters": 2.94,
-        "mobile_fogging_crew_size": 4,
-        "estimated_operation_duration_hours": 3.7
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-F390E67F",
-    "dispatched_at_utc": "2026-10-23T05:05:23.604933",
-    "sha256_cryptographic_receipt": "ab5472e475fac07ab9cf327673fe880452f0693f0aba630c4bdf9184c439a57b",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "KCC",
-      "authority_name": "Khulna City Corporation (KCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "KCC-HEOC-Khulna",
-      "dispatch_channel": "kcc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Khulna Division",
-    "district_name": "Khulna",
-    "ward_sector_id": "KCC-W02",
-    "municipal_ward_name": "Khulna Bus Terminal & Transport Corridor (Ward 02)",
-    "target_waterlogging_node_id": "EPI-NODE-003",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 22.8346,
-      "longitude": 89.5543
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8673,
-      "day_14_probability": 0.8673,
-      "day_1_probability": 0.5899,
-      "day_7_probability": 0.7863,
-      "mean_horizon_probability": 0.7676,
-      "mean_14d_probability": 0.7676,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 36.3,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 7.2,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 36.3,
-        "thermodynamic_briere_kinetics_pct": 27.1,
-        "dghs_clinical_baseline_pct": 8.6,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 700.0,
-        "hydrological_retention_days": 14.11,
-        "aedes_extrinsic_incubation_eip_days": 7.5,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 5.88,
-        "deltamethrin_thermal_fog_liters": 5.18,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 7.7
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-1426E023",
-    "dispatched_at_utc": "2026-10-23T05:05:23.604933",
-    "sha256_cryptographic_receipt": "eaa6db812a3b5d2aff6a812bd570133bccbe878bdf3a1d2cbcc892c1fffa140e",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "KCC",
-      "authority_name": "Khulna City Corporation (KCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "KCC-HEOC-Khulna",
-      "dispatch_channel": "kcc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Khulna Division",
-    "district_name": "Khulna",
-    "ward_sector_id": "KCC-W01",
-    "municipal_ward_name": "Khulna Central Bazar & Commercial Hub (Ward 01)",
-    "target_waterlogging_node_id": "EPI-NODE-002",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 22.8536,
-      "longitude": 89.5463
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8561,
-      "day_14_probability": 0.8561,
-      "day_1_probability": 0.577,
-      "day_7_probability": 0.7751,
-      "mean_horizon_probability": 0.7561,
-      "mean_14d_probability": 0.7561,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 36.3,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 7.3,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 36.3,
-        "thermodynamic_briere_kinetics_pct": 26.8,
-        "dghs_clinical_baseline_pct": 8.9,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 700.0,
-        "hydrological_retention_days": 14.5,
-        "aedes_extrinsic_incubation_eip_days": 7.5,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 5.85,
-        "deltamethrin_thermal_fog_liters": 5.27,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 7.9
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-1D653F6C",
-    "dispatched_at_utc": "2026-10-23T05:05:23.604933",
-    "sha256_cryptographic_receipt": "34db92d68d73d7103a996ac3bc6ec845d202753612f4e2c411cba76f6fb596df",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "KCC",
-      "authority_name": "Khulna City Corporation (KCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "KCC-HEOC-Khulna",
-      "dispatch_channel": "kcc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Khulna Division",
-    "district_name": "Khulna",
-    "ward_sector_id": "KCC-W04",
-    "municipal_ward_name": "Khulna Industrial & Warehouse Sector (Ward 04)",
-    "target_waterlogging_node_id": "EPI-NODE-005",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 22.8616,
-      "longitude": 89.5253
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.811,
-      "day_14_probability": 0.811,
-      "day_1_probability": 0.5328,
-      "day_7_probability": 0.7263,
-      "mean_horizon_probability": 0.7086,
-      "mean_14d_probability": 0.7086,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 35.7,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 7.3,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 35.7,
-        "thermodynamic_briere_kinetics_pct": 28.3,
-        "dghs_clinical_baseline_pct": 8.0,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 11.45,
-        "aedes_extrinsic_incubation_eip_days": 7.5,
-        "projected_threshold_breach_date": "2026-10-25",
-        "preemption_lead_time_days": 2,
-        "temephos_larvicide_50ec_liters": 4.07,
-        "deltamethrin_thermal_fog_liters": 3.27,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 4.4
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-E902B582",
-    "dispatched_at_utc": "2026-10-23T05:05:23.604933",
-    "sha256_cryptographic_receipt": "e44210449177a1c9d053bc13c6f8d4360d452fdf1a234308cf97e5829a851872",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "KCC",
-      "authority_name": "Khulna City Corporation (KCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "KCC-HEOC-Khulna",
-      "dispatch_channel": "kcc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Khulna Division",
-    "district_name": "Khulna",
-    "ward_sector_id": "KCC-W03",
-    "municipal_ward_name": "Khulna Old Town High-Density Cluster (Ward 03)",
-    "target_waterlogging_node_id": "EPI-NODE-004",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 22.8276,
-      "longitude": 89.5313
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8103,
-      "day_14_probability": 0.8103,
-      "day_1_probability": 0.5288,
-      "day_7_probability": 0.7239,
-      "mean_horizon_probability": 0.7062,
-      "mean_14d_probability": 0.7062,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 36.4,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 7.3,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 36.4,
-        "thermodynamic_briere_kinetics_pct": 27.5,
-        "dghs_clinical_baseline_pct": 8.1,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 600.0,
-        "hydrological_retention_days": 12.8,
-        "aedes_extrinsic_incubation_eip_days": 7.5,
-        "projected_threshold_breach_date": "2026-10-25",
-        "preemption_lead_time_days": 2,
-        "temephos_larvicide_50ec_liters": 4.89,
-        "deltamethrin_thermal_fog_liters": 4.19,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 6.0
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-091FD789",
-    "dispatched_at_utc": "2026-10-23T05:05:23.604933",
-    "sha256_cryptographic_receipt": "b058d5e67a2c52edde416b57e53803097992a21eb0c343af922c72a9060f2c2c",
-    "severity_tier": "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)",
-    "recipient_authority": {
-      "corporation_code": "KCC",
-      "authority_name": "Khulna City Corporation (KCC) - Vector Control & Public Health Wing",
-      "emergency_control_room": "KCC-HEOC-Khulna",
-      "dispatch_channel": "kcc-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Khulna Division",
-    "district_name": "Khulna",
-    "ward_sector_id": "KCC-W05",
-    "municipal_ward_name": "Khulna Hospital & Medical College Zone (Ward 05)",
-    "target_waterlogging_node_id": "EPI-NODE-006",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 22.8496,
-      "longitude": 89.5213
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.7439,
-      "day_14_probability": 0.7439,
-      "day_1_probability": 0.4829,
-      "day_7_probability": 0.6626,
-      "mean_horizon_probability": 0.6464,
-      "mean_14d_probability": 0.6464,
-      "risk_classification": "HIGH_TRANSMISSION_RISK"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 33.7,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 7.4,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 33.7,
-        "thermodynamic_briere_kinetics_pct": 30.2,
-        "dghs_clinical_baseline_pct": 8.1,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Targeted Preemptive Larvicide Spraying & Source Reduction Within 5 Days",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 10.05,
-        "aedes_extrinsic_incubation_eip_days": 7.5,
-        "projected_threshold_breach_date": "2026-10-27",
-        "preemption_lead_time_days": 4,
-        "temephos_larvicide_50ec_liters": 3.92,
-        "deltamethrin_thermal_fog_liters": 3.04,
-        "mobile_fogging_crew_size": 4,
-        "estimated_operation_duration_hours": 3.9
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-504989D3",
-    "dispatched_at_utc": "2026-10-23T05:04:44.281348",
-    "sha256_cryptographic_receipt": "c04ae5141d880fec6985d2be05527f48bc99436675e94e6cd1c1e3a4a2074e1a",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "CXB",
-      "authority_name": "Cox's Bazar Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "CXB-HEOC-Cox's Bazar",
-      "dispatch_channel": "cxb-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Chattogram Division",
-    "district_name": "Cox's Bazar",
-    "ward_sector_id": "CXB-W02",
-    "municipal_ward_name": "Cox's Bazar Bus Terminal & Transport Corridor (Ward 02)",
-    "target_waterlogging_node_id": "EPI-NODE-002",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 21.4162,
-      "longitude": 92.0198
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8627,
-      "day_14_probability": 0.8627,
-      "day_1_probability": 0.589,
-      "day_7_probability": 0.7858,
-      "mean_horizon_probability": 0.7667,
-      "mean_14d_probability": 0.7667,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 36.3,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 8.0,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 36.3,
-        "thermodynamic_briere_kinetics_pct": 26.8,
-        "dghs_clinical_baseline_pct": 8.9,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 700.0,
-        "hydrological_retention_days": 13.77,
-        "aedes_extrinsic_incubation_eip_days": 7.02,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 5.87,
-        "deltamethrin_thermal_fog_liters": 5.38,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 8.1
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-6B79B1AA",
-    "dispatched_at_utc": "2026-10-23T05:04:44.281348",
-    "sha256_cryptographic_receipt": "04c79039e374e496b61f646efcebcb9929e9e0f5e01df532f3077a95c5d068a5",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "CXB",
-      "authority_name": "Cox's Bazar Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "CXB-HEOC-Cox's Bazar",
-      "dispatch_channel": "cxb-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Chattogram Division",
-    "district_name": "Cox's Bazar",
-    "ward_sector_id": "CXB-W01",
-    "municipal_ward_name": "Cox's Bazar Central Bazar & Commercial Hub (Ward 01)",
-    "target_waterlogging_node_id": "EPI-NODE-001",
-    "structural_classification": "Concrete_Rooftop_Depression",
-    "gps_dispatch_coordinates": {
-      "latitude": 21.4352,
-      "longitude": 92.0118
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.8534,
-      "day_14_probability": 0.8534,
-      "day_1_probability": 0.5776,
-      "day_7_probability": 0.7749,
-      "mean_horizon_probability": 0.7556,
-      "mean_14d_probability": 0.7556,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 36.1,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 7.9,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 36.1,
-        "thermodynamic_briere_kinetics_pct": 26.7,
-        "dghs_clinical_baseline_pct": 9.2,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 700.0,
-        "hydrological_retention_days": 14.5,
-        "aedes_extrinsic_incubation_eip_days": 7.02,
-        "projected_threshold_breach_date": "2026-10-24",
-        "preemption_lead_time_days": 1,
-        "temephos_larvicide_50ec_liters": 5.84,
-        "deltamethrin_thermal_fog_liters": 5.56,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 8.6
-      }
-    },
-    "transmission_telemetry": {
-      "webhook_gateway_status": "Local_Cryptographic_Ledger_Active",
-      "smtp_relay_status": "Local_Dispatch_Spool_Verified",
-      "ledger_persisted": true
-    }
-  },
-  {
-    "alert_dispatch_id": "EPI-ALT-A49767FE",
-    "dispatched_at_utc": "2026-10-23T05:04:44.281348",
-    "sha256_cryptographic_receipt": "646ea830ba09a976761be1214d98c91ed89af094528aaeb914008f1a0887f5d2",
-    "severity_tier": "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)",
-    "recipient_authority": {
-      "corporation_code": "CXB",
-      "authority_name": "Cox's Bazar Pourashava Vector Control Wing - Vector Control & Public Health Wing",
-      "emergency_control_room": "CXB-HEOC-Cox's Bazar",
-      "dispatch_channel": "cxb-vector-preemption@epigrid.gov.bd"
-    },
-    "division_name": "Chattogram Division",
-    "district_name": "Cox's Bazar",
-    "ward_sector_id": "CXB-W04",
-    "municipal_ward_name": "Cox's Bazar Industrial & Warehouse Sector (Ward 04)",
-    "target_waterlogging_node_id": "EPI-NODE-005",
-    "structural_classification": "Structural_Alley_Retention_Channel",
-    "gps_dispatch_coordinates": {
-      "latitude": 21.4432,
-      "longitude": 91.9908
-    },
-    "forecast_horizon_days": 14,
-    "epidemiological_risk_metrics": {
-      "selected_horizon_days": 14,
-      "horizon_probability": 0.7999,
-      "day_14_probability": 0.7999,
-      "day_1_probability": 0.5298,
-      "day_7_probability": 0.7206,
-      "mean_horizon_probability": 0.7014,
-      "mean_14d_probability": 0.7014,
-      "risk_classification": "CRITICAL_OUTBREAK_IMMINENT"
-    },
-    "explainable_ai_rationale": {
-      "dominant_xai_driver": "Sentinel-2 MNDWI Waterlogging & Drainage Retention",
-      "dominant_driver_pct": 36.0,
-      "peak_temporal_attention_day": "Day -14 (2026-10-09)",
-      "peak_temporal_attention_weight_pct": 7.8,
-      "macro_pillar_attribution_pct": {
-        "hydrological_waterlogging_drainage_pct": 36.0,
-        "thermodynamic_briere_kinetics_pct": 27.6,
-        "dghs_clinical_baseline_pct": 8.4,
-        "spatial_mosquito_dispersal_pct": 28.0
-      }
-    },
-    "preemptive_fogging_work_order": {
-      "directive": "Immediate ULV Thermal Fogging, Larvicidal Temephos Dosing & Rooftop Drainage Within 24-48h",
-      "resource_quantification": {
-        "evaluated_horizon_days": 14,
-        "target_waterlogging_area_m2": 500.0,
-        "hydrological_retention_days": 11.17,
-        "aedes_extrinsic_incubation_eip_days": 7.02,
-        "projected_threshold_breach_date": "2026-10-25",
-        "preemption_lead_time_days": 2,
-        "temephos_larvicide_50ec_liters": 4.05,
-        "deltamethrin_thermal_fog_liters": 3.38,
-        "mobile_fogging_crew_size": 6,
-        "estimated_operation_duration_hours": 4.7
       }
     },
     "transmission_telemetry": {
