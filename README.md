@@ -110,10 +110,10 @@ Traditional supervised learning trains on static historical spreadsheets. Becaus
    * $f_0$: Normalized Ambient Temperature ($T_{2\text{m}}$)
    * $f_1$: Normalized Relative Humidity ($RH_{2\text{m}}$)
    * $f_2$: Normalized Daily Precipitation ($P_{\text{daily}}$)
-   * $f_3$: Brière Extrinsic Incubation Rate ($R_{\text{EIP}}(T)$)
-   * $f_4$: Brière Mosquito Development Rate ($R_{\text{MDR}}(T)$)
+   * $f_3$: Brière Extrinsic Incubation Rate ($R_{\text{EIP}(T)}$)
+   * $f_4$: Brière Mosquito Development Rate ($R_{\text{MDR}(T)}$)
    * $f_5$: Sentinel-2 Modified Normalized Difference Water Index ($\text{MNDWI}$)
-   * $f_6$: Hydrological Persistence Ratio ($D_{\text{retention}} / (1.4 \cdot \tau_{\text{aquatic}})$)
+   * $f_6$: Hydrological Persistence Ratio $\frac{D_{\text{retention}}}{1.4 \cdot \tau_{\text{aquatic}}}$
    * $f_7$: Drainage-Modulated DGHS Endemic Hospital Pressure ($\mathcal{P}_{\text{DGHS}}$)
 2. **Physics-Guided Ground-Truth Trajectory ($Y \in \mathbb{R}^{12 \times 14}$):** Using peer-reviewed entomological differential equations, hydrological desiccation thresholds, and spatial neighbor flight diffusion, the engine constructs the 14-day target trajectory tensor $Y$.
 3. **Supervised Backpropagation (`loss.backward()` & `optimizer.step()`):** Every time you click **"Start Area Scan & Dispatch Alerts"**, PyTorch executes live backpropagation across the configured epochs (e.g., $120\text{--}300$ epochs) using the **AdamW optimizer** and a **Cosine Annealing Learning Rate Scheduler (`CosineAnnealingLR`)** so the neural network learns both the non-linear temporal incubation lag and spatial inter-ward vector dispersal.
@@ -158,7 +158,10 @@ To isolate stagnant water on concrete rooftops and narrow urban alleys from $10\
 ### 5.2 Brière-1 Entomological Thermal Kinetics (NASA POWER)
 Poikilothermic *Aedes aegypti* mosquito development and dengue viral replication follow the **Brière-1 Non-Linear Thermal Reaction Norm**:
 
-$$R(T) = \begin{cases} c \cdot T \cdot (T - T_{\min}) \cdot \sqrt{T_{\max} - T} & \text{if } T_{\min} < T < T_{\max} \\ 0 & \text{otherwise} \end{cases}$$
+$$R(T) = \begin{cases}
+c \cdot T \cdot (T - T_{\min}) \cdot \sqrt{T_{\max} - T} & \text{if } T_{\min} < T < T_{\max} \\
+0 & \text{otherwise}
+\end{cases}$$
 
 Using calibrated biophysical constants for *Aedes aegypti*:
 1. **Dengue Virus Extrinsic Incubation Rate ($R_{\text{EIP}}$):** $c = 1.09 \times 10^{-4}$, $T_{\min} = 12.40^\circ\text{C}$, $T_{\max} = 36.50^\circ\text{C}$.
@@ -176,8 +179,13 @@ Given 14-day cumulative precipitation $P_{14\text{d}}$ ($\text{mm}$), ward drain
 2. **Hydrological Water Retention Duration ($D_{\text{retention}}$ in days):**
    $$D_{\text{retention}} = \text{clip}\Big((5.2 + \Delta_{\text{precip}}) \cdot M_{\text{ret}} \cdot (0.68 + 0.40 \cdot U_{\text{dist}}),\, 2.1,\, 14.5\Big)$$
 3. **Biological Larval Metamorphosis Viability Condition:**
-   $$\text{Viable} = \begin{cases} \text{True} & \text{if } D_{\text{retention}} \ge 0.88 \cdot \tau_{\text{aquatic}} \\ \text{False} & \text{if } D_{\text{retention}} < 0.88 \cdot \tau_{\text{aquatic}} \text{ (Larval Desiccation)} \end{cases}$$
-   If water evaporates before $0.88 \cdot \tau_{\text{aquatic}}$, aquatic larvae desiccate and die on dry concrete before emerging as adults, triggering a biological non-viability penalty ($\times 0.68$).
+
+$$\text{Viable} = \begin{cases}
+\text{True} & \text{if } D_{\text{retention}} \ge 0.88 \cdot \tau_{\text{aquatic}} \\
+\text{False} & \text{if } D_{\text{retention}} < 0.88 \cdot \tau_{\text{aquatic}} \text{ (Larval Desiccation)}
+\end{cases}$$
+
+If water evaporates before $0.88 \cdot \tau_{\text{aquatic}}$, aquatic larvae desiccate and die on dry concrete before emerging as adults, triggering a biological non-viability penalty ($\times 0.68$).
 
 ---
 
@@ -185,12 +193,22 @@ Given 14-day cumulative precipitation $P_{14\text{d}}$ ($\text{mm}$), ward drain
 1. **Geodesic Haversine Distance ($d_{ij}$ in $\text{km}$):**
    $$d_{ij} = 2 r_{\text{earth}} \arctan2\left(\sqrt{a},\, \sqrt{1-a}\right), \quad a = \sin^2\left(\frac{\Delta\phi}{2}\right) + \cos(\phi_i)\cos(\phi_j)\sin^2\left(\frac{\Delta\lambda}{2}\right)$$
 2. **Dampened Gaussian Radial Basis Adjacency Matrix ($A$):** For wards within adult flight & wind dispersal range ($d_{ij} \le 4.5\text{ km}$, $\sigma = 1.6\text{ km}$):
-   $$A_{ij} = \begin{cases} 1.0 & \text{if } i = j \\ 0.35 \cdot \exp\left(-\frac{d_{ij}^2}{2\sigma^2}\right) & \text{if } i \neq j \text{ and } d_{ij} \le 4.5\text{ km} \\ 0 & \text{otherwise} \end{cases}$$
+
+$$A_{ij} = \begin{cases}
+1.0 & \text{if } i = j \\
+0.35 \cdot \exp\left(-\frac{d_{ij}^2}{2\sigma^2}\right) & \text{if } i \neq j \text{ and } d_{ij} \le 4.5\text{ km} \\
+0 & \text{otherwise}
+\end{cases}$$
+
 3. **Symmetrically Normalized Kipf-Welling Adjacency ($\hat{A}$):**
-   $$\hat{A} = \tilde{D}^{-\frac{1}{2}} A \tilde{D}^{-\frac{1}{2}}, \quad \text{where } \tilde{D}_{ii} = \sum_{j} A_{ij}$$
+
+$$\hat{A} = \tilde{D}^{-\frac{1}{2}} A \tilde{D}^{-\frac{1}{2}}, \quad \text{where } \tilde{D}_{ii} = \sum_{j} A_{ij}$$
+
 4. **Residual Spectral Graph Convolution at Time Step $t$:**
-   $$H^{(1)}_t = \text{ELU}\left(\hat{A} X_t W_{\text{GCN1}} + b_1\right) + \text{ELU}\left(X_t W_{\text{proj}} + b_{\text{proj}}\right)$$
-   $$H^{(2)}_t = \text{LayerNorm}\Big(\text{ELU}\left(\hat{A} H^{(1)}_t W_{\text{GCN2}} + b_2\right) + H^{(1)}_t\Big)$$
+
+$$H^{(1)}_t = \text{ELU}\left(\hat{A} X_t W_{\text{GCN1}} + b_1\right) + \text{ELU}\left(X_t W_{\text{proj}} + b_{\text{proj}}\right)$$
+
+$$H^{(2)}_t = \text{LayerNorm}\Big(\text{ELU}\left(\hat{A} H^{(1)}_t W_{\text{GCN2}} + b_2\right) + H^{(1)}_t\Big)$$
 
 ---
 
@@ -200,22 +218,36 @@ Standard Binary Cross-Entropy ($\text{BCE}$) evaluated on soft probability targe
 $$\mathcal{L}_{\text{KL}}(Y, \hat{Y}) = \underbrace{-\frac{1}{NH}\sum_{i,k}\Big[Y_{i,k}\ln(\hat{Y}_{i,k}) + (1 - Y_{i,k})\ln(1 - \hat{Y}_{i,k})\Big]}_{\text{Raw Cross-Entropy } \text{BCE}(Y, \hat{Y})} - \underbrace{\left(-\frac{1}{NH}\sum_{i,k}\Big[Y_{i,k}\ln(Y_{i,k}) + (1 - Y_{i,k})\ln(1 - Y_{i,k})\Big]\right)}_{\text{Target Shannon Entropy Floor } H(Y)}$$
 
 $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{KL}}(Y, \hat{Y}) + \lambda_{\text{MSE}} \|\hat{Y} - Y\|_F^2 + \frac{\lambda_{\text{Lap}}}{NH} \text{Tr}\Big((\hat{Y} - Y)^\top (I - \hat{A}) (\hat{Y} - Y)\Big)$$
-where $\lambda_{\text{MSE}} = 0.50$ and $\lambda_{\text{Lap}} = 0.15$.
+where $\lambda_{\text{MSE}} = 0.50$ and $\lambda_{\text{Lap}} = 0.15$.$$
 
 ---
 
 ### 5.6 Explainable AI (XAI) Autograd Attribution & Chemical Dosing Formulas
 1. **Input $\times$ Gradient Saliency Attribution ($\mathcal{S}_{i,t,f}$):**
-   $$\mathcal{S}_{i,t,f} = \left| X_{i,t,f} \cdot \frac{\partial \hat{Y}_{i,H}}{\partial X_{i,t,f}} \right|$$
+
+$$\mathcal{S}_{i,t,f} = \left| X_{i,t,f} \cdot \frac{\partial \hat{Y}_{i,H}}{\partial X_{i,t,f}} \right|$$
+
 2. **Preemptive Chemical Dispatch Volumetric Formulas:** Let $A_{\text{m2}}$ be the satellite-detected waterlogged surface area ($\text{m}^2$) and $P_H = \hat{Y}_{i,H}$ be the forecast outbreak probability at horizon $H$:
    * **Temephos 50EC Larvicide Volume ($\text{Liters}$):**
      $$V_{\text{Temephos}} = \text{round}\left(\frac{A_{\text{m2}}}{100} \cdot (0.45 + 0.50 \cdot P_H) \cdot 0.95,\, 2\right)$$
    * **Deltamethrin 2.5% ULV Thermal Fogging Volume ($\text{Liters}$):**
-     $$V_{\text{Deltamethrin}} = \begin{cases} \text{round}\left(\frac{A_{\text{m2}}}{100} \cdot 0.85 \cdot P_H,\, 2\right) & \text{if } P_H \ge 0.75 \text{ (Level-1 Critical)} \\ \text{round}\left(\frac{A_{\text{m2}}}{100} \cdot 0.40 \cdot P_H,\, 2\right) & \text{if } 0.55 \le P_H < 0.75 \text{ (Level-2 High)} \end{cases}$$
+
+$$V_{\text{Deltamethrin}} = \begin{cases}
+\text{round}\left(\frac{A_{\text{m2}}}{100} \cdot 0.85 \cdot P_H,\, 2\right) & \text{if } P_H \ge 0.75 \text{ (Level-1 Critical)} \\
+\text{round}\left(\frac{A_{\text{m2}}}{100} \cdot 0.40 \cdot P_H,\, 2\right) & \text{if } 0.55 \le P_H < 0.75 \text{ (Level-2 High)}
+\end{cases}$$
+     
    * **Biological Breach Lead Days & Date:**
-     $$L_{\text{lead}} = \begin{cases} \max\left(1,\, \min\left(H,\, \lfloor \tau_{\text{aquatic}} - 2.0 \rfloor\right)\right) & \text{if } D_{\text{retention}} \ge \tau_{\text{aquatic}} \\ \max\left(2,\, \min\left(H,\, \lfloor \tau_{\text{aquatic}} \rfloor\right)\right) & \text{otherwise} \end{cases}$$
+
+$$L_{\text{lead}} = \begin{cases}
+\max\left(1,\, \min\left(H,\, \lfloor \tau_{\text{aquatic}} - 2.0 \rfloor\right)\right) & \text{if } D_{\text{retention}} \ge \tau_{\text{aquatic}} \\
+\max\left(2,\, \min\left(H,\, \lfloor \tau_{\text{aquatic}} \rfloor\right)\right) & \text{otherwise}
+\end{cases}$$
+
    * **Mobile Field Crew & Operational Duration:**
-     $$\text{Crew Size} = \begin{cases} 6\text{ Personnel} & \text{if } P_H \ge 0.75 \\ 4\text{ Personnel} & \text{if } 0.55 \le P_H < 0.75 \end{cases}, \quad T_{\text{duration}}\text{ (hours)} = \text{round}\left(2.5 + \frac{A_{\text{m2}}}{180} + 1.5 \cdot P_H,\, 1\right)$$
+
+$$\text{Crew Size} = \begin{cases} 6\text{ Personnel} & \text{if } P_H \ge 0.75 \\
+4\text{ Personnel} & \text{if } 0.55 \le P_H < 0.75 \end{cases}, \quad T_{\text{duration}}\text{ (hours)} = \text{round}\left(2.5 + \frac{A_{\text{m2}}}{180} + 1.5 \cdot P_H,\, 1\right)$$
 
 ---
 
@@ -250,7 +282,7 @@ To ensure public health officials, municipal engineers, and competition judges c
 
 Below is a complete scientific and mathematical breakdown of the live **EpiGrid Command Center output for Bogura District (`Rajshahi Division`)**, specifically examining **Ward 01 (`BGR-W01 — Bogura Central Bazar & Commercial Hub`)** evaluated at the **Day $+14$ Forecast Horizon (`2026-11-06`)** over **120 Epochs**.
 
-![Bogura Ward 01 Empirical Output](Ward1.jpg)
+<img width="1763" height="1795" alt="Ward1" src="https://github.com/user-attachments/assets/7d79b26b-0381-4a55-95ff-e8286157e3e8" />
 
 ### 📊 7.1 Telemetry Summary Extracted from Bogura Scan (`BGR-W01`)
 * **Target Jurisdiction:** `Rajshahi Division` $\rightarrow$ `Bogura (BGR)` $\rightarrow$ `BGR-W01: Bogura Central Bazar & Commercial Hub (Ward 01)`
@@ -310,7 +342,9 @@ Using the NASA POWER 14-day temperature time series (mean $T = 26.67^\circ\text{
 Why did the Automated Municipal Preemption Dispatcher prescribe exactly **`5.90 L` of Temephos 50EC**, **`5.19 L` of Deltamethrin Fog**, **`700 m²` Waterlogging Area**, **`6 Personnel`**, and **`7.7 Hours`** for `BGR-W01`? Here is the exact mathematical verification using our codebase equations:
 
 1. **Waterlogged Surface Area ($A_{\text{m2}} = 700\text{ m}^2$):**
-   $$\text{Pixels}_{10\text{m}} = \text{round}\big(6 \times M_{\text{ret}} \times (1.0 - 0.45 \times \eta_{\text{drain}})\big) = \text{round}\big(6 \times 1.32 \times (1.0 - 0.45 \times 0.18)\big) = \text{round}(7.28) = \mathbf{7\text{ contiguous pixels}}$$
+
+$$\text{Pixels}_{10\text{m}} = \text{round}\big(6 \times M_{\text{ret}} \times (1.0 - 0.45 \times \eta_{\text{drain}})\big) = \text{round}\big(6 \times 1.32 \times (1.0 - 0.45 \times 0.18)\big) = \text{round}(7.28) = \mathbf{7\text{ contiguous pixels}}$$
+
    Since each Sentinel-2 pixel covers $10\text{ m} \times 10\text{ m} = 100\text{ m}^2$:
    $$A_{\text{m2}} = 7 \times 100\text{ m}^2 = \mathbf{700\text{ m}^2}$$
 
