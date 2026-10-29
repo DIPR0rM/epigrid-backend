@@ -1,6 +1,6 @@
 # 🦟 EpiGrid: Epidemiological Preemption Engine
 
-**Multi-Modal Spatio-Temporal Graph Neural Network (ST-GNN) with Incremental Transfer Learning & Explainable AI (XAI) for 14-Day Preemptive Dengue Vector Control across all 8 Divisions, 64 Districts, and 768 Municipal Wards of Bangladesh.**
+**Multi-Modal Spatio-Temporal Graph Neural Network (ST-GNN) with Incremental Transfer Learning & Explainable AI (XAI) for 14-Day Preemptive Dengue Vector Control across all 8 Divisions, 64 Districts, and all Municipal Wards of Bangladesh.**
 
 ---
 
@@ -37,11 +37,11 @@ Bangladesh faces severe, recurring dengue epidemics driven by rapid unplanned ur
 1. **The 14-Day Reactive Lag (Post-Hospitalization Fogging):** Municipal authorities typically deploy thermal fogging trucks *after* hospitals report a spike in dengue admissions. However, by the time a human shows symptoms and enters a hospital, the *Aedes* larvae hatched $10\text{--}14\text{ days}$ earlier, completed their **Extrinsic Incubation Period ($\text{EIP}$)**, and have already infected dozens of neighbors.
 2. **Blind Chemical Spraying & Resource Waste:** Without micro-topographical hydrological mapping, City Corporations spray adulticide chemicals uniformly across entire cities—wasting expensive imported insecticides in well-drained greenbelt wards while under-dosing high-retention concrete commercial hubs where stagnant water persists longer than the larval metamorphosis threshold.
 3. **Unseen Micro-Breeding Habitats:** In dense Bangladeshi urban centers, water accumulates on flat concrete rooftops (`Concrete_Rooftop_Depression`) and narrow inter-building drainage channels (`Structural_Alley_Retention_Channel`) that street-level inspectors cannot easily see.
-4. **Absence of Ward-Level Labeled AI Datasets:** Public health records in Bangladesh aggregate dengue statistics at the national or division level. There is no standardized 10-year historical CSV dataset for all **768 municipal wards** across Bangladesh's **64 districts**, making traditional static CSV-based machine learning impossible.
+4. **Absence of Ward-Level Labeled AI Datasets:** Public health records in Bangladesh aggregate dengue statistics at the national or division level. There is no standardized 10-year historical CSV dataset for all **municipal wards** across Bangladesh's **64 districts**, making traditional static CSV-based machine learning impossible.
 
 ### 🟢 How EpiGrid Solves This
 * **14-Day Biological Preemption Window:** EpiGrid calculates the exact number of days required for aquatic larval emergence ($\tau_{\text{aquatic}}$) and viral incubation ($\text{EIP}$) against local water retention duration ($D_{\text{retention}}$). If standing water persists longer than the mosquito hatching threshold, EpiGrid dispatches larvicidal teams **during the aquatic larval stage**—destroying the vector in stagnant water before a single adult mosquito can fly.
-* **Nationwide 768-Ward Micro-Topographical Resolution:** Covers all **8 Divisions**, **64 Districts**, and **768 calibrated Municipal Wards** (12 distinct urban-to-peri-urban morphological archetypes per district), modeling local drainage efficiency ($\eta_{\text{drain}} \in [0.18, 0.92]$) and built-up surface density ($\text{NDBI}$).
+* **Nationwide Micro-Topographical Resolution:** Covers all **8 Divisions**, **64 Districts**, and **calibrated Municipal Wards** (12 distinct urban-to-peri-urban morphological archetypes per district), modeling local drainage efficiency ($\eta_{\text{drain}} \in [0.18, 0.92]$) and built-up surface density ($\text{NDBI}$).
 * **Physics-Informed Neural Training Without Static CSVs:** Overcomes data scarcity by generating physics-guided entomological ground-truth tensors on the fly from live satellite hydrology and meteorology, training the PyTorch ST-GNN in real time, and transferring learned weights across districts.
 * **Precision Chemical & Crew Logistics:** Eliminates chemical waste by calculating exact liters of **Temephos 50EC** (larvicide) and **Deltamethrin 2.5% ULV** (adulticide fog) strictly proportional to the satellite-detected waterlogged surface area ($\text{m}^2$) and outbreak severity.
 
