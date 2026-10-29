@@ -11,10 +11,14 @@ from datetime import datetime, timedelta
 
 from services.dghs_client import fetch_dghs_dengue_baseline
 from services.nasa_power_client import fetch_nasa_meteorological_matrix
-from services.spatiotemporal_pipeline import execute_spatiotemporal_pipeline, briere_rate
+from services.spatiotemporal_pipeline import (
+    execute_spatiotemporal_pipeline,
+    briere_rate,
+    estimate_coordinate_urban_morphology,
+)
 
 MODEL_WEIGHTS_PATH = "models/epigrid_stgnn_weights.pt"
-TRANSFER_SCHEMA_VERSION = 3
+TRANSFER_SCHEMA_VERSION = 4
 
 FEATURE_NAMES_8D = [
     "NASA_T2M_Temperature",
@@ -35,18 +39,141 @@ FEATURE_NAMES_8D = [
 # ==============================================================================
 CUSTOM_AUTHENTIC_WARDS_BY_DISTRICT = {
     "Dhaka": [
-        {"ward_id": "DNCC-W01", "ward_name": "Uttara Model Town & Commercial Hub (DNCC Ward 01)",     "lat": 23.8759, "lon": 90.3978, "radius_m": 750, "drainage_eff": 0.20, "struct": "Concrete_Rooftop_Depression"},
-        {"ward_id": "DSCC-W50", "ward_name": "Jatrabari-Sayedabad Bus Terminal (DSCC Ward 50)",       "lat": 23.7104, "lon": 90.4336, "radius_m": 650, "drainage_eff": 0.18, "struct": "Structural_Alley_Retention_Channel"},
-        {"ward_id": "DSCC-W06", "ward_name": "Mugda-Maniknagar Dense Cluster (DSCC Ward 06)",         "lat": 23.7294, "lon": 90.4312, "radius_m": 600, "drainage_eff": 0.26, "struct": "Concrete_Rooftop_Depression"},
-        {"ward_id": "DNCC-W24", "ward_name": "Tejgaon Industrial & Warehouse Zone (DNCC Ward 24)",    "lat": 23.7639, "lon": 90.3982, "radius_m": 700, "drainage_eff": 0.34, "struct": "Structural_Alley_Retention_Channel"},
-        {"ward_id": "DNCC-W06", "ward_name": "Mirpur Pallabi & Section 11 Sector (DNCC Ward 06)",     "lat": 23.8223, "lon": 90.3654, "radius_m": 700, "drainage_eff": 0.44, "struct": "Concrete_Rooftop_Depression"},
-        {"ward_id": "DNCC-W14", "ward_name": "Mirpur Kazipara & Shewrapara (DNCC Ward 14)",           "lat": 23.7925, "lon": 90.3736, "radius_m": 620, "drainage_eff": 0.50, "struct": "Concrete_Rooftop_Depression"},
-        {"ward_id": "DNCC-W21", "ward_name": "Badda & Rampura Residential Sector (DNCC Ward 21)",     "lat": 23.7785, "lon": 90.4242, "radius_m": 680, "drainage_eff": 0.58, "struct": "Structural_Alley_Retention_Channel"},
-        {"ward_id": "DNCC-W31", "ward_name": "Mohammadpur Town Hall & Lalmatia (DNCC Ward 31)",       "lat": 23.7612, "lon": 90.3638, "radius_m": 650, "drainage_eff": 0.66, "struct": "Concrete_Rooftop_Depression"},
-        {"ward_id": "DSCC-W09", "ward_name": "Motijheel & Fakirapool Commercial Core (DSCC Ward 09)", "lat": 23.7330, "lon": 90.4172, "radius_m": 640, "drainage_eff": 0.72, "struct": "Concrete_Rooftop_Depression"},
-        {"ward_id": "DSCC-W04", "ward_name": "Sabujbagh & Basabo Housing Estate (DSCC Ward 04)",      "lat": 23.7418, "lon": 90.4325, "radius_m": 650, "drainage_eff": 0.78, "struct": "Structural_Alley_Retention_Channel"},
-        {"ward_id": "DSCC-W15", "ward_name": "Dhanmondi Lake & Residential Enclave (DSCC Ward 15)",   "lat": 23.7465, "lon": 90.3760, "radius_m": 720, "drainage_eff": 0.86, "struct": "Structural_Alley_Retention_Channel"},
-        {"ward_id": "DNCC-W19", "ward_name": "Banani-Gulshan Model Diplomatic Zone (DNCC Ward 19)",   "lat": 23.7937, "lon": 90.4066, "radius_m": 780, "drainage_eff": 0.92, "struct": "Concrete_Rooftop_Depression"},
+
+#DNCC................................................................
+
+        {"ward_id": "DNCC-W01", "ward_name": "Uttara Model Town & Commercial Hub (DNCC Ward 01)",          "lat": 23.8759, "lon": 90.3978, "radius_m": 750, "drainage_eff": 0.20, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W02", "ward_name": "Mirpur Section 12, Kalshi & DOHS Sector (DNCC Ward 02)",     "lat": 23.8328, "lon": 90.3765, "radius_m": 740, "drainage_eff": 0.52, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W03", "ward_name": "Mirpur Section 10 & 11 Block-C Hub (DNCC Ward 03)",          "lat": 23.8092, "lon": 90.3688, "radius_m": 640, "drainage_eff": 0.36, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W04", "ward_name": "Mirpur Section 13, 14 & Baishteki (DNCC Ward 04)",           "lat": 23.8045, "lon": 90.3812, "radius_m": 660, "drainage_eff": 0.48, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W05", "ward_name": "Mirpur Section 11 & Bauniabad Colony (DNCC Ward 05)",        "lat": 23.8168, "lon": 90.3724, "radius_m": 650, "drainage_eff": 0.32, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W06", "ward_name": "Mirpur Pallabi & Section 11 Sector (DNCC Ward 06)",          "lat": 23.8223, "lon": 90.3654, "radius_m": 700, "drainage_eff": 0.44, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W07", "ward_name": "Mirpur Section 2, Rupnagar & Shialbari (DNCC Ward 07)",      "lat": 23.8098, "lon": 90.3556, "radius_m": 680, "drainage_eff": 0.54, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W08", "ward_name": "Mirpur Section 1, Zoo Road & Box Nagar (DNCC Ward 08)",      "lat": 23.8005, "lon": 90.3492, "radius_m": 740, "drainage_eff": 0.56, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W09", "ward_name": "Gabtoli, Baghbari & Harirampur Basin (DNCC Ward 09)",        "lat": 23.7836, "lon": 90.3442, "radius_m": 680, "drainage_eff": 0.28, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W10", "ward_name": "Darus Salam, Mazar Road & Terminal Zone (DNCC Ward 10)",     "lat": 23.7885, "lon": 90.3518, "radius_m": 650, "drainage_eff": 0.30, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W11", "ward_name": "Kalyanpur & Paikpara Residential Sector (DNCC Ward 11)",     "lat": 23.7828, "lon": 90.3612, "radius_m": 620, "drainage_eff": 0.42, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W12", "ward_name": "Shah Ali Bagh, Ahmed Nagar & Bishil (DNCC Ward 12)",         "lat": 23.7938, "lon": 90.3578, "radius_m": 640, "drainage_eff": 0.38, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W13", "ward_name": "Monipur, Pirerbagh & Bara Bagh Cluster (DNCC Ward 13)",      "lat": 23.7872, "lon": 90.3682, "radius_m": 640, "drainage_eff": 0.40, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W14", "ward_name": "Mirpur Kazipara & Shewrapara (DNCC Ward 14)",                "lat": 23.7925, "lon": 90.3736, "radius_m": 620, "drainage_eff": 0.50, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W15", "ward_name": "Bhashantek, Matikata & Manikdi Enclave (DNCC Ward 15)",      "lat": 23.8215, "lon": 90.3925, "radius_m": 760, "drainage_eff": 0.35, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W16", "ward_name": "Kafrul & Ibrahimpur Dense Residential (DNCC Ward 16)",       "lat": 23.7958, "lon": 90.3846, "radius_m": 660, "drainage_eff": 0.46, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W17", "ward_name": "Khilkhet, Kuril, Joar Sahara & Bashundhara (DNCC Ward 17)",  "lat": 23.8282, "lon": 90.4245, "radius_m": 820, "drainage_eff": 0.64, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W18", "ward_name": "Baridhara, Nadda & Shahjadpur West (DNCC Ward 18)",          "lat": 23.8035, "lon": 90.4215, "radius_m": 700, "drainage_eff": 0.84, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W19", "ward_name": "Banani-Gulshan Model Diplomatic Zone (DNCC Ward 19)",        "lat": 23.7937, "lon": 90.4066, "radius_m": 780, "drainage_eff": 0.92, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W20", "ward_name": "Mohakhali, Niketan & Wireless Gate (DNCC Ward 20)",          "lat": 23.7782, "lon": 90.4052, "radius_m": 680, "drainage_eff": 0.55, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W21", "ward_name": "Badda & Rampura Residential Sector (DNCC Ward 21)",          "lat": 23.7785, "lon": 90.4242, "radius_m": 680, "drainage_eff": 0.58, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W22", "ward_name": "Rampura, Ulon & Mahanagar Project (DNCC Ward 22)",           "lat": 23.7652, "lon": 90.4218, "radius_m": 660, "drainage_eff": 0.48, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W23", "ward_name": "Khilgaon Block-B & Malibagh Chowdhurypara (DNCC Ward 23)",   "lat": 23.7538, "lon": 90.4212, "radius_m": 580, "drainage_eff": 0.45, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W24", "ward_name": "Tejgaon Industrial & Warehouse Zone (DNCC Ward 24)",         "lat": 23.7639, "lon": 90.3982, "radius_m": 700, "drainage_eff": 0.34, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W25", "ward_name": "Nakhalpara & West Tejgaon Rail Corridor (DNCC Ward 25)",     "lat": 23.7695, "lon": 90.3928, "radius_m": 620, "drainage_eff": 0.38, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W26", "ward_name": "Karwan Bazar Wholesale Hub & Tejkunipara (DNCC Ward 26)",    "lat": 23.7545, "lon": 90.3915, "radius_m": 640, "drainage_eff": 0.22, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W27", "ward_name": "Sher-e-Bangla Nagar, Indira Rd & Rajabazar (DNCC Ward 27)",  "lat": 23.7582, "lon": 90.3835, "radius_m": 720, "drainage_eff": 0.62, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W28", "ward_name": "Agargaon Administrative & West Kafrul Zone (DNCC Ward 28)",  "lat": 23.7775, "lon": 90.3752, "radius_m": 660, "drainage_eff": 0.68, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W29", "ward_name": "Mohammadpur Tajmahal Rd & Johuri Mohalla (DNCC Ward 29)",    "lat": 23.7658, "lon": 90.3612, "radius_m": 600, "drainage_eff": 0.52, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W30", "ward_name": "Adabor, Shekhertek & Baitul Aman Housing (DNCC Ward 30)",    "lat": 23.7718, "lon": 90.3565, "radius_m": 680, "drainage_eff": 0.44, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W31", "ward_name": "Mohammadpur Town Hall & Lalmatia (DNCC Ward 31)",            "lat": 23.7612, "lon": 90.3638, "radius_m": 650, "drainage_eff": 0.66, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W32", "ward_name": "Lalmatia Blocks A-G, Asad Gate & Iqbal Rd (DNCC Ward 32)",   "lat": 23.7568, "lon": 90.3685, "radius_m": 640, "drainage_eff": 0.74, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W33", "ward_name": "Bosila, Mohammadia Housing & Katasur (DNCC Ward 33)",        "lat": 23.7532, "lon": 90.3515, "radius_m": 780, "drainage_eff": 0.36, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W34", "ward_name": "Rayerbazar, Jafrabad & West Dhanmondi (DNCC Ward 34)",       "lat": 23.7468, "lon": 90.3615, "radius_m": 640, "drainage_eff": 0.32, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W35", "ward_name": "Bara Moghbazar, New Eskaton & Dilu Road (DNCC Ward 35)",     "lat": 23.7485, "lon": 90.4028, "radius_m": 620, "drainage_eff": 0.46, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W36", "ward_name": "Moghbazar Wireless, Modhubagh & Nayatola (DNCC Ward 36)",    "lat": 23.7558, "lon": 90.4092, "radius_m": 580, "drainage_eff": 0.38, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W37", "ward_name": "Dakshin Badda, Aftabnagar & Merul East (DNCC Ward 37)",      "lat": 23.7685, "lon": 90.4335, "radius_m": 720, "drainage_eff": 0.54, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W38", "ward_name": "Uttar Badda & Shahjadpur Eastern Belt (DNCC Ward 38)",       "lat": 23.7885, "lon": 90.4268, "radius_m": 660, "drainage_eff": 0.42, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W39", "ward_name": "Nurerchala & Khilbarirtek Residential (DNCC Ward 39)",       "lat": 23.7975, "lon": 90.4365, "radius_m": 680, "drainage_eff": 0.36, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W40", "ward_name": "Bhatara, Solmaid & Chholmaid Sector (DNCC Ward 40)",         "lat": 23.8125, "lon": 90.4385, "radius_m": 720, "drainage_eff": 0.40, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W41", "ward_name": "Satarkul & East Badda Canal Corridor (DNCC Ward 41)",        "lat": 23.7812, "lon": 90.4445, "radius_m": 740, "drainage_eff": 0.34, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W42", "ward_name": "Beraid & Balu Riverbank Eastern Sector (DNCC Ward 42)",      "lat": 23.7888, "lon": 90.4615, "radius_m": 780, "drainage_eff": 0.30, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W43", "ward_name": "Dumni, Patira & Mastul Floodplain Zone (DNCC Ward 43)",      "lat": 23.8365, "lon": 90.4565, "radius_m": 800, "drainage_eff": 0.28, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W44", "ward_name": "Uttarkhan Kanchkura & Dobadia Sector (DNCC Ward 44)",        "lat": 23.8712, "lon": 90.4535, "radius_m": 780, "drainage_eff": 0.32, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W45", "ward_name": "Uttarkhan Mazar & Central Bazaar Hub (DNCC Ward 45)",        "lat": 23.8768, "lon": 90.4342, "radius_m": 740, "drainage_eff": 0.36, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W46", "ward_name": "Uttarkhan Munda, Rajabari & Chanpara (DNCC Ward 46)",        "lat": 23.8885, "lon": 90.4225, "radius_m": 760, "drainage_eff": 0.38, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W47", "ward_name": "Dakshinkhan Faydabad, Kotbari & Chalaban (DNCC Ward 47)",    "lat": 23.8742, "lon": 90.4148, "radius_m": 700, "drainage_eff": 0.26, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W48", "ward_name": "Dakshinkhan Bazar, Sonarkhola & Holan (DNCC Ward 48)",       "lat": 23.8615, "lon": 90.4268, "radius_m": 740, "drainage_eff": 0.24, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W49", "ward_name": "Ashkona Hajj Camp & Kawla Airport East (DNCC Ward 49)",      "lat": 23.8512, "lon": 90.4145, "radius_m": 720, "drainage_eff": 0.34, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W50", "ward_name": "Dakshinkhan Azampur, Mollartek & Prembagan (DNCC Ward 50)",  "lat": 23.8648, "lon": 90.4085, "radius_m": 680, "drainage_eff": 0.30, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W51", "ward_name": "Uttara Model Town Sectors 11, 12, 13 & 14 (DNCC Ward 51)",   "lat": 23.8728, "lon": 90.3825, "radius_m": 740, "drainage_eff": 0.76, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W52", "ward_name": "Turag Baunia, Dalipara & Badaldia Sector (DNCC Ward 52)",    "lat": 23.8585, "lon": 90.3715, "radius_m": 760, "drainage_eff": 0.42, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DNCC-W53", "ward_name": "Turag Diabari & Uttara Sectors 15-18 Hub (DNCC Ward 53)",    "lat": 23.8785, "lon": 90.3635, "radius_m": 820, "drainage_eff": 0.80, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DNCC-W54", "ward_name": "Turag Kamarpara, Nishatnagar & Dhour (DNCC Ward 54)",        "lat": 23.8915, "lon": 90.3845, "radius_m": 740, "drainage_eff": 0.46, "struct": "Structural_Alley_Retention_Channel"},
+
+#DSCC................................................................
+
+        {"ward_id": "DSCC-W01", "ward_name": "Khilgaon Blocks A & C Residential Zone (DSCC Ward 01)",       "lat": 23.7512, "lon": 90.4265, "radius_m": 640, "drainage_eff": 0.56, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W02", "ward_name": "Goran North-South & South Banasree (DSCC Ward 02)",           "lat": 23.7505, "lon": 90.4382, "radius_m": 680, "drainage_eff": 0.42, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W03", "ward_name": "Meradia & North Banasree Blocks E-H (DSCC Ward 03)",          "lat": 23.7595, "lon": 90.4435, "radius_m": 720, "drainage_eff": 0.46, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W04", "ward_name": "Sabujbagh & Basabo Housing Estate (DSCC Ward 04)",            "lat": 23.7418, "lon": 90.4325, "radius_m": 650, "drainage_eff": 0.78, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W05", "ward_name": "Mayakanon, Ahmedbagh & Kadamtala Basabo (DSCC Ward 05)",      "lat": 23.7368, "lon": 90.4338, "radius_m": 620, "drainage_eff": 0.48, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W06", "ward_name": "Mugda-Maniknagar Dense Cluster (DSCC Ward 06)",               "lat": 23.7294, "lon": 90.4312, "radius_m": 660, "drainage_eff": 0.26, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W07", "ward_name": "Maniknagar, WASA Road & Kazirbagh (DSCC Ward 07)",            "lat": 23.7235, "lon": 90.4328, "radius_m": 620, "drainage_eff": 0.30, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W08", "ward_name": "Gopibagh & Kamlapur Railway Colony (DSCC Ward 08)",           "lat": 23.7268, "lon": 90.4252, "radius_m": 640, "drainage_eff": 0.38, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W09", "ward_name": "Motijheel & Fakirapool Commercial Core (DSCC Ward 09)",       "lat": 23.7330, "lon": 90.4172, "radius_m": 650, "drainage_eff": 0.72, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W10", "ward_name": "Motijheel AGB, Postal & Bank Colony (DSCC Ward 10)",          "lat": 23.7365, "lon": 90.4225, "radius_m": 580, "drainage_eff": 0.64, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W11", "ward_name": "Shahjahanpur, Shahidbagh & Khilgaon Bagicha (DSCC Ward 11)",  "lat": 23.7438, "lon": 90.4215, "radius_m": 600, "drainage_eff": 0.44, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W12", "ward_name": "Malibagh Bazar, Gulbagh & Shantibagh (DSCC Ward 12)",         "lat": 23.7462, "lon": 90.4152, "radius_m": 580, "drainage_eff": 0.40, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W13", "ward_name": "Paltan, Naya Paltan, Bijoynagar & Shantinagar (DSCC Ward 13)","lat": 23.7372, "lon": 90.4125, "radius_m": 640, "drainage_eff": 0.52, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W14", "ward_name": "Jhigatola, Hazaribagh Tannery & Sonatengar (DSCC Ward 14)",   "lat": 23.7375, "lon": 90.3665, "radius_m": 660, "drainage_eff": 0.34, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W15", "ward_name": "Dhanmondi Lake & Residential Enclave (DSCC Ward 15)",         "lat": 23.7465, "lon": 90.3760, "radius_m": 720, "drainage_eff": 0.86, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W16", "ward_name": "Kalabagan, Kathalbagan & Green Road West (DSCC Ward 16)",     "lat": 23.7468, "lon": 90.3882, "radius_m": 580, "drainage_eff": 0.42, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W17", "ward_name": "Kalabagan Lake Circus, Sukrabad & Sobhanbagh (DSCC Ward 17)", "lat": 23.7518, "lon": 90.3812, "radius_m": 600, "drainage_eff": 0.54, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W18", "ward_name": "New Market, Nilkhet, Science Lab & Elephant Rd (DSCC Ward 18)","lat": 23.7358, "lon": 90.3855, "radius_m": 640, "drainage_eff": 0.48, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W19", "ward_name": "Ramna, Bailey Road, Mintoo Road & Kakrail (DSCC Ward 19)",    "lat": 23.7415, "lon": 90.4042, "radius_m": 680, "drainage_eff": 0.84, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W20", "ward_name": "Shahbagh, Segunbagicha & High Court Zone (DSCC Ward 20)",     "lat": 23.7335, "lon": 90.4025, "radius_m": 680, "drainage_eff": 0.78, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W21", "ward_name": "Dhaka University Campus, Paribagh & Banglamotor (DSCC Ward 21)","lat": 23.7368, "lon": 90.3945, "radius_m": 660, "drainage_eff": 0.74, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W22", "ward_name": "Hazaribagh Road, Baddanagar & Ganaktuli (DSCC Ward 22)",      "lat": 23.7295, "lon": 90.3695, "radius_m": 600, "drainage_eff": 0.28, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W23", "ward_name": "Nababganj, Kashmiritola & Pilkhana South (DSCC Ward 23)",     "lat": 23.7242, "lon": 90.3768, "radius_m": 560, "drainage_eff": 0.32, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W24", "ward_name": "Shahidnagar & Jagannath Saha Road West (DSCC Ward 24)",       "lat": 23.7178, "lon": 90.3788, "radius_m": 540, "drainage_eff": 0.24, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W25", "ward_name": "Lalbagh Fort & Sheikh Saheb Bazar (DSCC Ward 25)",            "lat": 23.7195, "lon": 90.3865, "radius_m": 540, "drainage_eff": 0.34, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W26", "ward_name": "Azimpur Estate, Palashi & Dhakeshwari Zone (DSCC Ward 26)",   "lat": 23.7258, "lon": 90.3868, "radius_m": 580, "drainage_eff": 0.56, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W27", "ward_name": "Bakshibazar, Hossaini Dalan & Chankharpul (DSCC Ward 27)",    "lat": 23.7222, "lon": 90.3965, "radius_m": 560, "drainage_eff": 0.36, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W28", "ward_name": "Chawkbazar, Urdu Road & Begum Bazar West (DSCC Ward 28)",     "lat": 23.7165, "lon": 90.3948, "radius_m": 500, "drainage_eff": 0.20, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W29", "ward_name": "Islambagh & Water Works Riverfront (DSCC Ward 29)",           "lat": 23.7122, "lon": 90.3895, "radius_m": 520, "drainage_eff": 0.18, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W30", "ward_name": "Mitford Hospital, Babu Bazar & Swarighat (DSCC Ward 30)",     "lat": 23.7115, "lon": 90.3988, "radius_m": 520, "drainage_eff": 0.22, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W31", "ward_name": "Maulvibazar, Armanitola & Chhota Katra (DSCC Ward 31)",       "lat": 23.7152, "lon": 90.4012, "radius_m": 500, "drainage_eff": 0.24, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W32", "ward_name": "Badamtali, Jindabahar & Kashaituli Cluster (DSCC Ward 32)",   "lat": 23.7118, "lon": 90.4048, "radius_m": 480, "drainage_eff": 0.25, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W33", "ward_name": "Aga Masih Lane, Sikkatuli & Bongshal West (DSCC Ward 33)",    "lat": 23.7185, "lon": 90.4032, "radius_m": 500, "drainage_eff": 0.28, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W34", "ward_name": "Siddique Bazar, Nazira Bazar & Fulbaria (DSCC Ward 34)",      "lat": 23.7225, "lon": 90.4058, "radius_m": 520, "drainage_eff": 0.30, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W35", "ward_name": "Bangshal, Malitola & Nawabpur North (DSCC Ward 35)",          "lat": 23.7172, "lon": 90.4082, "radius_m": 500, "drainage_eff": 0.26, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W36", "ward_name": "Kotwali, Tanti Bazar & Rai Saheb Bazar (DSCC Ward 36)",       "lat": 23.7128, "lon": 90.4095, "radius_m": 480, "drainage_eff": 0.28, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W37", "ward_name": "Sadarghat, Bangla Bazar, Patuatuli & Islampur (DSCC Ward 37)","lat": 23.7078, "lon": 90.4112, "radius_m": 520, "drainage_eff": 0.22, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W38", "ward_name": "Nawabpur South, Kaptan Bazar & Thatari Bazar (DSCC Ward 38)", "lat": 23.7198, "lon": 90.4128, "radius_m": 520, "drainage_eff": 0.24, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W39", "ward_name": "Wari Planned Enclave, Rankin St & Tikatuli (DSCC Ward 39)",   "lat": 23.7185, "lon": 90.4185, "radius_m": 560, "drainage_eff": 0.68, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W40", "ward_name": "Daya Ganj, Swamibagh & Sharat Gupta Road (DSCC Ward 40)",     "lat": 23.7138, "lon": 90.4222, "radius_m": 540, "drainage_eff": 0.32, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W41", "ward_name": "Narinda, Tipu Sultan Road & Dholaikhal (DSCC Ward 41)",       "lat": 23.7125, "lon": 90.4162, "radius_m": 520, "drainage_eff": 0.28, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W42", "ward_name": "Laxmibazar, Walter Road & Pach Bhai Ghat (DSCC Ward 42)",     "lat": 23.7092, "lon": 90.4158, "radius_m": 480, "drainage_eff": 0.34, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W43", "ward_name": "Sutrapur, Farashganj & Shyambazar Ghat (DSCC Ward 43)",       "lat": 23.7048, "lon": 90.4165, "radius_m": 520, "drainage_eff": 0.26, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W44", "ward_name": "Sutrapur Kathpatti & Loharpool Corridor (DSCC Ward 44)",      "lat": 23.7068, "lon": 90.4202, "radius_m": 480, "drainage_eff": 0.30, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W45", "ward_name": "Gandaria West, Dhupkhola & Distillery Road (DSCC Ward 45)",   "lat": 23.7042, "lon": 90.4235, "radius_m": 560, "drainage_eff": 0.42, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W46", "ward_name": "Gandaria East, Milbarak & Alamganj (DSCC Ward 46)",           "lat": 23.6995, "lon": 90.4238, "radius_m": 560, "drainage_eff": 0.38, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W47", "ward_name": "Postagola, Faridabad & IG Gate Riverfront (DSCC Ward 47)",    "lat": 23.6938, "lon": 90.4265, "radius_m": 580, "drainage_eff": 0.30, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W48", "ward_name": "North Jatrabari, Sayedabad North & Bibir Bagicha (DSCC Ward 48)","lat": 23.7158, "lon": 90.4348, "radius_m": 600, "drainage_eff": 0.28, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W49", "ward_name": "Dhalpur, Golapbagh & Sayedabad Depot Zone (DSCC Ward 49)",    "lat": 23.7185, "lon": 90.4285, "radius_m": 580, "drainage_eff": 0.24, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W50", "ward_name": "Jatrabari-Sayedabad Bus Terminal (DSCC Ward 50)",             "lat": 23.7104, "lon": 90.4336, "radius_m": 640, "drainage_eff": 0.18, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W51", "ward_name": "Mirhazirbagh, Dolaipar & West Jurain (DSCC Ward 51)",         "lat": 23.7025, "lon": 90.4312, "radius_m": 600, "drainage_eff": 0.26, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W52", "ward_name": "Muradpur, Medical Road & Jurain Central (DSCC Ward 52)",      "lat": 23.6978, "lon": 90.4362, "radius_m": 600, "drainage_eff": 0.28, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W53", "ward_name": "East Jurain, Commissioner Rd & Postagola East (DSCC Ward 53)","lat": 23.6922, "lon": 90.4345, "radius_m": 620, "drainage_eff": 0.24, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W54", "ward_name": "Shyampur Bazar & Karimullarbagh Sector (DSCC Ward 54)",       "lat": 23.6885, "lon": 90.4395, "radius_m": 600, "drainage_eff": 0.22, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W55", "ward_name": "Kamrangirchar West, Alinagar & Nabinagar (DSCC Ward 55)",     "lat": 23.7185, "lon": 90.3635, "radius_m": 660, "drainage_eff": 0.20, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W56", "ward_name": "Kamrangirchar Central, Rasulpur & Ashrafabad (DSCC Ward 56)", "lat": 23.7135, "lon": 90.3712, "radius_m": 640, "drainage_eff": 0.18, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W57", "ward_name": "Kamrangirchar East, Madbor Bazar & Kurerghat (DSCC Ward 57)", "lat": 23.7212, "lon": 90.3698, "radius_m": 620, "drainage_eff": 0.22, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W58", "ward_name": "Shyampur Industrial Estate & Kadamtali (DSCC Ward 58)",       "lat": 23.6835, "lon": 90.4452, "radius_m": 680, "drainage_eff": 0.25, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W59", "ward_name": "Mohammadbagh, Merajnagar & Rayerbagh West (DSCC Ward 59)",    "lat": 23.6915, "lon": 90.4485, "radius_m": 660, "drainage_eff": 0.28, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W60", "ward_name": "Dania South, Paterbagh & Noorpur Sector (DSCC Ward 60)",      "lat": 23.6985, "lon": 90.4462, "radius_m": 640, "drainage_eff": 0.30, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W61", "ward_name": "Dania North, Gobindapur & Shanir Akhra West (DSCC Ward 61)",  "lat": 23.7042, "lon": 90.4458, "radius_m": 640, "drainage_eff": 0.32, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W62", "ward_name": "Shanir Akhra, Shekhdi & Kazla South (DSCC Ward 62)",          "lat": 23.7058, "lon": 90.4535, "radius_m": 660, "drainage_eff": 0.28, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W63", "ward_name": "Kazla, Matuail West & Mridhabari (DSCC Ward 63)",             "lat": 23.7115, "lon": 90.4568, "radius_m": 680, "drainage_eff": 0.30, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W64", "ward_name": "Konapara, Matuail North & Momenbagh (DSCC Ward 64)",          "lat": 23.7155, "lon": 90.4685, "radius_m": 700, "drainage_eff": 0.34, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W65", "ward_name": "Matuail South, Rayerbagh East & Sadamath (DSCC Ward 65)",     "lat": 23.6975, "lon": 90.4642, "radius_m": 720, "drainage_eff": 0.26, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W66", "ward_name": "Dogair, Bamail & Sarulia West Sector (DSCC Ward 66)",         "lat": 23.7065, "lon": 90.4785, "radius_m": 720, "drainage_eff": 0.32, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W67", "ward_name": "Sarulia, Tengra & Konapara East Belt (DSCC Ward 67)",         "lat": 23.7128, "lon": 90.4865, "radius_m": 700, "drainage_eff": 0.30, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W68", "ward_name": "Sarulia Bazar, Hazinagar & Boxnagar Demra (DSCC Ward 68)",    "lat": 23.7168, "lon": 90.4955, "radius_m": 680, "drainage_eff": 0.34, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W69", "ward_name": "Demra Ghat, Bawalia & Latif Bawani Mill Zone (DSCC Ward 69)", "lat": 23.7245, "lon": 90.4982, "radius_m": 720, "drainage_eff": 0.36, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W70", "ward_name": "Amulia, Mendipur & Demra North-East Basin (DSCC Ward 70)",    "lat": 23.7365, "lon": 90.4865, "radius_m": 780, "drainage_eff": 0.38, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W71", "ward_name": "Manda North, Hirajheel & Green Model West (DSCC Ward 71)",    "lat": 23.7295, "lon": 90.4435, "radius_m": 660, "drainage_eff": 0.32, "struct": "Concrete_Rooftop_Depression"},
+        {"ward_id": "DSCC-W72", "ward_name": "Manda South, Katherpool & Lalar Chawk (DSCC Ward 72)",        "lat": 23.7225, "lon": 90.4465, "radius_m": 660, "drainage_eff": 0.28, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W73", "ward_name": "Dakshingaon West, Kusumbagh & Beggidpur (DSCC Ward 73)",      "lat": 23.7355, "lon": 90.4535, "radius_m": 700, "drainage_eff": 0.34, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W74", "ward_name": "Dakshingaon East, Nandipara & Trimohoni (DSCC Ward 74)",      "lat": 23.7425, "lon": 90.4615, "radius_m": 720, "drainage_eff": 0.36, "struct": "Structural_Alley_Retention_Channel"},
+        {"ward_id": "DSCC-W75", "ward_name": "Nasirabad, Balurpar & Goran Chadbari Basin (DSCC Ward 75)",   "lat": 23.7515, "lon": 90.4745, "radius_m": 780, "drainage_eff": 0.38, "struct": "Structural_Alley_Retention_Channel"},
     ],
     "Rajshahi": [
         {"ward_id": "RCC-W12", "ward_name": "Shaheb Bazar & Boalia Commercial Hub (RCC Ward 12)",     "lat": 24.3642, "lon": 88.6004, "radius_m": 620, "drainage_eff": 0.18, "struct": "Concrete_Rooftop_Depression"},
@@ -242,6 +369,7 @@ def expand_single_ward_into_zonal_mesh(ward: dict) -> list[dict]:
             "lat": pt["lat"],
             "lon": pt["lon"],
             "zonal_radius_m": round(radius_m * 0.42, 1),
+            "zonal_subsector_mesh": project_ward_geodesic_mesh(pt["lat"], pt["lon"], radius_m * 0.42),
             "drainage_efficiency": d_eff,
             "retention_multiplier": r_mult,
             "ndbi_shift": n_shift,
@@ -353,16 +481,17 @@ def build_custom_latlon_target_region(lat: float, lon: float, radius_m: float = 
     """
     Constructs a standalone Custom Coordinate Scan Region centered on the exact (lat, lon)
     entered by the operator (independent of Division/District/Ward dropdowns) using the
-    WGS84 Geodesic Zonal Mesh Projector.
+    WGS84 Geodesic Zonal Mesh Projector and Coordinate-Aware Urban Morphology.
     """
     nearest_dist = resolve_target_district(lat, lon, None)
-    urban_factor = nearest_dist["urban_density_factor"]
+    coord_morphology = estimate_coordinate_urban_morphology(lat, lon)
+    urban_factor = round(float(0.55 * coord_morphology + 0.45 * nearest_dist["urban_density_factor"]), 3)
     near_name = nearest_dist["district_name"]
 
     mesh_pts = project_ward_geodesic_mesh(lat, lon, radius_m)
-    drain_profile = [0.26, 0.40, 0.54, 0.68, 0.80]
-    ret_profile = [1.24, 1.04, 0.86, 0.68, 0.52]
-    ndbi_profile = [0.10, 0.04, -0.02, -0.06, -0.12]
+    drain_profile = [0.22, 0.36, 0.52, 0.68, 0.84]
+    ret_profile = [1.28, 1.08, 0.88, 0.68, 0.48]
+    ndbi_profile = [0.12, 0.05, -0.01, -0.07, -0.14]
 
     wards = []
     for idx, pt in enumerate(mesh_pts):
@@ -625,9 +754,9 @@ class EpidemiologicalObjectiveFunction(nn.Module):
 def load_or_initialize_transfer_learning(model: EpiGridSTGNN, target_district_name: str) -> dict:
     """
     Implements Domain-Adaptive Incremental Transfer Learning:
-    - Retains 85% of all layers when re-scanning the same district.
+    - Retains 85% of all layers when re-scanning the same district under the same schema.
     - Transfers 72% of the Spatio-Temporal Feature Encoder (GCN + GRU + Attention) while
-      resetting 75% of the final readout head (`decoder.4`) when switching districts.
+      resetting 75% of the final readout head (`decoder.4`) when switching districts or upgrading schema.
     """
     metadata = {
         "transfer_learning_mode": "COLD_START_XAVIER_INITIALIZATION",
@@ -652,7 +781,8 @@ def load_or_initialize_transfer_learning(model: EpiGridSTGNN, target_district_na
         ):
             prev_districts = list(checkpoint.get("districts_learned_history", []))
             last_dist = checkpoint.get("district", "Dhaka")
-            same_district = (target_district_name == last_dist)
+            saved_schema = int(checkpoint.get("transfer_schema_version", 0))
+            same_district = (target_district_name == last_dist) and (saved_schema == TRANSFER_SCHEMA_VERSION)
 
             blended_state = {}
             with torch.no_grad():
@@ -660,7 +790,7 @@ def load_or_initialize_transfer_learning(model: EpiGridSTGNN, target_district_na
                     if same_district:
                         alpha = 0.85
                     elif "decoder.4" in k:
-                        alpha = 0.25
+                        alpha = 0.20
                     else:
                         alpha = 0.72
                     blended_state[k] = alpha * saved_state[k] + (1.0 - alpha) * current_state[k]
@@ -831,14 +961,18 @@ def parse_dghs_baseline_factor(dghs_payload: dict, district_urban_factor: float 
 def synthesize_ward_nodes(
     district_obj: dict,
     phase3_nodes: list[dict],
-    incubation_model: dict
+    incubation_model: dict,
+    zonal_subsector_summary: dict | None = None
 ) -> list[dict]:
     """
     Authentic WGS84 Geodesic 5-Subsector Zonal Mesh Aggregation:
-    For each ward (lat, lon), projects 5 real GPS coordinates across the ward's radius
-    (CORE, NE, NW, SE, SW), spatially matches each sub-quadrant to the nearest Sentinel-2
-    waterlogging detections, and aggregates the total stagnant water surface area (m^2)
-    and hydrological retention across the entire ward boundary.
+    For each ward or custom GPS sub-sector (lat, lon):
+    1. Projects 5 real GPS coordinates across the zone boundary (CORE, NE, NW, SE, SW),
+    2. Fuses Sentinel-2 MNDWI / NDWI / NDBI waterlogging detections from both the prioritized
+       satellite clusters (`phase3_nodes`) and the 5-quadrant `zonal_subsector_summary`,
+    3. Computes hydrological water persistence (`retention_days`) and stagnant water surface
+       area (`estimated_surface_area_m2`) directly from Sentinel-2 spectral water depth,
+       municipal drainage efficiency, perennial structural water retention, and NASA rainfall.
     """
     kinetics = incubation_model.get("aedes_aegypti_kinetics", {})
     meteo = incubation_model.get("meteorological_window_summary", {})
@@ -847,21 +981,30 @@ def synthesize_ward_nodes(
     base_eip = float(kinetics.get("extrinsic_incubation_period_eip_days", 8.6))
     bio_suitability = float(kinetics.get("composite_biological_suitability_score", 0.68))
     precip_14d = float(meteo.get("cumulative_14d_precipitation_mm", 28.0))
+    mean_temp = float(meteo.get("mean_temperature_c", 27.5))
+    mean_rh = float(meteo.get("mean_relative_humidity_pct", 74.0))
+
+    evap_mod = float(np.clip(1.06 - 0.012 * max(0.0, mean_temp - 25.0) + 0.004 * (mean_rh - 70.0), 0.84, 1.16))
 
     ward_nodes = []
     n_p3 = len(phase3_nodes)
+    zonal_summary = zonal_subsector_summary or {}
 
     for idx, ward in enumerate(district_obj["wards"]):
         w_lat = float(ward["lat"])
         w_lon = float(ward["lon"])
         radius_m = float(ward.get("zonal_radius_m", 650.0))
+        ward_id_str = str(ward.get("ward_id", ""))
 
         mesh_pts = ward.get("zonal_subsector_mesh") or project_ward_geodesic_mesh(w_lat, w_lon, radius_m)
 
         # Match each of the ward's 5 geodesic sub-sector GPS coordinates to nearest satellite detections
         subsector_mndwis = []
+        subsector_pixels = []
+
         if n_p3 > 0:
-            for s_idx, pt in enumerate(mesh_pts):
+            for pt in mesh_pts:
+                sub_key = pt.get("sub_id", "CORE")
                 nearest_p3 = min(
                     phase3_nodes,
                     key=lambda n: haversine_km(
@@ -871,44 +1014,94 @@ def synthesize_ward_nodes(
                         float(n.get("coordinates", {}).get("longitude", w_lon))
                     )
                 )
-                base_m = float(nearest_p3.get("spatial_metrics", {}).get("mean_mndwi", 0.14))
+                p3_metrics = nearest_p3.get("spatial_metrics", {})
+                base_m = float(p3_metrics.get("mean_mndwi", 0.22))
+                base_px = int(p3_metrics.get("contiguous_pixels_10m", 4))
+
+                if sub_key in zonal_summary:
+                    q_m = float(zonal_summary[sub_key].get("mean_mndwi", base_m))
+                    q_px = int(zonal_summary[sub_key].get("contiguous_pixels_10m", base_px))
+                    base_m = 0.65 * base_m + 0.35 * q_m
+                    base_px = max(base_px, q_px)
+
                 subsector_mndwis.append(base_m * float(pt.get("ret_mod", 1.0)))
+                subsector_pixels.append(base_px)
         else:
-            subsector_mndwis = [0.14] * len(mesh_pts)
+            subsector_mndwis = [0.22] * len(mesh_pts)
+            subsector_pixels = [4] * len(mesh_pts)
+
+        # If scanning a specific sub-sector node (e.g., GPS-CORE or Ward-NE), blend its exact quadrant summary
+        for q_key in ("CORE", "NE", "NW", "SE", "SW"):
+            if ward_id_str.endswith(f"-{q_key}") and q_key in zonal_summary:
+                q_mndwi = float(zonal_summary[q_key].get("mean_mndwi", 0.22))
+                subsector_mndwis = [0.55 * m + 0.45 * q_mndwi for m in subsector_mndwis]
+                break
 
         mean_raw_mndwi = float(np.mean(subsector_mndwis))
-        drainage_eff = ward["drainage_efficiency"]
-        ret_mult = ward["retention_multiplier"]
-        ndbi_shift = ward["ndbi_shift"]
-        urban_factor = ward["urban_factor"]
+        mean_sat_pixels = float(np.mean(subsector_pixels))
 
-        ward_mndwi = round(float(np.clip(mean_raw_mndwi * ret_mult * (0.75 + 0.35 * urban_factor), 0.02, 0.42)), 4)
-        ward_ndwi = round(float(np.clip(ward_mndwi - 0.045, -0.15, 0.35)), 4)
+        drainage_eff = float(ward["drainage_efficiency"])
+        ret_mult = float(ward["retention_multiplier"])
+        ndbi_shift = float(ward["ndbi_shift"])
+        urban_factor = float(ward["urban_factor"])
+
+        # Calibrate ward-level Sentinel-2 MNDWI, NDWI, and NDBI indices
+        ward_mndwi = round(
+            float(np.clip(mean_raw_mndwi * ret_mult * (0.76 + 0.34 * urban_factor), 0.03, 0.46)),
+            4
+        )
+        ward_ndwi = round(float(np.clip(ward_mndwi - 0.045, -0.15, 0.36)), 4)
         ward_ndbi = round(float(np.clip(0.04 + ndbi_shift, -0.22, 0.28)), 4)
 
-        precip_depth_bonus = min(precip_14d * 0.16, 6.5) * (1.15 - 0.65 * drainage_eff)
-        base_retention = (5.2 + precip_depth_bonus) * ret_mult * (0.68 + 0.40 * urban_factor)
-        retention_days = round(float(np.clip(base_retention, 2.1, 14.5)), 2)
+        # 1. Sentinel-2 Spectral Water Depth Persistence (Beer-Lambert SWIR MNDWI signal)
+        satellite_mndwi_days = (ward_mndwi * 18.5) + (max(0.0, ward_mndwi - ward_ndwi) * 8.0)
+
+        # 2. Perennial Structural & Anthropogenic Water Retention (clogged drains, concrete curing,
+        #    leaking municipal pipes, rooftop tanks, AC drips across all districts & custom coordinates)
+        structural_drainage_days = 4.2 * (1.0 - 0.68 * drainage_eff) * (0.65 + 0.35 * urban_factor)
+
+        # 3. Pluvial Surface Runoff Bonus from 14-day NASA POWER precipitation
+        pluvial_rain_days = min(precip_14d * 0.11, 4.2) * (1.12 - 0.62 * drainage_eff)
+
+        base_retention = (
+            (satellite_mndwi_days + structural_drainage_days + pluvial_rain_days)
+            * (0.58 + 0.42 * ret_mult)
+            * evap_mod
+        )
+        retention_days = round(float(np.clip(base_retention, 2.2, 14.5)), 2)
 
         viable = bool(retention_days >= (base_emergence * 0.88))
 
         persistence_ratio = min(retention_days / max(base_emergence, 1.0), 1.45) / 1.45
-        desiccation_factor = 1.0 if viable else max(0.35, (retention_days / max(base_emergence, 1.0)) ** 1.6)
+        desiccation_factor = 1.0 if viable else max(0.48, (retention_days / max(base_emergence, 1.0)) ** 1.15)
 
         vii_score = round(
             float(
                 np.clip(
-                    (0.48 * bio_suitability + 0.52 * persistence_ratio)
+                    (0.45 * bio_suitability + 0.55 * persistence_ratio)
                     * desiccation_factor
-                    * (1.08 - 0.52 * drainage_eff),
+                    * (1.08 - 0.48 * drainage_eff),
                     0.08,
-                    0.94
+                    0.95
                 )
             ),
             4
         )
 
-        zonal_pixels = max(1, min(15, int(round(6 * ret_mult * (1.0 - 0.45 * drainage_eff)))))
+        # Satellite-driven waterlogged pixel count (10m x 10m = 100 m^2 per pixel)
+        zonal_pixels = max(
+            1,
+            min(
+                15,
+                int(
+                    round(
+                        (0.42 * mean_sat_pixels + 14.0 * ward_mndwi)
+                        * ret_mult
+                        * (1.02 - 0.38 * drainage_eff)
+                    )
+                )
+            )
+        )
         node_id = f"ZONAL-{ward['ward_id']}"
 
         ward_nodes.append({
@@ -951,6 +1144,7 @@ def construct_spatiotemporal_tensors(
     """
     Builds the 3D Node Feature Tensor X in R^(N x 14 x 8) and Calibrated Target
     Outbreak Trajectory Tensor Y in R^(N x 14) spanning Normal, Medium, High, and Critical tiers.
+    Directly integrates Sentinel-2 MNDWI spectral waterlogging depth alongside Brière kinetics.
     """
     ts = nasa_payload.get("time_series", {})
     temps = list(ts.get("T2M", {}).values())[-14:] or [28.5] * 14
@@ -980,7 +1174,7 @@ def construct_spatiotemporal_tensors(
 
         retention_days = float(bio["hydrological_retention_days"])
         emergence_days = max(float(bio["required_aquatic_emergence_days"]), 1.0)
-        retention_ratio = float(np.clip(retention_days / (emergence_days * 1.4), 0.08, 1.0))
+        retention_ratio = float(np.clip(retention_days / (emergence_days * 1.35), 0.08, 1.0))
         vii_score = float(bio["vectorial_incubation_index"])
         viable = bool(bio["larval_metamorphosis_viable"])
 
@@ -997,33 +1191,38 @@ def construct_spatiotemporal_tensors(
             x_array[i, t, 2] = np.clip(precip_t / 50.0, 0.0, 1.0)
             x_array[i, t, 3] = np.clip(eip_rate_t / 0.14, 0.0, 1.0)
             x_array[i, t, 4] = np.clip(mdr_rate_t / 0.14, 0.0, 1.0)
-            x_array[i, t, 5] = np.clip((mndwi_val + 0.1) / 0.5, 0.0, 1.0)
+            x_array[i, t, 5] = np.clip((mndwi_val + 0.05) / 0.45, 0.0, 1.0)
             x_array[i, t, 6] = retention_ratio
             x_array[i, t, 7] = float(np.clip(dghs_pressure * (1.05 - 0.55 * drainage_eff), 0.08, 0.92))
 
         eip_lag_days = min(float(bio["extrinsic_incubation_eip_days"]), 12.0)
-        ward_dghs = dghs_pressure * (0.45 + 0.55 * urban_factor) * (1.05 - 0.50 * drainage_eff)
+        mndwi_norm = float(np.clip(mndwi_val / 0.36, 0.08, 1.0))
+        ward_dghs = dghs_pressure * (0.48 + 0.52 * urban_factor) * (1.08 - 0.52 * drainage_eff)
+
         base_prob = (
-            0.46 * vii_score
-            + 0.32 * retention_ratio * (1.0 - 0.35 * drainage_eff)
-            + 0.22 * ward_dghs
+            0.38 * vii_score
+            + 0.24 * mndwi_norm * (1.05 - 0.40 * drainage_eff)
+            + 0.20 * retention_ratio * (1.02 - 0.38 * drainage_eff)
+            + 0.18 * ward_dghs
         )
 
+        # Smooth physical attenuation when below the larval emergence threshold (avoids artificial cliff)
         if not viable:
-            base_prob *= 0.68
+            viability_mod = float(np.clip(0.74 + 0.22 * (retention_days / emergence_days), 0.72, 0.94))
+            base_prob *= viability_mod
 
-        structural_mod = 0.05 if ndbi_val > 0.08 else (-0.04 if ndbi_val < -0.06 else 0.0)
+        structural_mod = 0.04 if ndbi_val > 0.08 else (-0.04 if ndbi_val < -0.06 else 0.0)
 
         for k in range(14):
             day_horizon = k + 1
             incubation_wave = 1.0 / (1.0 + math.exp(-(day_horizon - (eip_lag_days * 0.62)) / 2.4))
 
-            if viable and drainage_eff < 0.45:
-                temporal_factor = 0.58 + 0.50 * incubation_wave
+            if viable and drainage_eff < 0.42:
+                temporal_factor = 0.60 + 0.48 * incubation_wave
             elif viable:
-                temporal_factor = 0.56 + 0.34 * incubation_wave
+                temporal_factor = 0.58 + 0.36 * incubation_wave
             else:
-                temporal_factor = 0.52 + 0.16 * incubation_wave
+                temporal_factor = 0.54 + 0.22 * incubation_wave
 
             y_raw[i, k] = np.clip(base_prob * temporal_factor + structural_mod, 0.06, 0.94)
 
@@ -1097,15 +1296,19 @@ async def execute_phase4_stgnn_training_and_forecast(
         fetch_dghs_dengue_baseline()
     )
 
-    isolated_nodes = (
-        phase3_output.get("spatiotemporal_waterlogging_synchronization", {})
-        .get("prioritized_rooftop_and_alley_nodes", [])
-    )
+    phase3_sync = phase3_output.get("spatiotemporal_waterlogging_synchronization", {})
+    isolated_nodes = phase3_sync.get("prioritized_rooftop_and_alley_nodes", [])
+    zonal_subsector_summary = phase3_sync.get("zonal_subsector_spectral_summary", {})
     incubation_model = phase3_output.get("aedes_biological_incubation_model", {})
     dghs_admissions, dghs_pressure = parse_dghs_baseline_factor(dghs_payload, urban_factor)
 
     # 2. Build the full-ward zonal nodes for the target region
-    active_nodes = synthesize_ward_nodes(target_district, isolated_nodes, incubation_model)
+    active_nodes = synthesize_ward_nodes(
+        target_district,
+        isolated_nodes,
+        incubation_model,
+        zonal_subsector_summary=zonal_subsector_summary
+    )
     coords = [(n["coordinates"]["latitude"], n["coordinates"]["longitude"]) for n in active_nodes]
 
     # 3. Construct Normalized Spatial Adjacency Matrix
