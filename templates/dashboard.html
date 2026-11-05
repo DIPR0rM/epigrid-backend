@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EpiGrid | Zonal ST-GNN, Custom GPS &amp; Explainable AI Command Center</title>
+  <title>EpiGrid | PINN ST-GNN, 30m DEM, Hybrid Graph RAG &amp; Explainable AI Command Center</title>
 
   <!-- Leaflet Geospatial Map CSS & JS -->
   <link
@@ -79,6 +79,23 @@
     .brand-subtitle {
       font-size: 0.75rem;
       color: var(--text-muted);
+    }
+
+    .nav-doc-link {
+      text-decoration: none;
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      transition: all 0.15s;
+    }
+
+    .nav-doc-link:hover {
+      background: rgba(16, 185, 129, 0.28);
+      color: #ffffff;
     }
 
     .control-bar {
@@ -188,6 +205,18 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
+    }
+
+    /* Executive AI Co-Pilot Briefing Bar */
+    .copilot-banner {
+      display: none;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.10) 0%, rgba(192, 132, 252, 0.10) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.38);
+      border-radius: 8px;
+      padding: 9px 14px;
+      margin-bottom: 10px;
+      font-size: 0.75rem;
+      color: #ecfdf5;
     }
 
     /* 4-Tier + AI KPI Strip */
@@ -419,6 +448,16 @@
       color: #e9d5ff;
     }
 
+    .rag-protocol-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.32);
+      border-radius: 5px;
+      padding: 5px 8px;
+      margin-bottom: 6px;
+      font-size: 0.69rem;
+      color: #d1fae5;
+    }
+
     .work-order-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -482,9 +521,11 @@
         <span>🛰️ EpiGrid: Epidemiological Preemption Engine</span>
         <span class="badge badge-cyan" id="regionBadge">Ready — Select Area &amp; Click Scan</span>
         <span class="badge badge-purple" id="transferBadge">🧠 Transfer Learning: Checking...</span>
+        <a href="/docs" target="_blank" class="nav-doc-link">📄 Live /docs Whitepaper</a>
+        <a href="/mcp" target="_blank" class="nav-doc-link" style="color:#38bdf8;border-color:rgba(56,189,248,0.4);background:rgba(56,189,248,0.12);">🔌 MCP Server</a>
       </div>
       <div class="brand-subtitle">
-        Full-Ward Zonal MNDWI Aggregation + NASA POWER Brière Kinetics + Transfer-Learned PyTorch ST-GNN + Autograd Explainable AI (XAI)
+        Sentinel-2 MNDWI/NDBI + Copernicus 30m DEM + NASA Brière Kinetics + Ross-Macdonald PINN ST-GNN + Hybrid Graph RAG &amp; Autograd XAI
       </div>
     </div>
 
@@ -548,10 +589,13 @@
   <!-- Live Selection & Persistent Transfer Learning Status Banner -->
   <div class="selection-banner" id="selectionBanner">
     <span id="selectionStatusText">
-      📍 <strong>Target Area Staged (Dropdown Mode):</strong> Dhaka Division &rarr; Dhaka (All 12 Municipal Wards) | Horizon: <strong>Day +14</strong>. Click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to run.
+      📍 <strong>Target Area Staged (Dropdown Mode):</strong> Dhaka Division &rarr; Dhaka (All Municipal Wards) | Horizon: <strong>Day +14</strong>. Click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to run.
     </span>
-    <span class="badge badge-cyan" id="transferHistoryBadge">5-Subsector Full-Ward Zonal Scan Active</span>
+    <span class="badge badge-cyan" id="transferHistoryBadge">30m DEM + IDW + 5-Subsector Zonal Scan Active</span>
   </div>
+
+  <!-- Structured Executive AI Co-Pilot Situation Briefing Banner (Populated After Scan) -->
+  <div class="copilot-banner" id="copilotBriefingBanner"></div>
 
   <!-- 4-Tier Epidemiological + Transfer Learning & XAI KPI Strip -->
   <div class="kpi-grid">
@@ -599,7 +643,7 @@
         <div class="panel-title" id="mapHeaderTitle">
           Municipal Ward Predictive Outbreak Heat Map (Select Horizon &amp; Click Scan)
         </div>
-        <span class="badge badge-cyan" id="sceneBadge">OpenStreetMap + Esri Satellite</span>
+        <span class="badge badge-cyan" id="sceneBadge">Google Hybrid HD + 30m DEM</span>
       </div>
 
       <div id="map"></div>
@@ -651,7 +695,7 @@
         <div class="panel-title" id="trajectoryPanelTitle">
           Ward Outbreak Probability Trajectories (Day +1 to Day +14)
         </div>
-        <span class="badge badge-emerald" id="trajectoryHorizonBadge">Multi-Horizon Sigmoid Decoder</span>
+        <span class="badge badge-emerald" id="trajectoryHorizonBadge">Ross-Macdonald PINN Decoder</span>
       </div>
       <div class="chart-box">
         <canvas id="trajectoryChart"></canvas>
@@ -659,7 +703,7 @@
 
       <!-- Chart 2: Zero-Floor Backpropagation Loss Convergence -->
       <div class="panel-header" style="margin-top: 2px;">
-        <div class="panel-title">PyTorch ST-GNN Backpropagation Convergence (Zero-Floor KL Loss)</div>
+        <div class="panel-title">PyTorch ST-GNN Backpropagation Convergence (Zero-Floor KL + PINN Loss)</div>
         <div style="display: flex; gap: 6px; align-items: center;">
           <span class="badge badge-emerald" id="accuracyBadge">Accuracy: --%</span>
           <span class="badge badge-cyan" id="epochsBadge">120 Epochs</span>
@@ -687,7 +731,7 @@
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title" id="workOrdersPanelTitle">
-          Automated Municipal Preemption &amp; XAI-Verified Fogging Work Orders (&ge; 55%)
+          Automated Preemption, Graph RAG &amp; Guardrail-Verified Work Orders (&ge; 55%)
         </div>
         <span class="badge badge-cyan" id="alertCountBadge">Awaiting Scan</span>
       </div>
@@ -701,7 +745,7 @@
 
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title" id="matrixTableTitle">Full-Ward Zonal Probability &amp; Explainable AI Matrix</div>
+        <div class="panel-title" id="matrixTableTitle">Full-Ward Zonal Probability, Ross-Macdonald R₀ &amp; XAI Matrix</div>
         <span class="badge badge-purple">Click Any Row to Zoom Map &amp; Inspect Sector XAI</span>
       </div>
       <div style="overflow-x: auto; max-height: 500px;">
@@ -709,18 +753,18 @@
           <thead>
             <tr>
               <th>Sector ID</th>
-              <th>Municipal Ward / Custom Sector Name</th>
-              <th>Dominant XAI Driver &amp; GRU Attention</th>
+              <th>Municipal Ward / Custom Sector &amp; DEM Physics</th>
+              <th>Dominant XAI Driver &amp; Graph RAG SOP</th>
               <th>Day +1</th>
               <th>Day +7</th>
-              <th id="dynamicHorizonHeader">Day +14</th>
+              <th id="dynamicHorizonHeader">Day +14 (±CI95)</th>
               <th>4-Tier Risk Status</th>
             </tr>
           </thead>
           <tbody id="wardTableBody">
             <tr>
               <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">
-                Select your target mode and click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to generate the zonal probability &amp; XAI matrix.
+                Select your target mode and click <strong>"Start Area Scan &amp; Dispatch Alerts"</strong> to generate the zonal probability, DEM drainage, Ross-Macdonald R₀ &amp; XAI matrix.
               </td>
             </tr>
           </tbody>
@@ -742,7 +786,6 @@
     let latestPipelineData = null;
     let wardMarkerMap = {};
 
-    // Haversine distance in km for drawing ST-GNN spatial dispersal edges (<= 4.5 km)
     function haversineKm(lat1, lon1, lat2, lon2) {
       const R = 6371.0;
       const toRad = (deg) => (deg * Math.PI) / 180.0;
@@ -757,7 +800,6 @@
       return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    // 4-Tier Risk Classifier for any probability in [0, 1]
     function getRiskTierStyle(prob) {
       if (prob >= 0.75) {
         return {
@@ -795,7 +837,6 @@
     }
 
     function initMap() {
-      // 1. Google Maps Hybrid (Satellite HD + Roads, Bangla/English Labels & Landmarks)
       const googleHybrid = L.tileLayer(
         "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
         {
@@ -805,7 +846,6 @@
         }
       );
 
-      // 2. Google Maps Street View (Updated Roads, Upazilas & Local Bazars)
       const googleStreets = L.tileLayer(
         "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
         {
@@ -815,7 +855,6 @@
         }
       );
 
-      // 3. Google Satellite Pure HD (No Labels)
       const googleSatellite = L.tileLayer(
         "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
         {
@@ -825,7 +864,6 @@
         }
       );
 
-      // 4. OpenStreetMap Standard
       const osmStreet = L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
@@ -839,7 +877,7 @@
         center: [23.8103, 90.4125],
         zoom: 12,
         maxZoom: 22,
-        layers: [googleHybrid] // Default to Google Hybrid HD (Satellite + Labels)
+        layers: [googleHybrid]
       });
 
       L.control
@@ -858,7 +896,6 @@
       edgeLayerGroup = L.layerGroup().addTo(mapInstance);
       markerLayerGroup = L.layerGroup().addTo(mapInstance);
 
-      // In Custom LAT & LON mode, clicking anywhere on the map sets LAT/LON to that exact point
       mapInstance.on("click", (e) => {
         const mode = document.getElementById("scanModeSelect").value;
         if (mode === "custom_latlon") {
@@ -888,18 +925,17 @@
         .addTo(mapInstance)
         .bindPopup(
           `<div style="color:#0f172a; font-family:Inter,sans-serif; font-size:0.76rem;">` +
-            `<strong>📍 Custom Target Epicenter</strong><br/>LAT: ${lat.toFixed(4)}°N, LON: ${lon.toFixed(4)}°E<br/>Click <em>Start Area Scan</em> to analyze.` +
+            `<strong>📍 Custom Target Epicenter</strong><br/>LAT: ${lat.toFixed(4)}°N, LON: ${lon.toFixed(4)}°E<br/>` +
+            `5-Subsector 30m DEM + Sentinel-2 NDBI/GNDVI/MNDWI + IDW Drainage Physics Ready.` +
           `</div>`
         )
         .openPopup();
     }
 
-    // Mutually Exclusive Toggle: Dropdowns vs. Custom LAT & LON
     function onScanModeChange() {
       const mode = document.getElementById("scanModeSelect").value;
       const isCustom = mode === "custom_latlon";
 
-      // Lock/unlock controls mutually exclusively
       document.getElementById("divisionSelect").disabled = isCustom;
       document.getElementById("districtSelect").disabled = isCustom;
       document.getElementById("wardSelect").disabled = isCustom;
@@ -969,8 +1005,8 @@
         const lat = parseFloat(document.getElementById("latInput").value) || 23.8103;
         const lon = parseFloat(document.getElementById("lonInput").value) || 90.4125;
         document.getElementById("selectionStatusText").innerHTML =
-          `📍 <strong>Custom Single-Area Mode Active (Dropdowns Disabled):</strong> Target Coordinates <strong>(${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E)</strong> ` +
-          `[Tip: Click anywhere on the map to move pin] | Horizon: <strong>Day +${dayNum}</strong> | Epochs: <strong>${epochs}</strong>.`;
+          `📍 <strong>Custom Single-Area Mode Active (30m DEM + Sentinel-2 NDBI/GNDVI + IDW Drainage):</strong> Target <strong>(${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E)</strong> ` +
+          `[Click map to move pin] | Horizon: <strong>Day +${dayNum}</strong> | Epochs: <strong>${epochs}</strong>.`;
       } else {
         const divName = document.getElementById("divisionSelect").value || "Dhaka Division";
         const distName = document.getElementById("districtSelect").value || "Dhaka";
@@ -1070,7 +1106,6 @@
       updatePendingSelectionBanner();
     }
 
-    // Manual Scan Execution — Respects Mutually Exclusive Scan Mode
     async function executeEpiGridPipeline() {
       const btn = document.getElementById("runBtn");
       btn.disabled = true;
@@ -1162,9 +1197,11 @@
       const kinetics = bioSummary.aedes_aegypti_kinetics || {};
       const meteo = bioSummary.meteorological_window_summary || {};
       const waterSummary = data.spatiotemporal_waterlogging_summary || {};
+      const demProfile = waterSummary.elevation_dem_profile || {};
       const gnnTelemetry = data.st_gnn_neural_network_telemetry || {};
       const trainTel = gnnTelemetry.training_telemetry || {};
       const finalBreakdown = trainTel.final_epoch_loss_breakdown || {};
+      const copilot = data.executive_ai_copilot_briefing || null;
 
       const tl =
         data.incremental_transfer_learning_telemetry ||
@@ -1178,7 +1215,14 @@
       document.getElementById("regionBadge").textContent =
         `${region.district_name || "Dhaka"} (${region.corporation_code || "DNCC"}) • Day +${horizonDays}`;
       document.getElementById("sceneBadge").textContent =
-        waterSummary.stac_scene_id || "Sentinel-2 L2A Calibrated";
+        `${waterSummary.stac_scene_id || "Sentinel-2 L2A"} • DEM ${demProfile.mean_elevation_m ?? 7.5}m`;
+
+      const copilotEl = document.getElementById("copilotBriefingBanner");
+      if (copilot && copilot.executive_narrative) {
+        copilotEl.style.display = "block";
+        copilotEl.innerHTML =
+          `🤖 <strong>AI Co-Pilot Executive Situation Briefing:</strong> ${copilot.executive_narrative}`;
+      }
 
       const cumEpochs = tl.cumulative_epochs_trained || trainTel.epochs_completed || 120;
       const cumSessions = tl.cumulative_training_sessions || 1;
@@ -1232,7 +1276,7 @@
       if (!latestPipelineData) {
         document.getElementById("scrubberLabel").textContent =
           `Day +${dayNum} Forecast Horizon (Staged — Click Start Area Scan)`;
-        document.getElementById("dynamicHorizonHeader").textContent = `Day +${dayNum}`;
+        document.getElementById("dynamicHorizonHeader").textContent = `Day +${dayNum} (±CI95)`;
         updatePendingSelectionBanner();
         return;
       }
@@ -1253,9 +1297,9 @@
         `${region.district_name || "Municipal"} Full-Ward Zonal Outbreak Heat Map (Day +${dayNum} Horizon)`;
       document.getElementById("scrubberLabel").textContent =
         `Day +${dayNum} Forecast Horizon${dateStr}`;
-      document.getElementById("dynamicHorizonHeader").textContent = `Day +${dayNum}`;
+      document.getElementById("dynamicHorizonHeader").textContent = `Day +${dayNum} (±CI95)`;
       document.getElementById("matrixTableTitle").textContent =
-        `Full-Ward Zonal Probability & Explainable AI Matrix (Evaluated at Day +${dayNum})`;
+        `Full-Ward Zonal Probability, Ross-Macdonald R₀ & XAI Matrix (Day +${dayNum})`;
 
       markerLayerGroup.clearLayers();
       edgeLayerGroup.clearLayers();
@@ -1305,6 +1349,7 @@
         const day1Prob = getWardProbabilityAtDay(ward, 1);
         const day7Prob = getWardProbabilityAtDay(ward, 7);
         const activeProb = getWardProbabilityAtDay(ward, dayNum);
+        const ci95Pct = parseFloat(ward.epistemic_uncertainty_ci95_pct || 1.6).toFixed(1);
         const tier = getRiskTierStyle(activeProb);
 
         if (tier.code === "CRITICAL_OUTBREAK_IMMINENT") countCritical++;
@@ -1316,15 +1361,19 @@
         const spatial = ward.spatial_metrics || {};
         const xai = ward.explainable_ai_attribution || {};
         const pillars = xai.macro_pillar_attribution_pct || {};
+        const rag = ward.graph_rag_protocol || {};
 
         const subSectors = spatial.zonal_subsectors_scanned ?? 5;
         const drainEff = ((spatial.drainage_efficiency_index ?? 0.5) * 100).toFixed(0);
+        const elevM = spatial.elevation_m ?? 7.5;
+        const twiVal = parseFloat(spatial.topographic_wetness_index ?? 0.50).toFixed(2);
+        const r0Val = parseFloat(bio.basic_reproduction_number_r0 ?? 1.42).toFixed(2);
         const viableFlag = bio.larval_metamorphosis_viable !== false;
         const domDriver = xai.dominant_xai_driver || "Sentinel-2 MNDWI Waterlogging & Drainage";
         const domPct = xai.dominant_driver_pct ?? 42.0;
         const peakDay = xai.peak_temporal_attention_day || "Day -8";
+        const sopId = rag.primary_protocol_id || "WHO-DGHS-SOP-01";
 
-	// Draw Full-Ward Zonal Coverage Boundary Ring (in meters)
         const zonalRadiusM = parseFloat(spatial.zonal_radius_m || 650);
         L.circle([lat, lon], {
           radius: zonalRadiusM,
@@ -1347,24 +1396,24 @@
         });
 
         marker.bindPopup(`
-          <div style="font-family: Inter, sans-serif; min-width: 255px; color: #0f172a;">
+          <div style="font-family: Inter, sans-serif; min-width: 265px; color: #0f172a;">
             <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 3px;">
               ${ward.ward_sector_id}: ${ward.municipal_ward_name}
             </div>
             <div style="font-size: 0.75rem; font-weight: 700; color: ${tier.color}; margin-bottom: 6px;">
-              ● ${tier.label} — Day +${dayNum}: ${(activeProb * 100).toFixed(1)}%
+              ● ${tier.label} — Day +${dayNum}: ${(activeProb * 100).toFixed(1)}% (±${ci95Pct}% CI95)
             </div>
             <div style="font-size: 0.72rem; line-height: 1.45; margin-bottom: 6px;">
-              <strong>Zonal Coverage:</strong> ${subSectors} Sub-Sectors Aggregated (${spatial.estimated_surface_area_m2 ?? 400} m²)<br/>
-              <strong>GPS Center:</strong> ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E<br/>
-              <strong>Water Retention:</strong> ${bio.hydrological_retention_days ?? "--"}d (Req: ${bio.required_aquatic_emergence_days ?? "--"}d)<br/>
-              <strong>Drainage Efficiency:</strong> ${drainEff}% | <strong>Larval Viable:</strong> ${viableFlag ? "Yes" : "No (Dries Early)"}
+              <strong>Zonal Coverage:</strong> ${subSectors} Sub-Sectors (${spatial.estimated_surface_area_m2 ?? 400} m²)<br/>
+              <strong>30m DEM &amp; TWI:</strong> Elev ${elevM}m | TWI ${twiVal} | Drainage ${drainEff}%<br/>
+              <strong>Ross-Macdonald R₀:</strong> ${r0Val} | <strong>Water Retention:</strong> ${bio.hydrological_retention_days ?? "--"}d<br/>
+              <strong>Larval Viable:</strong> ${viableFlag ? "Yes (Exceeds Emergence Threshold)" : "No (Dries Early)"}
             </div>
             <div style="background: #f3e8ff; border-left: 3px solid #9333ea; padding: 5px 7px; font-size: 0.7rem; border-radius: 4px;">
-              <strong>🧠 Explainable AI (XAI) Attribution:</strong><br/>
+              <strong>🧠 Explainable AI &amp; Graph RAG (${sopId}):</strong><br/>
               • Top Driver: <strong>${domDriver} (${domPct}%)</strong><br/>
               • Peak GRU Attention: <strong>${peakDay}</strong><br/>
-              • Hydrology: ${pillars.hydrological_waterlogging_drainage_pct ?? "--"}% | Brière Thermal: ${pillars.thermodynamic_briere_kinetics_pct ?? "--"}% | Spatial Graph: ${pillars.spatial_mosquito_dispersal_pct ?? "--"}%
+              • Hydrology: ${pillars.hydrological_waterlogging_drainage_pct ?? "--"}% | Brière: ${pillars.thermodynamic_briere_kinetics_pct ?? "--"}% | Graph: ${pillars.spatial_mosquito_dispersal_pct ?? "--"}%
             </div>
           </div>
         `);
@@ -1387,17 +1436,20 @@
           <td style="font-weight: 700; color: var(--accent-cyan);">${ward.ward_sector_id}</td>
           <td>
             <div style="font-weight: 600;">${ward.municipal_ward_name}</div>
-            <div style="font-size: 0.68rem; color: var(--text-muted);">
-              ${subSectors} Sub-Sectors • Drainage ${drainEff}% • ${viableFlag ? "<span style='color:#f97316;'>Larval Viable</span>" : "<span style='color:#10b981;'>Non-Viable</span>"}
+            <div style="font-size: 0.67rem; color: var(--text-muted);">
+              Drainage ${drainEff}% • DEM ${elevM}m (TWI ${twiVal}) • R₀=${r0Val} • ${viableFlag ? "<span style='color:#f97316;'>Larval Viable</span>" : "<span style='color:#10b981;'>Non-Viable</span>"}
             </div>
           </td>
           <td style="font-size: 0.7rem;">
             <div style="color: #e9d5ff; font-weight: 600;">${domDriver.split("(")[0].trim()} (${domPct}%)</div>
-            <div style="color: var(--text-muted); font-size: 0.67rem;">Peak Attention: ${peakDay}</div>
+            <div style="color: var(--text-muted); font-size: 0.66rem;">Attention: ${peakDay} • <span style="color:#34d399;">${sopId}</span></div>
           </td>
           <td>${(day1Prob * 100).toFixed(1)}%</td>
           <td>${(day7Prob * 100).toFixed(1)}%</td>
-          <td style="font-weight: 800; color: ${tier.color};">${(activeProb * 100).toFixed(1)}%</td>
+          <td style="font-weight: 800; color: ${tier.color};">
+            ${(activeProb * 100).toFixed(1)}%
+            <div style="font-size:0.63rem; color:var(--text-muted); font-weight:500;">±${ci95Pct}%</div>
+          </td>
           <td><span class="badge ${tier.badgeClass}">${tier.label}</span></td>
         `;
         tbody.appendChild(tr);
@@ -1507,7 +1559,7 @@
           labels: convergenceCurve.map((pt) => `Ep ${pt.epoch}`),
           datasets: [
             {
-              label: "Zero-Floor Bregman KL-Divergence + Horizon MSE + Graph Laplacian Loss",
+              label: "Zero-Floor Bregman KL + Horizon MSE + Graph Laplacian + PINN Loss",
               data: convergenceCurve.map((pt) => pt.total_loss),
               borderColor: "#38bdf8",
               backgroundColor: "rgba(56, 189, 248, 0.16)",
@@ -1620,7 +1672,7 @@
       const feed = document.getElementById("alertFeed");
 
       document.getElementById("workOrdersPanelTitle").textContent =
-        `Automated Preemption & XAI Work Orders (Day +${dayNum} ≥ ${(threshold * 100).toFixed(0)}%)`;
+        `Automated Preemption, Graph RAG & XAI Work Orders (Day +${dayNum} ≥ ${(threshold * 100).toFixed(0)}%)`;
 
       const qualifyingWards = sortedWards.filter(
         (w) => getWardProbabilityAtDay(w, dayNum) >= threshold
@@ -1644,19 +1696,22 @@
           const prob = getWardProbabilityAtDay(w, dayNum);
           const isCritical = prob >= 0.75;
           const probPct = (prob * 100).toFixed(1);
+          const ci95Pct = parseFloat(w.epistemic_uncertainty_ci95_pct || 1.6).toFixed(1);
 
           const spatial = w.spatial_metrics || {};
           const bio = w.synchronized_biological_status || {};
           const xai = w.explainable_ai_attribution || {};
           const pillars = xai.macro_pillar_attribution_pct || {};
+          const rag = w.graph_rag_protocol || {};
 
           const subSectors = spatial.zonal_subsectors_scanned ?? 5;
           const areaM2 = parseFloat(spatial.estimated_surface_area_m2 || 400);
           const retDays = parseFloat(bio.hydrological_retention_days || 8.2);
           const emgDays = Math.max(parseFloat(bio.required_aquatic_emergence_days || 7.8), 1.0);
+          const r0Val = parseFloat(bio.basic_reproduction_number_r0 || 1.45).toFixed(2);
 
-          const temephosL = (0.0045 * areaM2 * (1.0 + prob)).toFixed(2);
-          const deltamethrinL = (0.0028 * areaM2 * (1.0 + retDays / emgDays)).toFixed(2);
+          const temephosL = Math.min(14.0, 0.0045 * areaM2 * (1.0 + prob)).toFixed(2);
+          const deltamethrinL = Math.min(10.0, 0.0028 * areaM2 * (1.0 + retDays / emgDays)).toFixed(2);
           const crewSize = isCritical ? 6 : 4;
           const durationHrs = Math.max(1.5, (areaM2 / 150.0) * (retDays / emgDays)).toFixed(1);
 
@@ -1676,6 +1731,10 @@
             ? "LEVEL-1 CRITICAL PREEMPTION (IMMEDIATE DISPATCH)"
             : "LEVEL-2 HIGH TRANSMISSION WARNING (PREEMPTIVE SPRAYING)";
 
+          const sopId = rag.primary_protocol_id || "WHO-DGHS-SOP-01";
+          const sopTitle = rag.who_dghs_guideline_title || "Perennial Structural Drainage & Alley Larviciding Protocol";
+          const sopStewardship = rag.insecticide_stewardship_rule || "Prioritize Temephos 50 EC in standing water; restrict ULV fogging to dawn/dusk.";
+
           return `
             <div class="alert-card ${isCritical ? "" : "high-tier"}">
               <div class="alert-header">
@@ -1683,17 +1742,21 @@
                   ${isCritical ? "🔴" : "🟠"} ${severityLabel}
                 </span>
                 <span class="badge ${isCritical ? "badge-red" : "badge-orange"}">
-                  ${w.ward_sector_id} • Day +${dayNum}: ${probPct}%
+                  ${w.ward_sector_id} • Day +${dayNum}: ${probPct}% (±${ci95Pct}%)
                 </span>
               </div>
               <div class="alert-meta">
-                <strong>${w.municipal_ward_name}</strong> | Zonal Node: ${w.source_waterlogging_node} (${subSectors} Sub-Sectors Aggregated)<br/>
+                <strong>${w.municipal_ward_name}</strong> | Zonal Node: ${w.source_waterlogging_node} (${subSectors} Sub-Sectors) | R₀: <strong>${r0Val}</strong><br/>
                 Authority: ${w.municipal_authority || "Municipal Vector Control Wing"}
               </div>
               <div class="xai-rationale-box">
                 <strong>🧠 XAI Dispatch Rationale:</strong> Driven <strong>${xai.dominant_driver_pct ?? 42}%</strong> by <em>${xai.dominant_xai_driver || "MNDWI Waterlogging & Drainage"}</em> |
                 Peak GRU Attention: <strong>${xai.peak_temporal_attention_day || "Day -8"}</strong>
                 (Hydrology: ${pillars.hydrological_waterlogging_drainage_pct ?? "--"}%, Brière Kinetics: ${pillars.thermodynamic_briere_kinetics_pct ?? "--"}%, Graph Dispersal: ${pillars.spatial_mosquito_dispersal_pct ?? "--"}%)
+              </div>
+              <div class="rag-protocol-box">
+                <strong>📚 Hybrid Graph RAG Protocol (${sopId}):</strong> ${sopTitle}<br/>
+                <strong>🛡️ Biophysical Guardrail &amp; Stewardship:</strong> ${sopStewardship}
               </div>
               <div class="work-order-grid">
                 <div><strong>Temephos 50EC:</strong> ${temephosL} L</div>

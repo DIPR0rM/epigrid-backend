@@ -1,0 +1,7 @@
+# EpiGrid Spec-Driven AI-DLC & Biophysical Engineering Rules (.cursorrules)
+
+1. **Zero Hardcoded Custom GPS Risk:** Custom `LAT/LON` scans (`scan_mode="custom_latlon"`) must always compute `drainage_efficiency`, `retention_multiplier`, and `topographic_wetness_index` dynamically from Copernicus 30m DEM, Sentinel-2 spectral indices (`MNDWI`, `NDBI`, `GNDVI`), and Inverse-Distance-Weighted (`IDW`) spatial interpolation.
+2. **Biophysical Reality Guardrails:** Never predict positive viral or larval development outside Brière-1 thermal boundaries ($T \le T_{\min}$ or $T \ge T_{\max}$). Always exclude permanent flowing rivers and open lakes from *Aedes aegypti* container breeding counts.
+3. **Explainable AI Accountability:** Every ward forecast and municipal work order must include 4-pillar PyTorch Autograd Input x Gradient Saliency summing to 100.0%, peak GRU temporal attention lag day, 95% MC-Dropout confidence interval, and a Hybrid Graph RAG WHO/DGHS standard operating protocol.
+4. **Strict Horizon Locking & Zero Cache:** Respect `horizon_days` (1 to 14) across all endpoints and serve `/dashboard` and `/docs` with `Cache-Control: no-store`.
+5. **Privacy & Responsible AI:** Process strictly aggregated satellite, meteorological, and municipal ward telemetry with zero PII.
