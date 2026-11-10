@@ -15,10 +15,12 @@ from services.spatiotemporal_pipeline import (
     execute_spatiotemporal_pipeline,
     briere_rate,
     estimate_coordinate_urban_morphology,
+    _quantize_coord_cell,
+    _is_in_known_water_corridor,
 )
 
 MODEL_WEIGHTS_PATH = "models/epigrid_stgnn_weights.pt"
-TRANSFER_SCHEMA_VERSION = 5
+TRANSFER_SCHEMA_VERSION = 6
 
 FEATURE_NAMES_8D = [
     "NASA_T2M_Temperature",
@@ -33,9 +35,8 @@ FEATURE_NAMES_8D = [
 
 # ==============================================================================
 # HOW TO ADD OR EDIT REAL WARDS FOR ANY DISTRICT YOURSELF:
-# Paste your full 129 Dhaka wards (DNCC + DSCC) inside "Dhaka" below.
-# The engine's WGS84 Geodesic Mesh Projector automatically expands each (lat, lon)
-# into 5 Sub-Sector GPS coordinates (CORE, NE, NW, SE, SW) across `radius_m`.
+# Keep your full 129 Dhaka wards inside `"Dhaka": [` below!
+# Make sure the line `"Dhaka": [` stays right under `CUSTOM_AUTHENTIC_WARDS_BY_DISTRICT = {`
 # ==============================================================================
 CUSTOM_AUTHENTIC_WARDS_BY_DISTRICT = {
     "Dhaka": [
@@ -315,21 +316,21 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def project_ward_geodesic_mesh(lat: float, lon: float, radius_m: float = 650.0) -> list[dict]:
     """
-    WGS84 Spherical Trigonometric Zonal Mesh Projector:
-    Takes 1 single ward center coordinate (lat, lon) and projects 5 authentic GPS
-    sub-sector coordinates across the entire ward boundary (CORE, NE, NW, SE, SW).
+    Coordinate-Shift-Invariant WGS84 Zonal Mesh Projector:
+    Projects 5 GPS sub-sector coordinates (CORE, NE, NW, SE, SW) with neutral 1.00 modifiers
+    so a coordinate's physical risk never changes when it moves from NW/SW to CORE!
     """
-    diag_m = float(radius_m) * 0.70710678  # R * cos(45 deg)
+    diag_m = float(radius_m) * 0.70710678
     dlat = diag_m / 111320.0
     cos_lat = max(0.20, math.cos(math.radians(lat)))
     dlon = diag_m / (111320.0 * cos_lat)
 
     return [
-        {"sub_id": "CORE", "label": "Central Core Sector",       "lat": round(lat, 6),        "lon": round(lon, 6),        "drain_mod": 0.90, "ret_mod": 1.10, "ndbi_mod":  0.03},
-        {"sub_id": "NE",   "label": "North-East Boundary Zone",  "lat": round(lat + dlat, 6), "lon": round(lon + dlon, 6), "drain_mod": 0.95, "ret_mod": 1.05, "ndbi_mod":  0.01},
-        {"sub_id": "NW",   "label": "North-West Boundary Zone",  "lat": round(lat + dlat, 6), "lon": round(lon - dlon, 6), "drain_mod": 1.00, "ret_mod": 1.00, "ndbi_mod":  0.00},
-        {"sub_id": "SE",   "label": "South-East Boundary Zone",  "lat": round(lat - dlat, 6), "lon": round(lon + dlon, 6), "drain_mod": 1.05, "ret_mod": 0.95, "ndbi_mod": -0.01},
-        {"sub_id": "SW",   "label": "South-West Boundary Zone",  "lat": round(lat - dlat, 6), "lon": round(lon - dlon, 6), "drain_mod": 1.10, "ret_mod": 0.90, "ndbi_mod": -0.03},
+        {"sub_id": "CORE", "label": "Central Core Sector",       "lat": round(lat, 6),        "lon": round(lon, 6),        "drain_mod": 1.00, "ret_mod": 1.00, "ndbi_mod": 0.00},
+        {"sub_id": "NE",   "label": "North-East Boundary Zone",  "lat": round(lat + dlat, 6), "lon": round(lon + dlon, 6), "drain_mod": 1.00, "ret_mod": 1.00, "ndbi_mod": 0.00},
+        {"sub_id": "NW",   "label": "North-West Boundary Zone",  "lat": round(lat + dlat, 6), "lon": round(lon - dlon, 6), "drain_mod": 1.00, "ret_mod": 1.00, "ndbi_mod": 0.00},
+        {"sub_id": "SE",   "label": "South-East Boundary Zone",  "lat": round(lat - dlat, 6), "lon": round(lon + dlon, 6), "drain_mod": 1.00, "ret_mod": 1.00, "ndbi_mod": 0.00},
+        {"sub_id": "SW",   "label": "South-West Boundary Zone",  "lat": round(lat - dlat, 6), "lon": round(lon - dlon, 6), "drain_mod": 1.00, "ret_mod": 1.00, "ndbi_mod": 0.00},
     ]
 
 
@@ -339,18 +340,23 @@ def interpolate_idw_drainage_and_morphology(
     reference_wards: list[dict]
 ) -> dict:
     """
-    Inverse-Distance-Weighted (IDW) Spatial & Morphological Drainage Estimator:
-    For any arbitrary WGS84 coordinate (lat, lon), computes prior drainage efficiency,
-    retention multiplier, and NDBI shift by combining:
-      1. Shepherd's IDW interpolation (power p=2.2) across known municipal wards within 8km,
-      2. Coordinate-aware urban built-up morphology (`estimate_coordinate_urban_morphology`),
-      3. Micro-topographical harmonic variance across sub-sectors.
-    (Subsequently refined in `synthesize_ward_nodes` by live Sentinel-2 + 30m DEM TWI).
+    Coordinate-Shift-Invariant Inverse-Distance-Weighted (IDW) & Morphological Estimator:
+    Snaps (lat, lon) to its fixed ~55m WGS84 world grid cell before computing IDW
+    and urban morphology so the exact same location always yields the exact same prior.
     """
-    local_morph = estimate_coordinate_urban_morphology(lat, lon)
+    qlat, qlon = _quantize_coord_cell(lat, lon)
+    if _is_in_known_water_corridor(qlat, qlon):
+        return {
+            "drainage_efficiency": 0.92,
+            "retention_multiplier": 0.36,
+            "ndbi_shift": -0.20,
+            "default_structure": "Permanent_Open_Water_Body_Excluded",
+        }
+
+    local_morph = estimate_coordinate_urban_morphology(qlat, qlon)
     micro_var = (
-        0.11 * math.sin(lat * 1580.0 - lon * 940.0)
-        + 0.08 * math.cos(lon * 1640.0 + lat * 820.0)
+        0.08 * math.sin(qlat * 85.0 - qlon * 65.0)
+        + 0.06 * math.cos(qlon * 95.0 + qlat * 75.0)
     )
     morph_drain_prior = float(np.clip(1.02 - 0.78 * local_morph + micro_var, 0.16, 0.90))
 
@@ -370,7 +376,7 @@ def interpolate_idw_drainage_and_morphology(
     weights = []
     drains = []
     for w in reference_wards:
-        dist_km = haversine_km(lat, lon, float(w["lat"]), float(w["lon"]))
+        dist_km = haversine_km(qlat, qlon, float(w["lat"]), float(w["lon"]))
         if dist_km < 0.05:
             return {
                 "drainage_efficiency": float(w["drainage_efficiency"]),
@@ -385,7 +391,7 @@ def interpolate_idw_drainage_and_morphology(
 
     if weights:
         idw_drain = float(np.sum(np.array(weights) * np.array(drains)) / np.sum(weights))
-        min_dist = min(haversine_km(lat, lon, float(w["lat"]), float(w["lon"])) for w in reference_wards)
+        min_dist = min(haversine_km(qlat, qlon, float(w["lat"]), float(w["lon"])) for w in reference_wards)
         idw_trust = float(np.clip(math.exp(-min_dist / 3.5), 0.25, 0.82))
         blended_drain = idw_trust * idw_drain + (1.0 - idw_trust) * morph_drain_prior + (0.65 * micro_var)
     else:
@@ -408,12 +414,6 @@ def interpolate_idw_drainage_and_morphology(
 
 
 def expand_single_ward_into_zonal_mesh(ward: dict, district_wards: list[dict] | None = None) -> list[dict]:
-    """
-    When the user selects a specific Ward from the dropdown (e.g., RCC-W30),
-    expands that ward into its 5 real WGS84 geographic sub-sectors (CORE, NE, NW, SE, SW)
-    with IDW-aware and terrain-aware local drainage priors (further refined by live
-    Sentinel-2 + 30m DEM sub-sector telemetry in `synthesize_ward_nodes`).
-    """
     radius_m = float(ward.get("zonal_radius_m", 650.0))
     mesh_pts = project_ward_geodesic_mesh(ward["lat"], ward["lon"], radius_m)
     base_drain = float(ward["drainage_efficiency"])
@@ -426,12 +426,12 @@ def expand_single_ward_into_zonal_mesh(ward: dict, district_wards: list[dict] | 
             pt["lat"], pt["lon"], district_wards or [ward]
         )
         d_eff = round(
-            float(np.clip(0.68 * (base_drain * pt["drain_mod"]) + 0.32 * idw_est["drainage_efficiency"], 0.14, 0.94)),
+            float(np.clip(0.68 * base_drain + 0.32 * idw_est["drainage_efficiency"], 0.14, 0.94)),
             3
         )
-        r_mult = round(float(np.clip(0.68 * (base_ret * pt["ret_mod"]) + 0.32 * idw_est["retention_multiplier"], 0.32, 1.45)), 3)
+        r_mult = round(float(np.clip(0.68 * base_ret + 0.32 * idw_est["retention_multiplier"], 0.32, 1.45)), 3)
         n_shift = round(float(np.clip(base_ndbi + pt["ndbi_mod"], -0.22, 0.28)), 3)
-        struct = (
+        struct = idw_est["default_structure"] if "Water_Body" in idw_est["default_structure"] else (
             ward["default_structure"]
             if idx % 2 == 0
             else "Structural_Alley_Retention_Channel"
@@ -456,10 +456,6 @@ def expand_single_ward_into_zonal_mesh(ward: dict, district_wards: list[dict] | 
 
 
 def apply_coastal_and_river_land_clamp(district_name: str, dlat: float, dlon: float, idx: int) -> tuple[float, float]:
-    """
-    Projects ward offsets onto dry urban land for coastal and riverfront cities so
-    no Aedes aegypti breeding node ever lands in the Bay of Bengal or a river channel.
-    """
     rule = COASTAL_AND_RIVER_LAND_CONSTRAINTS.get(district_name)
     if not rule:
         return dlat, dlon
@@ -483,11 +479,6 @@ def apply_coastal_and_river_land_clamp(district_name: str, dlat: float, dlon: fl
 
 
 def build_district_wards(division_name: str, dist_info: dict) -> list[dict]:
-    """
-    Generates the municipal wards for a given Bangladesh district.
-    If the district is defined in CUSTOM_AUTHENTIC_WARDS_BY_DISTRICT, uses those exact
-    authentic Ward IDs, names, and GPS coordinates; otherwise uses the calibrated land-clamped template.
-    """
     d_name = dist_info["district"]
     base_lat = dist_info["lat"]
     base_lon = dist_info["lon"]
@@ -556,24 +547,27 @@ def build_district_wards(division_name: str, dist_info: dict) -> list[dict]:
 
 def build_custom_latlon_target_region(lat: float, lon: float, radius_m: float = 650.0) -> dict:
     """
-    Constructs a standalone Custom Coordinate Scan Region centered on the exact (lat, lon)
-    entered by the operator using Shepherd's Inverse-Distance-Weighted (IDW) spatial
-    interpolation across nearby municipal wards + local urban morphology (subsequently
-    updated with live Sentinel-2 NDBI/GNDVI/MNDWI & 30m DEM TWI in `synthesize_ward_nodes`).
+    Constructs a Coordinate-Shift-Invariant Custom Coordinate Scan Region:
+    Every sub-sector (CORE, NE, NW, SE, SW) computes its own urban_factor and IDW
+    drainage efficiency purely from its own quantized WGS84 coordinate `(pt['lat'], pt['lon'])`
+    (independent of the main scan center pin!).
     """
     nearest_dist = resolve_target_district(lat, lon, None)
-    coord_morphology = estimate_coordinate_urban_morphology(lat, lon)
-    urban_factor = round(float(0.60 * coord_morphology + 0.40 * nearest_dist["urban_density_factor"]), 3)
     near_name = nearest_dist["district_name"]
+    dist_urban_base = float(nearest_dist["urban_density_factor"])
     ref_wards = nearest_dist.get("wards", [])
 
     mesh_pts = project_ward_geodesic_mesh(lat, lon, radius_m)
 
     wards = []
+    sub_urbans = []
     for pt in mesh_pts:
-        idw_props = interpolate_idw_drainage_and_morphology(pt["lat"], pt["lon"], ref_wards)
-        sub_morph = estimate_coordinate_urban_morphology(pt["lat"], pt["lon"])
-        sub_urban = round(float(0.65 * sub_morph + 0.35 * urban_factor), 3)
+        qlat, qlon = _quantize_coord_cell(pt["lat"], pt["lon"])
+        idw_props = interpolate_idw_drainage_and_morphology(qlat, qlon, ref_wards)
+        sub_morph = estimate_coordinate_urban_morphology(qlat, qlon)
+        # Intrinsic urban factor for this exact coordinate cell (independent of main center pin!)
+        sub_urban = round(float(0.75 * sub_morph + 0.25 * dist_urban_base), 3)
+        sub_urbans.append(sub_urban)
 
         wards.append({
             "ward_id": f"GPS-{pt['sub_id']}",
@@ -597,7 +591,7 @@ def build_custom_latlon_target_region(lat: float, lon: float, radius_m: float = 
         "district_name": f"Custom Coordinates ({lat:.4f}, {lon:.4f})",
         "corporation_code": "GPS",
         "municipal_authority": f"Localized Vector Response Unit ({near_name} Zone)",
-        "urban_density_factor": urban_factor,
+        "urban_density_factor": round(float(np.mean(sub_urbans)), 3),
         "latitude": lat,
         "longitude": lon,
         "wards": wards,
@@ -605,7 +599,6 @@ def build_custom_latlon_target_region(lat: float, lon: float, radius_m: float = 
 
 
 def get_full_bangladesh_hierarchy() -> dict:
-    """Returns all 8 Divisions, 64 Districts, and Municipal Wards of Bangladesh."""
     divisions_dict = {}
     flat_districts = []
     total_wards = 0
@@ -640,7 +633,6 @@ def get_full_bangladesh_hierarchy() -> dict:
 
 
 def resolve_target_district(lat: float, lon: float, district_name: str | None = None) -> dict:
-    """Resolves the target district by exact/partial name match or nearest WGS84 coordinate."""
     hierarchy = get_full_bangladesh_hierarchy()
     all_districts = hierarchy["districts"]
 
@@ -657,13 +649,6 @@ def resolve_target_district(lat: float, lon: float, district_name: str | None = 
 
 
 def classify_epidemiological_risk(prob: float) -> tuple[str, str]:
-    """
-    4-Tier Epidemiological Risk Classification:
-    - CRITICAL_OUTBREAK_IMMINENT (>= 0.75)
-    - HIGH_TRANSMISSION_RISK     (0.55 - 0.74)
-    - MEDIUM_ENDEMIC_RISK        (0.35 - 0.54)
-    - NORMAL_BASELINE_SURVEILLANCE (< 0.35)
-    """
     if prob >= 0.75:
         return (
             "CRITICAL_OUTBREAK_IMMINENT",
@@ -687,10 +672,6 @@ def classify_epidemiological_risk(prob: float) -> tuple[str, str]:
 
 
 def build_normalized_adjacency_matrix(coords: list[tuple[float, float]], sigma_km: float = 1.6) -> torch.Tensor:
-    """
-    Constructs the Kipf-Welling symmetrically normalized spatial adjacency matrix
-    A_hat = D^(-1/2) * (A + I) * D^(-1/2) with self-feature preservation.
-    """
     n_nodes = len(coords)
     adj = np.eye(n_nodes, dtype=np.float32)
 
@@ -709,7 +690,6 @@ def build_normalized_adjacency_matrix(coords: list[tuple[float, float]], sigma_k
 
 
 class SpectralGraphConvolution(nn.Module):
-    """Kipf-Welling Spectral Graph Convolutional Layer (GCN) for spatial message passing."""
     def __init__(self, in_features: int, out_features: int):
         super().__init__()
         self.weight = nn.Parameter(torch.empty(in_features, out_features))
@@ -723,12 +703,6 @@ class SpectralGraphConvolution(nn.Module):
 
 
 class EpiGridSTGNN(nn.Module):
-    """
-    Physics-Informed Spatio-Temporal Graph Neural Network (ST-GNN) combining two-stage
-    Kipf-Welling Spectral Graph Convolutions with skip-residual projections, Gated Recurrent
-    Units (GRU), Temporal Self-Attention (with XAI weight extraction), Monte Carlo Dropout
-    for Bayesian epistemic uncertainty estimation, and a 14-day Sigmoid Decoder.
-    """
     def __init__(self, num_features: int = 8, hidden_dim: int = 48, forecast_horizon: int = 14):
         super().__init__()
         self.input_proj = nn.Linear(num_features, hidden_dim)
@@ -778,13 +752,6 @@ class EpiGridSTGNN(nn.Module):
 
 
 class EpidemiologicalObjectiveFunction(nn.Module):
-    """
-    Zero-Floor Physics-Informed Composite Objective Function:
-    1. Entropy-Normalized Binary KL-Divergence: D_KL(Y || Y_hat) = BCE(Y_hat, Y) - H(Y).
-    2. Multi-Horizon Mean Squared Error: ||Y_hat - Y||_F^2.
-    3. Residual Graph Laplacian Smoothness: Tr((Y_hat - Y)^T * L * (Y_hat - Y)).
-    4. PINN Ross-Macdonald Temporal Velocity Consistency Penalty:||(Y_hat_t+1 - Y_hat_t) - (Y_t+1 - Y_t)||^2.
-    """
     def __init__(self, lambda_mse: float = 0.50, lambda_laplacian: float = 0.15, lambda_pinn: float = 0.20):
         super().__init__()
         self.mse = nn.MSELoss()
@@ -816,7 +783,6 @@ class EpidemiologicalObjectiveFunction(nn.Module):
         ) / (y_p.shape[0] * y_p.shape[1])
         laplacian_penalty = torch.clamp(laplacian_penalty, min=0.0)
 
-        # PINN First-Order Temporal Differential Consistency (Ross-Macdonald incubation velocity)
         dy_pred = y_p[:, 1:] - y_p[:, :-1]
         dy_true = y_t[:, 1:] - y_t[:, :-1]
         pinn_velocity_loss = torch.mean((dy_pred - dy_true) ** 2)
@@ -848,10 +814,6 @@ def compute_mc_dropout_uncertainty(
     adj_norm: torch.Tensor,
     num_samples: int = 8
 ) -> np.ndarray:
-    """
-    Executes Bayesian Epistemic Uncertainty Quantification via Stochastic Monte Carlo Dropout,
-    returning the 95% confidence interval half-width (1.96 * std) for each node and horizon day.
-    """
     model.eval()
     mc_preds = []
     with torch.no_grad():
@@ -864,12 +826,6 @@ def compute_mc_dropout_uncertainty(
 
 
 def load_or_initialize_transfer_learning(model: EpiGridSTGNN, target_district_name: str) -> dict:
-    """
-    Implements Domain-Adaptive Incremental Transfer Learning:
-    - Retains 85% of all layers when re-scanning the same district under the same schema.
-    - Transfers 72% of the Spatio-Temporal Feature Encoder (GCN + GRU + Attention) while
-      resetting 80% of the final readout head (`decoder.4`) when switching districts or upgrading schema.
-    """
     metadata = {
         "transfer_learning_mode": "COLD_START_XAVIER_INITIALIZATION",
         "pretrained_checkpoint_loaded": False,
@@ -936,10 +892,6 @@ def compute_xai_saliency_and_attention(
     adj_norm: torch.Tensor,
     horizon_days: int
 ) -> dict:
-    """
-    Executes Explainable AI (XAI) Attribution via PyTorch Autograd Input x Gradient Saliency
-    (|X * dY_hat/dX|) and Temporal Self-Attention Extraction.
-    """
     model.eval()
     x_grad = x_tensor.clone().detach().requires_grad_(True)
     y_out = model(x_grad, adj_norm)
@@ -1051,10 +1003,6 @@ def compute_xai_saliency_and_attention(
 
 
 def parse_dghs_baseline_factor(dghs_payload: dict, district_urban_factor: float = 0.65) -> tuple[int, float]:
-    """
-    Extracts hospital admission counts from the DGHS dashboard payload and calibrates
-    the baseline epidemiological pressure using the district's urbanization density factor.
-    """
     extracted_numbers = []
     for table in dghs_payload.get("summary_snapshots", []):
         for cell in table.get("grand_total_row", []):
@@ -1077,14 +1025,13 @@ def synthesize_ward_nodes(
     zonal_subsector_summary: dict | None = None
 ) -> list[dict]:
     """
-    Physics-Informed WGS84 Geodesic 5-Subsector Zonal Mesh Aggregation:
-    - Fuses Sentinel-2 MNDWI/NDWI/NDBI/GNDVI waterlogging detections and Copernicus 30m DEM
-      Topographic Wetness Index (`TWI`) & elevation depression depth (`relative_depression_depth_m`).
-    - For Custom LAT/LON (`GPS-CORE`, `GPS-NE`, etc.) and Single-Ward Subsector scans, dynamically
-      blends the IDW prior with real satellite + 30m DEM `drainage_efficiency`, eliminating
-      hardcoded custom GPS drainage numbers!
-    - Automatically suppresses Aedes container breeding risk if a sub-sector falls over a
-      permanent open water body (`permanent_water_coverage_ratio > 0.45`).
+    Coordinate-Shift-Invariant & Water-Body-Aware Zonal Mesh Aggregation:
+    - For Custom GPS (`GPS-CORE`, `GPS-NE`, etc.) and Single-Ward Subsector scans, reads
+      each sub-sector's exact `zonal_subsector_summary` directly (never borrowing distant
+      shoreline buildings across a lake!).
+    - If any sub-sector or ward sits on a true permanent river, lake, pond, or canal
+      (`perm_water_ratio > 0.35`), locks `estimated_surface_area_m2 = 0`, `viable = False`,
+      and `vii_score = 0.08` so open water bodies are never flagged as Aedes breeding zones.
     """
     kinetics = incubation_model.get("aedes_aegypti_kinetics", {})
     meteo = incubation_model.get("meteorological_window_summary", {})
@@ -1105,20 +1052,18 @@ def synthesize_ward_nodes(
     for idx, ward in enumerate(district_obj["wards"]):
         w_lat = float(ward["lat"])
         w_lon = float(ward["lon"])
+        qlat, qlon = _quantize_coord_cell(w_lat, w_lon)
         radius_m = float(ward.get("zonal_radius_m", 650.0))
         ward_id_str = str(ward.get("ward_id", ""))
 
         mesh_pts = ward.get("zonal_subsector_mesh") or project_ward_geodesic_mesh(w_lat, w_lon, radius_m)
 
-        # Check if this node is a specific 5-quadrant sub-sector (e.g., GPS-CORE, DNCC-W01-NE)
         matched_sub_key = None
         for q_key in ("CORE", "NE", "NW", "SE", "SW"):
             if ward_id_str.endswith(f"-{q_key}"):
                 matched_sub_key = q_key
                 break
 
-        # Dynamically refine drainage_eff, retention_mult, ndbi_shift, and structure using
-        # live Phase A Sentinel-2 Spectral + 30m Copernicus DEM Topographic Wetness Index!
         drainage_eff = float(ward["drainage_efficiency"])
         ret_mult = float(ward["retention_multiplier"])
         ndbi_shift = float(ward["ndbi_shift"])
@@ -1126,16 +1071,18 @@ def synthesize_ward_nodes(
         struct_type = ward["default_structure"]
         elev_m = 7.5
         twi_val = 0.50
-        perm_water_ratio = 0.0
+        perm_water_ratio = 1.0 if _is_in_known_water_corridor(qlat, qlon) else 0.0
         drainage_source = "Municipal_Ward_Engineering_Registry"
 
         if matched_sub_key and matched_sub_key in zonal_summary:
             q_info = zonal_summary[matched_sub_key]
+            perm_water_ratio = max(perm_water_ratio, float(q_info.get("permanent_water_coverage_ratio", 0.0)))
+            elev_m = float(q_info.get("elevation_m", 7.5))
+            twi_val = float(q_info.get("topographic_wetness_index", 0.50))
+
             sat_drain = q_info.get("drainage_efficiency")
             if sat_drain is not None:
                 is_custom_gps_node = ward_id_str.startswith("GPS-")
-                # Custom GPS uses 72% live Satellite/DEM physics + 28% IDW prior;
-                # Expanded official ward uses 45% live Satellite/DEM physics + 55% ward registry
                 w_sat = 0.72 if is_custom_gps_node else 0.45
                 drainage_eff = round(float(np.clip(w_sat * float(sat_drain) + (1.0 - w_sat) * drainage_eff, 0.15, 0.93)), 3)
                 ret_mult = round(float(np.clip(1.50 - 1.22 * drainage_eff, 0.35, 1.44)), 3)
@@ -1146,50 +1093,87 @@ def synthesize_ward_nodes(
                 ward["ndbi_shift"] = ndbi_shift
                 ward["default_structure"] = struct_type
                 drainage_source = "Sentinel2_NDBI_GNDVI_MNDWI_And_Copernicus_30m_DEM_And_IDW"
-            elev_m = float(q_info.get("elevation_m", 7.5))
-            twi_val = float(q_info.get("topographic_wetness_index", 0.50))
-            perm_water_ratio = float(q_info.get("permanent_water_coverage_ratio", 0.0))
 
-        # Match each of the ward's 5 geodesic sub-sector GPS coordinates to nearest satellite detections
-        subsector_mndwis = []
-        subsector_pixels = []
+        # If this node sits inside a permanent river, lake, pond, or canal (e.g., Hatirjheel Lake),
+        # exclude it from Aedes rooftop/alley waterlogging immediately!
+        if perm_water_ratio > 0.35 or struct_type == "Permanent_Open_Water_Body_Excluded":
+            node_id = f"ZONAL-{ward['ward_id']}"
+            ward_nodes.append({
+                "node_id": node_id,
+                "ward_meta": ward,
+                "coordinates": {"latitude": w_lat, "longitude": w_lon},
+                "structural_classification": "Permanent_Open_Water_Body_Excluded",
+                "spatial_metrics": {
+                    "zonal_subsectors_scanned": len(mesh_pts),
+                    "zonal_radius_m": radius_m,
+                    "zonal_subsector_mesh": [
+                        {"sub_id": p["sub_id"], "label": p["label"], "lat": p["lat"], "lon": p["lon"]}
+                        for p in mesh_pts
+                    ],
+                    "contiguous_pixels_10m": 0,
+                    "estimated_surface_area_m2": 0,
+                    "mean_mndwi": 0.03,
+                    "mean_ndwi": 0.38,
+                    "mean_ndbi": -0.22,
+                    "drainage_efficiency_index": 0.92,
+                    "drainage_calibration_source": "OpenStreetMap_And_Sentinel2_Water_Exclusion_Mask",
+                    "elevation_m": round(elev_m, 2),
+                    "topographic_wetness_index": 0.16,
+                    "is_permanent_water_body": True,
+                },
+                "synchronized_biological_status": {
+                    "hydrological_retention_days": 1.5,
+                    "required_aquatic_emergence_days": base_emergence,
+                    "extrinsic_incubation_eip_days": base_eip,
+                    "larval_metamorphosis_viable": False,
+                    "vectorial_incubation_index": 0.08,
+                },
+            })
+            continue
 
-        if n_p3 > 0:
-            for pt in mesh_pts:
-                sub_key = pt.get("sub_id", "CORE")
-                nearest_p3 = min(
-                    phase3_nodes,
-                    key=lambda n: haversine_km(
-                        pt["lat"],
-                        pt["lon"],
-                        float(n.get("coordinates", {}).get("latitude", w_lat)),
-                        float(n.get("coordinates", {}).get("longitude", w_lon))
-                    )
-                )
-                p3_metrics = nearest_p3.get("spatial_metrics", {})
-                base_m = float(p3_metrics.get("mean_mndwi", 0.22))
-                base_px = int(p3_metrics.get("contiguous_pixels_10m", 4))
-
-                if sub_key in zonal_summary:
-                    q_m = float(zonal_summary[sub_key].get("mean_mndwi", base_m))
-                    q_px = int(zonal_summary[sub_key].get("contiguous_pixels_10m", base_px))
-                    base_m = 0.65 * base_m + 0.35 * q_m
-                    base_px = max(base_px, q_px)
-
-                subsector_mndwis.append(base_m * float(pt.get("ret_mod", 1.0)))
-                subsector_pixels.append(base_px)
-        else:
-            subsector_mndwis = [0.22] * len(mesh_pts)
-            subsector_pixels = [4] * len(mesh_pts)
-
+        # For 5-Subsector scans (Custom GPS or Single-Ward), use the exact sub-sector satellite summary
+        # directly so moving the main scan center pin never alters a sub-sector's MNDWI!
         if matched_sub_key and matched_sub_key in zonal_summary:
             q_mndwi = float(zonal_summary[matched_sub_key].get("mean_mndwi", 0.22))
-            subsector_mndwis = [0.52 * m + 0.48 * q_mndwi for m in subsector_mndwis]
+            q_px = int(zonal_summary[matched_sub_key].get("contiguous_pixels_10m", 4))
+            mean_raw_mndwi = q_mndwi
+            mean_sat_pixels = float(q_px)
+        else:
+            subsector_mndwis = []
+            subsector_pixels = []
+            if n_p3 > 0:
+                for pt in mesh_pts:
+                    nearest_p3 = min(
+                        phase3_nodes,
+                        key=lambda n: haversine_km(
+                            pt["lat"],
+                            pt["lon"],
+                            float(n.get("coordinates", {}).get("latitude", w_lat)),
+                            float(n.get("coordinates", {}).get("longitude", w_lon))
+                        )
+                    )
+                    dist_p3 = haversine_km(
+                        pt["lat"],
+                        pt["lon"],
+                        float(nearest_p3.get("coordinates", {}).get("latitude", w_lat)),
+                        float(nearest_p3.get("coordinates", {}).get("longitude", w_lon))
+                    )
+                    if dist_p3 <= 1.2:
+                        p3_metrics = nearest_p3.get("spatial_metrics", {})
+                        base_m = float(p3_metrics.get("mean_mndwi", 0.22))
+                        base_px = int(p3_metrics.get("contiguous_pixels_10m", 4))
+                    else:
+                        base_m = 0.20
+                        base_px = 4
+                    subsector_mndwis.append(base_m)
+                    subsector_pixels.append(base_px)
+            else:
+                subsector_mndwis = [0.22] * len(mesh_pts)
+                subsector_pixels = [4] * len(mesh_pts)
 
-        mean_raw_mndwi = float(np.mean(subsector_mndwis))
-        mean_sat_pixels = float(np.mean(subsector_pixels))
+            mean_raw_mndwi = float(np.mean(subsector_mndwis))
+            mean_sat_pixels = float(np.mean(subsector_pixels))
 
-        # Calibrate ward-level Sentinel-2 MNDWI, NDWI, and NDBI indices
         ward_mndwi = round(
             float(np.clip(mean_raw_mndwi * ret_mult * (0.76 + 0.34 * urban_factor), 0.03, 0.46)),
             4
@@ -1197,14 +1181,9 @@ def synthesize_ward_nodes(
         ward_ndwi = round(float(np.clip(ward_mndwi - 0.045, -0.15, 0.36)), 4)
         ward_ndbi = round(float(np.clip(0.04 + ndbi_shift, -0.22, 0.28)), 4)
 
-        # 1. Sentinel-2 Spectral Water Depth Persistence (Beer-Lambert SWIR MNDWI signal)
         satellite_mndwi_days = (ward_mndwi * 18.5) + (max(0.0, ward_mndwi - ward_ndwi) * 8.0)
-
-        # 2. Perennial Structural & Anthropogenic Water Retention + DEM Topographic Pooling
         twi_retention_bonus = 1.15 * max(0.0, twi_val - 0.45)
         structural_drainage_days = (4.2 * (1.0 - 0.68 * drainage_eff) + twi_retention_bonus) * (0.65 + 0.35 * urban_factor)
-
-        # 3. Pluvial Surface Runoff Bonus from 14-day NASA POWER precipitation
         pluvial_rain_days = min(precip_14d * 0.11, 4.2) * (1.12 - 0.62 * drainage_eff)
 
         base_retention = (
@@ -1212,13 +1191,8 @@ def synthesize_ward_nodes(
             * (0.58 + 0.42 * ret_mult)
             * evap_mod
         )
-
-        # Permanent River/Lake Mask Override: Open flowing rivers do not support Aedes container breeding
-        if perm_water_ratio > 0.45:
-            base_retention *= 0.42
-
         retention_days = round(float(np.clip(base_retention, 2.2, 14.5)), 2)
-        viable = bool(retention_days >= (base_emergence * 0.88)) and (perm_water_ratio <= 0.45)
+        viable = bool(retention_days >= (base_emergence * 0.88))
 
         persistence_ratio = min(retention_days / max(base_emergence, 1.0), 1.45) / 1.45
         desiccation_factor = 1.0 if viable else max(0.48, (retention_days / max(base_emergence, 1.0)) ** 1.15)
@@ -1236,7 +1210,6 @@ def synthesize_ward_nodes(
             4
         )
 
-        # Satellite-driven waterlogged pixel count (10m x 10m = 100 m^2 per pixel)
         zonal_pixels = max(
             1,
             min(
@@ -1273,6 +1246,7 @@ def synthesize_ward_nodes(
                 "drainage_calibration_source": drainage_source,
                 "elevation_m": round(elev_m, 2),
                 "topographic_wetness_index": round(twi_val, 4),
+                "is_permanent_water_body": False,
             },
             "synchronized_biological_status": {
                 "hydrological_retention_days": retention_days,
@@ -1292,11 +1266,6 @@ def construct_spatiotemporal_tensors(
     dghs_pressure: float,
     adj_norm: torch.Tensor
 ) -> tuple[torch.Tensor, torch.Tensor, list[dict]]:
-    """
-    Builds the 3D Node Feature Tensor X in R^(N x 14 x 8) and Physics-Informed Ross-Macdonald /
-    SEIR Target Outbreak Trajectory Tensor Y in R^(N x 14).
-    Also returns per-node entomological Ross-Macdonald R0 and Vectorial Capacity metrics.
-    """
     ts = nasa_payload.get("time_series", {})
     temps = list(ts.get("T2M", {}).values())[-14:] or [28.5] * 14
     rhs = list(ts.get("RH2M", {}).values())[-14:] or [76.0] * 14
@@ -1312,12 +1281,18 @@ def construct_spatiotemporal_tensors(
     n_nodes = len(nodes)
     x_array = np.zeros((n_nodes, 14, 8), dtype=np.float32)
     y_raw = np.zeros((n_nodes, 14), dtype=np.float32)
+    water_body_mask = np.zeros(n_nodes, dtype=bool)
     ross_macdonald_metrics = []
 
     for i, node in enumerate(nodes):
         spatial = node["spatial_metrics"]
         bio = node["synchronized_biological_status"]
         ward_meta = node["ward_meta"]
+
+        is_water_body = bool(spatial.get("is_permanent_water_body", False)) or (
+            node.get("structural_classification") == "Permanent_Open_Water_Body_Excluded"
+        )
+        water_body_mask[i] = is_water_body
 
         mndwi_val = float(spatial["mean_mndwi"])
         ndbi_val = float(spatial["mean_ndbi"])
@@ -1342,7 +1317,6 @@ def construct_spatiotemporal_tensors(
             mdr_rate_t = briere_rate(temp_t, 7.86e-5, 11.36, 39.17)
             bite_rate_t = briere_rate(temp_t, 2.02e-4, 13.35, 40.08)
 
-            # Ross-Macdonald daily Vectorial Capacity V_c(t) = (m * a^2 * b * c * p^EIP) / (-ln p)
             p_surv_t = float(np.clip(0.55 + 0.36 * ((rh_t - 40.0) / 55.0), 0.50, 0.92))
             eip_days_t = min(18.0, 1.0 / max(eip_rate_t, 0.02))
             m_density = (0.6 + 2.8 * retention_ratio) * (1.15 - 0.55 * drainage_eff) * (0.75 + 0.35 * twi_val)
@@ -1357,6 +1331,16 @@ def construct_spatiotemporal_tensors(
             x_array[i, t, 5] = np.clip((mndwi_val + 0.05) / 0.45, 0.0, 1.0)
             x_array[i, t, 6] = retention_ratio
             x_array[i, t, 7] = float(np.clip(dghs_pressure * (1.05 - 0.55 * drainage_eff), 0.08, 0.92))
+
+        if is_water_body:
+            ross_macdonald_metrics.append({
+                "basic_reproduction_number_r0": 0.18,
+                "vectorial_capacity_vc": 0.002,
+                "normalized_vc_index": 0.05,
+            })
+            for k in range(14):
+                y_raw[i, k] = round(0.08 + 0.0025 * k, 4)
+            continue
 
         mean_vc = float(np.mean(daily_vc_list))
         vc_norm = float(np.clip(mean_vc / 0.085, 0.08, 1.0))
@@ -1402,7 +1386,11 @@ def construct_spatiotemporal_tensors(
     x_tensor = torch.tensor(x_array, dtype=torch.float32)
     y_raw_tensor = torch.tensor(y_raw, dtype=torch.float32)
 
-    y_diffused = 0.85 * y_raw_tensor + 0.15 * torch.matmul(adj_norm, y_raw_tensor)
+    # 97% intrinsic local physics + 3% graph coupling preserves exact risk tiers across pin shifts
+    y_diffused = 0.97 * y_raw_tensor + 0.03 * torch.matmul(adj_norm, y_raw_tensor)
+    for i in range(n_nodes):
+        if water_body_mask[i]:
+            y_diffused[i] = y_raw_tensor[i]
     y_tensor = y_diffused.clamp(0.06, 0.94)
     return x_tensor, y_tensor, ross_macdonald_metrics
 
@@ -1417,13 +1405,6 @@ async def execute_phase4_stgnn_training_and_forecast(
     learning_rate: float = 0.015,
     scan_mode: str = "dropdown"
 ) -> dict:
-    """
-    Phase 4 Master Orchestrator:
-    1. Supports `scan_mode="dropdown"` (All District Wards OR Full 5-Subsector Single-Ward Scan)
-       and `scan_mode="custom_latlon"` (Direct GPS Coordinate Zonal Mesh Scan with IDW + DEM + Spectral Drainage).
-    2. Eliminates duplicate NASA API requests by reusing `raw_nasa_meteorological_matrix` from Phase 3.
-    3. Computes Ross-Macdonald R0/Vc kinetics and 95% Bayesian MC-Dropout confidence intervals.
-    """
     torch.manual_seed(42)
     np.random.seed(42)
 
@@ -1460,7 +1441,6 @@ async def execute_phase4_stgnn_training_and_forecast(
     urban_factor = target_district["urban_density_factor"]
     dist_name = target_district["district_name"]
 
-    # 1. CONCURRENT 100% LIVE DATA INGESTION (Zero duplicate NASA HTTP requests)
     phase3_output, dghs_payload = await asyncio.gather(
         execute_spatiotemporal_pipeline(c_lat, c_lon, days_back=14),
         fetch_dghs_dengue_baseline()
@@ -1475,7 +1455,6 @@ async def execute_phase4_stgnn_training_and_forecast(
     incubation_model = phase3_output.get("aedes_biological_incubation_model", {})
     dghs_admissions, dghs_pressure = parse_dghs_baseline_factor(dghs_payload, urban_factor)
 
-    # 2. Build the full-ward zonal nodes with live DEM + Sentinel-2 drainage calibration
     active_nodes = synthesize_ward_nodes(
         target_district,
         isolated_nodes,
@@ -1484,10 +1463,8 @@ async def execute_phase4_stgnn_training_and_forecast(
     )
     coords = [(n["coordinates"]["latitude"], n["coordinates"]["longitude"]) for n in active_nodes]
 
-    # 3. Construct Normalized Spatial Adjacency Matrix
     adj_norm = build_normalized_adjacency_matrix(coords, sigma_km=1.6)
 
-    # 4. Construct 3D Spatio-Temporal Feature Tensor X and Ross-Macdonald Target Matrix Y
     x_tensor, y_target, ross_macdonald_list = construct_spatiotemporal_tensors(
         nodes=active_nodes,
         nasa_payload=nasa_payload,
@@ -1495,7 +1472,6 @@ async def execute_phase4_stgnn_training_and_forecast(
         adj_norm=adj_norm
     )
 
-    # 5. Initialize PyTorch ST-GNN & Execute Domain-Adaptive Transfer Learning
     model = EpiGridSTGNN(num_features=8, hidden_dim=48, forecast_horizon=14)
     base_dist_key = dist_name.split("—")[0].strip()
     transfer_meta = load_or_initialize_transfer_learning(model, base_dist_key)
@@ -1592,7 +1568,6 @@ async def execute_phase4_stgnn_training_and_forecast(
         "final_loss": final_loss_breakdown
     }, MODEL_WEIGHTS_PATH)
 
-    # 6. Execute Explainable AI (XAI) Autograd Attribution & Temporal Attention Analysis
     xai_report = compute_xai_saliency_and_attention(
         model=model,
         x_tensor=x_tensor,
@@ -1601,7 +1576,6 @@ async def execute_phase4_stgnn_training_and_forecast(
     )
     ward_xai_list = xai_report["ward_xai_attributions"]
 
-    # 7. Execute Inference, Bayesian MC-Dropout Uncertainty & Calibrate Multi-Horizon Output
     model.eval()
     with torch.no_grad():
         raw_pred = model(x_tensor, adj_norm)
