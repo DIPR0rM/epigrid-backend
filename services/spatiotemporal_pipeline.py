@@ -110,14 +110,17 @@ def estimate_coordinate_urban_morphology(lat: float, lon: float) -> float:
 
 def _is_in_known_water_corridor(lat: float, lon: float) -> bool:
     """
-    Strictly checks if (lat, lon) is physically INSIDE the water channel of Hatirjheel
-    or major lakes/rivers (never flagging dry-land shoreline streets like BITAC Rd!).
+    Strictly checks if (lat, lon) is physically INSIDE the water channel of Hatirjheel,
+    Padma River, or major lakes/rivers (never flagging dry-land shoreline streets!).
     """
     # Tight Hatirjheel water channel centerline check (width ~140m = ±0.0011 deg around water center)
     if 23.7535 <= lat <= 23.7702 and 90.4038 <= lon <= 90.4220:
         channel_lon = 90.4068 + (lat - 23.7535) * 0.82
         if abs(lon - channel_lon) <= 0.0011:
             return True
+    # Padma River main channel south of Rajshahi embankment
+    if 24.3400 <= lat <= 24.3585 and 88.5500 <= lon <= 88.6500:
+        return True
     for lat0, lat1, lon0, lon1, _ in KNOWN_PERMANENT_WATER_POLYGONS:
         if lat0 <= lat <= lat1 and lon0 <= lon <= lon1:
             return True
@@ -126,7 +129,7 @@ def _is_in_known_water_corridor(lat: float, lon: float) -> bool:
 
 async def detect_permanent_water_bodies_osm(sub_coords: dict[str, tuple[float, float]]) -> dict[str, bool]:
     """
-    Queries OpenStreetMap Overpass API with a strict 15-meter point-in-water radius
+    Queries OpenStreetMap Overpass API with a strict 12-meter point-in-water radius
     so dry land next to a lake is NEVER misclassified as water.
     """
     results: dict[str, bool] = {}
@@ -153,17 +156,24 @@ async def detect_permanent_water_bodies_osm(sub_coords: dict[str, tuple[float, f
             union_parts.append(f'way["natural"="water"](around:12,{qlat},{qlon});')
             union_parts.append(f'way["waterway"~"river|canal"](around:12,{qlat},{qlon});')
 
-        query = f"[out:json][timeout:3];({''.join(union_parts)});out ids tags;"
+        query = f"[out:json][timeout:3];({''.join(union_parts)});out center tags;"
         async with httpx.AsyncClient(timeout=3.2) as client:
             resp = await client.post(OVERPASS_API_URL, data={"data": query})
             if resp.status_code == 200:
-                # Only if a single point query returns an enclosing water way within 12m
                 elements = resp.json().get("elements", [])
-                if not elements:
-                    for _, _, _, cache_key in uncached_keys:
-                        _WATER_CACHE[cache_key] = False
+                for k, qlat, qlon, cache_key in uncached_keys:
+                    is_water = False
+                    for el in elements:
+                        c = el.get("center") or {"lat": el.get("lat"), "lon": el.get("lon")}
+                        if c.get("lat") is not None and c.get("lon") is not None:
+                            if _haversine_km(qlat, qlon, float(c["lat"]), float(c["lon"])) <= 0.08:
+                                is_water = True
+                                break
+                    _WATER_CACHE[cache_key] = is_water
+                    results[k] = is_water
     except Exception:
-        pass
+        for k, _, _, cache_key in uncached_keys:
+            _WATER_CACHE[cache_key] = results.get(k, False)
 
     return results
 
@@ -176,7 +186,7 @@ def _project_5_subsector_coords(lat: float, lon: float, radius_m: float = 650.0)
     return {
         "CORE": (round(lat, 6), round(lon, 6)),
         "NE":   (round(lat + dlat, 6), round(lon + dlon, 6)),
-        "NW":   (round(lat + dlat, 6), round(lon - dlon, 6),),
+        "NW":   (round(lat + dlat, 6), round(lon - dlon, 6)),
         "SE":   (round(lat - dlat, 6), round(lon + dlon, 6)),
         "SW":   (round(lat - dlat, 6), round(lon - dlon, 6)),
     }
@@ -186,7 +196,7 @@ async def fetch_subsector_elevation_profile(lat: float, lon: float, radius_m: fl
     """
     Smooth, Coordinate-Shift-Invariant 30m Copernicus DEM & Topographic Wetness Index (TWI):
     Queries each sub-sector's center and its 150m N/S/E/W ring so each point's depression
-    depth and TWI depend strictly on its own local topography.
+    depth and TWI depend strictly on its own local topography (never on the other 4 scan points).
     """
     sub_coords = _project_5_subsector_coords(lat, lon, radius_m)
     sub_ids = ["CORE", "NE", "NW", "SE", "SW"]
@@ -203,7 +213,13 @@ async def fetch_subsector_elevation_profile(lat: float, lon: float, radius_m: fl
         ck = f"{qlat:.4f},{qlon:.4f}"
         if ck not in _TERRAIN_CACHE:
             uncached_sub_ids.append((k, qlat, qlon, ck))
-            for dlat, dlon in [(0.0, 0.0), (ring_offset_deg, 0.0), (-ring_offset_deg, 0.0), (0.0, ring_offset_deg), (0.0, -ring_offset_deg)]:
+            for dlat, dlon in [
+                (0.0, 0.0),
+                (ring_offset_deg, 0.0),
+                (-ring_offset_deg, 0.0),
+                (0.0, ring_offset_deg),
+                (0.0, -ring_offset_deg),
+            ]:
                 query_lats.append(str(round(qlat + dlat, 5)))
                 query_lons.append(str(round(qlon + dlon, 5)))
 
@@ -235,7 +251,6 @@ async def fetch_subsector_elevation_profile(lat: float, lon: float, radius_m: fl
                 c_elev = base_e + 1.15 * math.sin(qlat * 85.0 + qlon * 65.0)
                 ring_mean = base_e + 0.95 * math.cos(qlon * 80.0 - qlat * 60.0)
 
-            # Smooth low-frequency micro-relief (no rapid oscillation over 20m!)
             sub_meter = 0.25 * math.sin(qlat * 90.0 + qlon * 70.0)
             elev_m = round(max(0.5, c_elev + sub_meter), 2)
             dep_m = round(float(np.clip((ring_mean - elev_m) + 0.22 * math.cos(qlat * 85.0 - qlon * 65.0), -1.5, 1.8)), 3)
@@ -435,7 +450,6 @@ def generate_calibrated_urban_tensor(
         b08[r0:r1, c0:c1] = 0.220 * (1.10 - 0.26 * pooling_potential)
         b11[r0:r1, c0:c1] = 0.235 * (0.90 + 0.24 * pooling_potential)
 
-        # Place deterministic smooth depression at sub-sector center
         green_val = 0.125 + 0.075 * pooling_potential
         nir_val = 0.125 - 0.050 * pooling_potential
         swir_val = (0.115 - 0.072 * pooling_potential) * max(0.74, 1.0 - 0.18 * pluvial_boost)
@@ -525,13 +539,12 @@ def isolate_micro_waterlogging_coordinates(
     elevation_profile: dict | None = None
 ) -> dict:
     """
-    Shoreline-Safe Waterlogging & Permanent Water-Body Mask:
+    Shoreline-Safe Waterlogging, USDA-NRCS Runoff Curve Number (CN) & Sub-Canopy Urban Physics:
     1. Only classifies a sub-sector as a Permanent Open Water Body (Green) if the
        EXACT 3x3 center pixel patch at that sub-sector's coordinate is open water
        (>= 67% of the 3x3 center pixels, or physically inside an OSM/known water channel).
-    2. When a pin is on dry land NEXT to a lake (like BITAC Rd at 23.7592, 90.4030 next
-       to Hatirjheel Lake), it masks out the lake pixels inside the 15x15 window and
-       evaluates strictly the dry-land urban pixels!
+    2. Computes dynamic drainage efficiency using USDA-NRCS Curve Number (CN) + Sub-Canopy
+       Urban Shading Regime Switch (fixing the Rajshahi roadside tree-canopy illusion).
     """
     eps = 1e-6
     b03 = tensor[:, :, 0]
@@ -681,7 +694,7 @@ def isolate_micro_waterlogging_coordinates(
     for sub_id, (slat, slon) in sub_coords.items():
         sr, sc = _latlon_to_grid_rc(slat, slon, bbox, height, width)
 
-        # 1. Check ONLY the tight 3x3 center patch right under the pin to decide if the pin itself is in a lake/river!
+        # 1. Check ONLY the tight 3x3 center patch right under the pin for permanent open lakes/rivers
         cr0, cr1 = max(0, sr - 1), min(height, sr + 2)
         cc0, cc1 = max(0, sc - 1), min(width, sc + 2)
         center_3x3_water_ratio = float(np.mean(permanent_open_water_mask[cr0:cr1, cc0:cc1]))
@@ -700,6 +713,7 @@ def isolate_micro_waterlogging_coordinates(
                 "drainage_efficiency": 0.92,
                 "retention_multiplier": 0.36,
                 "ndbi_shift": -0.20,
+                "scs_curve_number_cn": 52.0,
                 "elevation_m": float(dem_info.get("elevation_m", 5.5)),
                 "relative_depression_depth_m": 0.0,
                 "topographic_wetness_index": 0.16,
@@ -708,8 +722,7 @@ def isolate_micro_waterlogging_coordinates(
             }
             continue
 
-        # 2. If the pin is on dry land (even right next to Hatirjheel Lake!), evaluate only the DRY LAND
-        # pixels inside the 15x15 window so nearby lake water never distorts shoreline buildings!
+        # 2. Evaluate strictly DRY LAND pixels inside the 15x15 sub-sector window
         r0, r1 = max(0, sr - 7), min(height, sr + 8)
         c0, c1 = max(0, sc - 7), min(width, sc + 8)
         sub_mndwi = mndwi[r0:r1, c0:c1]
@@ -732,41 +745,66 @@ def isolate_micro_waterlogging_coordinates(
             peak_mndwi = float(np.percentile(sub_mndwi[sub_water], 75))
             water_px = int(np.clip(np.sum(sub_water), 1, 15))
         elif np.any(sub_dry_land):
-            peak_mndwi = float(np.clip(np.percentile(sub_mndwi[sub_dry_land], 85), 0.04, 0.25))
+            peak_mndwi = float(np.clip(np.percentile(sub_mndwi[sub_dry_land], 85), 0.04, 0.28))
             water_px = 1
         else:
             peak_mndwi = 0.08
             water_px = 1
 
-        # Smooth distance-weighted blend with intrinsic urban morphology so 20m shifts on a GeoTIFF
-        # never jump across pixel boundaries
+        # 3. Physics-Informed USDA-NRCS Curve Number (CN) + Sub-Canopy Urban Hydrology
         local_morph = estimate_coordinate_urban_morphology(slat, slon)
         twi_val = float(dem_info.get("topographic_wetness_index", 0.50))
         dep_depth_m = float(dem_info.get("relative_depression_depth_m", 0.0))
         elev_m = float(dem_info.get("elevation_m", 7.5))
 
-        smooth_mndwi = 0.50 * peak_mndwi + 0.50 * (0.06 + 0.22 * local_morph + 0.08 * twi_val)
+        # Regime Switch: In dense urban centers (local_morph >= 0.56), high GNDVI is roadside/rooftop
+        # tree canopy (which shades puddles & clogs drains with leaf litter) rather than open farm soil!
+        gndvi_norm = float(np.clip((mean_sub_gndvi + 0.10) / 0.50, 0.0, 1.0))
+        if local_morph >= 0.56:
+            soil_infiltration_credit = 0.04 * (1.0 - local_morph) * gndvi_norm
+            canopy_shade_impedance = 0.10 * gndvi_norm * (local_morph - 0.50)
+        else:
+            soil_infiltration_credit = 0.34 * (1.0 - local_morph) * gndvi_norm
+            canopy_shade_impedance = 0.0
 
-        pervious_gain = 0.42 * float(np.clip((mean_sub_gndvi + 0.15) / 0.55, 0.0, 1.0))
-        impervious_loss = 0.34 * float(np.clip((mean_sub_ndbi + 0.15) / 0.42, 0.0, 1.0))
-        waterlogging_loss = 0.36 * float(np.clip((smooth_mndwi - 0.04) / 0.32, 0.0, 1.0))
-        topographic_loss = 0.28 * float(np.clip(twi_val - 0.35, -0.20, 0.60))
+        ndbi_impervious = float(np.clip((mean_sub_ndbi + 0.15) / 0.40, 0.0, 1.0))
+        scs_cn = round(
+            float(
+                np.clip(
+                    50.0 + 38.0 * local_morph + 12.0 * ndbi_impervious - 18.0 * soil_infiltration_credit,
+                    52.0,
+                    96.0
+                )
+            ),
+            1
+        )
+        # Potential maximum soil/drainage retention capacity S (mm) normalized to [0, 1]
+        s_capacity_mm = (25400.0 / scs_cn) - 254.0
+        cn_drainage_base = float(np.clip(s_capacity_mm / 180.0, 0.14, 0.88))
+
+        smooth_mndwi = 0.55 * peak_mndwi + 0.45 * (0.08 + 0.24 * local_morph + 0.10 * twi_val)
+        waterlogging_penalty = 0.28 * float(np.clip((smooth_mndwi - 0.05) / 0.30, 0.0, 1.0))
+        topographic_bowl_penalty = 0.22 * float(np.clip(twi_val - 0.42, -0.25, 0.55))
 
         dynamic_drainage_eff = round(
             float(
                 np.clip(
-                    0.58 + pervious_gain - impervious_loss - waterlogging_loss - topographic_loss,
+                    cn_drainage_base
+                    + soil_infiltration_credit
+                    - canopy_shade_impedance
+                    - waterlogging_penalty
+                    - topographic_bowl_penalty,
                     0.16,
                     0.92
                 )
             ),
             3
         )
-        dynamic_retention_mult = round(float(np.clip(1.50 - 1.22 * dynamic_drainage_eff, 0.36, 1.42)), 3)
-        dynamic_ndbi_shift = round(float(np.clip(mean_sub_ndbi - 0.04, -0.20, 0.24)), 3)
+        dynamic_retention_mult = round(float(np.clip(1.52 - 1.25 * dynamic_drainage_eff, 0.36, 1.42)), 3)
+        dynamic_ndbi_shift = round(float(np.clip(0.22 - 0.42 * dynamic_drainage_eff, -0.20, 0.24)), 3)
         dominant_struct = (
             "Concrete_Rooftop_Depression"
-            if mean_sub_ndbi >= -0.04 and dep_depth_m <= 0.15
+            if (mean_sub_ndbi >= -0.04 and dep_depth_m <= 0.15)
             else "Structural_Alley_Retention_Channel"
         )
 
@@ -779,6 +817,7 @@ def isolate_micro_waterlogging_coordinates(
             "drainage_efficiency": dynamic_drainage_eff,
             "retention_multiplier": dynamic_retention_mult,
             "ndbi_shift": dynamic_ndbi_shift,
+            "scs_curve_number_cn": scs_cn,
             "elevation_m": elev_m,
             "relative_depression_depth_m": dep_depth_m,
             "topographic_wetness_index": round(twi_val, 4),
@@ -848,7 +887,7 @@ async def execute_spatiotemporal_pipeline(
     )
 
     return {
-        "pipeline_phase": "Phase 3: Spatio-Temporal Pipeline, 30m DEM & Shoreline-Safe Water Exclusion",
+        "pipeline_phase": "Phase 3: Spatio-Temporal Pipeline, 30m DEM, SCS Curve Number & Shoreline-Safe Water Exclusion",
         "execution_timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "target_epicenter": {
             "latitude": lat,
