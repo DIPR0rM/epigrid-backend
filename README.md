@@ -254,7 +254,7 @@ To prove the mathematical and biological precision of **EpiGrid v7.0**, we exami
 ### 7.2 Micro-Topographical Differentiation Across the 5 Campus Sub-Sectors
 When `RCC-W30` is selected, the WGS84 Geodesic Mesh Projector expands the $850\text{m}$ campus zone into 5 sub-sectors (`CORE`, `NW`, `NE`, `SE`, `SW`). Notice how the **30m Copernicus DEM** and **Autonomous USDA-NRCS Curve Number ($CN$)** engine separate low-lying waterlogged basins from higher well-drained ridges across the university campus:
 
-| Sub-Sector ID | Campus Geographic Zone | 30m DEM Elev ($z$) | Topographic Wetness ($\text{TWI}$) | Autonomous Drainage ($\eta_{\text{drain}}$) | Larval Viability ($\tau_{\text{ret}} \ge 8.65\text{d}$) | Ross-Macdonald $R_0$ | Day +1 Prob | Day +7 Prob | Day +14 Prob ($\pm\text{CI}_{95\%}$) | 4-Tier Risk Status |
+| Sub-Sector ID | Campus Geographic Zone | 30m DEM Elev ($z$) | Topographic Wetness ($\text{TWI}$) | Autonomous Drainage ($\eta_{\text{drain}}$) | Larval Viability ($\tau_{\text{ret}} \ge 8.65\text{d}$) | Ross-Macdonald $R_0$ | Day +1 Prob | Day +7 Prob | Day +14 Prob ($\pm\text{CI}_{95\\%}$) | 4-Tier Risk Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **`RCC-W30-NW`** | North-West Boundary (Station / Low Basin) | **`22.20m`** | **`0.69`** | **`28%`** | **Yes (`Larval Viable`)** | **`2.48`** | `52.8%` | `71.2%` | **`81.6% (±1.8%)`** | 🔴 **CRITICAL RISK** |
 | **`RCC-W30-CORE`** | Central Core (Academic & Dormitory Hub) | **`22.29m`** | **`0.63`** | **`36%`** | **Yes (`Larval Viable`)** | **`2.08`** | `44.5%` | `59.7%` | **`68.5% (±3.9%)`** | 🟠 **HIGH RISK** |
