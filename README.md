@@ -131,15 +131,15 @@ EpiGrid is powered by **`EpiGridSTGNN`**, a multi-layer **Spatio-Temporal Graph 
 Rather than hardcoding `"drainage_eff"` in a dictionary, EpiGrid computes drainage efficiency autonomously from each coordinate's physical geography and transfers it into **three distinct stages** of the AI pipeline:
 
 * **Stage A — Physical Derivation (`spatiotemporal_pipeline.py` & `st_gnn_engine.py`):**
-  1. **Copernicus 30m DEM 5-Point Local Terrain Ring:** For any coordinate $(\phi, \lambda)$, the engine queries its center elevation $z_c$ and a fixed $150\text{m}$ North/South/East/West ring ($\bar{z}_{\text{ring}}$) to calculate intrinsic depression depth $\Delta z = \bar{z}_{\text{ring}} - z_c$ and **Topographic Wetness Index ($\text{TWI} \in [0.15, 0.94]$)**.
-  2. **USDA-NRCS Runoff Curve Number ($CN$) & Sub-Canopy Regime Switch:** Combines urban built-up morphology ($I_{\text{urb}}$), Sentinel-2 SWIR `NDBI`, and `GNDVI`. Crucially, in dense urban centers ($I_{\text{urb}} \ge 0.56$), high `GNDVI` is recognized as **roadside/rooftop tree canopy shading concrete drains** (which impedes evaporation and traps leaf litter) rather than rural farm soil.
+  1. **Copernicus 30m DEM 5-Point Local Terrain Ring:** For any coordinate $(\phi, \lambda)$, the engine queries its center elevation $z_c$ and a fixed $150\text{m}$ North/South/East/West ring ($`\bar{z}_{\text{ring}}`$) to calculate intrinsic depression depth $`\Delta z = \bar{z}_{\text{ring}} - z_c`$ and **Topographic Wetness Index ($\text{TWI} \in [0.15, 0.94]$)**.
+  2. **USDA-NRCS Runoff Curve Number ($CN$) & Sub-Canopy Regime Switch:** Combines urban built-up morphology ($`I_{\text{urb}}`$), Sentinel-2 SWIR `NDBI`, and `GNDVI`. Crucially, in dense urban centers ($I_{\text{urb}} \ge 0.56$), high `GNDVI` is recognized as **roadside/rooftop tree canopy shading concrete drains** (which impedes evaporation and traps leaf litter) rather than rural farm soil.
   3. **Shoreline-Safe Permanent Water Exclusion:** Checks the exact $3\times 3$ center pixel patch in Sentinel-2 (`SCL == 6` or deep `NDWI > 0.22`) plus **OpenStreetMap Overpass API** water polygons. True rivers, lakes, and ponds are locked to $\eta_{\text{drain}} = 0.92$, `estimated_surface_area_m2 = 0`, and `larval_metamorphosis_viable = False`.
 * **Stage B — Direct Injection into the 8D Neural Input Tensor ($X_{i,t,5..7}$):**
   1. **Feature #5 (`Sentinel2_MNDWI_Water_Index`):** Scaled by the drainage retention multiplier $M_{\text{ret}} = \text{clip}(1.52 - 1.25\,\eta_{\text{drain}}, 0.36, 1.42)$.
   2. **Feature #6 (`Hydrological_Retention_Ratio`):** The ratio of standing water persistence duration $\tau_{\text{ret}}(\eta_{\text{drain}}, \text{TWI}, \text{MNDWI})$ to required Brière larval emergence days $\tau_{\text{aquatic}}(T)$.
   3. **Feature #7 (`DGHS_Endemic_Baseline_Pressure`):** Modulated by local drainage impedance $(1.05 - 0.55\,\eta_{\text{drain}})$.
 * **Stage C — Autograd Gradient Flow Back to Hydrology (`XAI`):**
-  During `compute_xai_saliency_and_attention()`, PyTorch computes the partial derivative $\left|\frac{\partial \hat{Y}_{i,h}}{\partial X_{i,t,5..6}} \cdot X_{i,t,5..6}\right|$, quantifying the exact percentage of outbreak risk driven by poor drainage and surface waterlogging.
+  During `compute_xai_saliency_and_attention()`, PyTorch computes the partial derivative $`\left|\frac{\partial \hat{Y}_{i,h}}{\partial X_{i,t,5..6}} \cdot X_{i,t,5..6}\right|`$, quantifying the exact percentage of outbreak risk driven by poor drainage and surface waterlogging.
 
 ### 4.3 How Persistent Transfer Memory (`models/epigrid_stgnn_weights.pt`) Actually Works
 Every time a scan completes, `EpiGridSTGNN` serializes its learned state dictionary and telemetry metadata into `models/epigrid_stgnn_weights.pt` (`TRANSFER_SCHEMA_VERSION = 7`). On the next scan:
@@ -212,11 +212,11 @@ Standard Binary Cross-Entropy $\text{BCE}(\hat{Y}, Y) = -\left[Y \ln \hat{Y} + (
 
 $$\mathcal{D}_{\text{KL}}(Y \parallel \hat{Y}) = \text{BCE}(\hat{Y}, Y) - H(Y) = Y \ln\!\left(\frac{Y}{\hat{Y}}\right) + (1 - Y)\ln\!\left(\frac{1 - Y}{1 - \hat{Y}}\right) \ge 0$$
 
-*Proof:* By Gibbs' inequality, $\mathcal{D}_{\text{KL}}(Y \parallel \hat{Y}) \ge 0$ for all $Y, \hat{Y} \in (0, 1)$, with equality $\mathcal{D}_{\text{KL}}(Y \parallel \hat{Y}) = 0.000000$ **if and only if** $\hat{Y} = Y$. Combined with Multi-Horizon Frobenius MSE, Residual Graph Laplacian Smoothness ($L = I - \hat{A}$), and the **PINN First-Order Temporal Velocity Residual**, the total objective is:
+*Proof:* By Gibbs' inequality, $`\mathcal{D}_{\text{KL}}(Y \parallel \hat{Y}) \ge 0$ for all $Y, \hat{Y} \in (0, 1)`$, with equality $`\mathcal{D}_{\text{KL}}(Y \parallel \hat{Y}) = 0.000000`$ **if and only if** $\hat{Y} = Y$. Combined with Multi-Horizon Frobenius MSE, Residual Graph Laplacian Smoothness ($L = I - \hat{A}$), and the **PINN First-Order Temporal Velocity Residual**, the total objective is:
 
 $$\mathcal{L}_{\text{total}} = \mathcal{D}_{\text{KL}}(Y \parallel \hat{Y}) + \lambda_{\text{mse}} \|\hat{Y} - Y\|_F^2 + \frac{\lambda_{\text{lap}}}{N \cdot K}\text{Tr}\!\left[(\hat{Y} - Y)^\top (I - \hat{A})(\hat{Y} - Y)\right] + \lambda_{\text{pinn}} \left\|(\hat{Y}_{:, t+1} - \hat{Y}_{:, t}) - (Y_{:, t+1} - Y_{:, t})\right\|_2^2$$
 
-Every term in $\mathcal{L}_{\text{total}}$ vanishes at $\hat{Y} = Y$, enabling backpropagation to converge down to $\mathcal{L}_{\text{total}} \le 0.00009$ ($99.6\%+$ accuracy).
+Every term in $`\mathcal{L}_{\text{total}}`$ vanishes at $\hat{Y} = Y$, enabling backpropagation to converge down to $`\mathcal{L}_{\text{total}} \le 0.00009`$ ($`99.6\%+`$ accuracy).
 
 ---
 
@@ -232,7 +232,7 @@ Every term in $\mathcal{L}_{\text{total}}$ vanishes at $\hat{Y} = Y$, enabling b
 | **`R₀ = X.XX` (Ross-Macdonald $R_0$)** | Basic Reproduction Number: expected secondary dengue transmissions generated by a single primary case. $R_0 > 1.0$ indicates active outbreak amplification; $R_0 \le 1.0$ indicates subcritical containment. |
 | **`Larval Viable` vs. `Non-Viable`** | **Larval Viable:** Standing water persists longer than the Brière larval emergence threshold ($\tau_{\text{ret}} \ge 0.88\,\tau_{\text{aquatic}}$), allowing adult mosquitoes to hatch. **Non-Viable:** Standing water drains or evaporates before larvae can pupate. |
 | **`Day +14 (±CI95)`** | Forecasted outbreak probability on the selected horizon day along with the **95% Bayesian Epistemic Confidence Interval ($\pm 1.96\sigma_{\text{MC}}$)** computed across 8 stochastic Monte Carlo Dropout passes. |
-| **`Dominant XAI Driver & Attention`** | The #1 physical pillar responsible for that sector's risk (computed via PyTorch Autograd Input $\times$ Gradient Saliency $\left|X \cdot \partial\hat{Y}/\partial X\right|$), the historical day with **Peak GRU Temporal Attention**, and the matched **WHO/DGHS Graph RAG SOP**. |
+| **`Dominant XAI Driver & Attention`** | The #1 physical pillar responsible for that sector's risk (computed via PyTorch Autograd Input $\times$ Gradient Saliency ($`\lvert X \cdot \partial\hat{Y}/\partial X \rvert`$), the historical day with **Peak GRU Temporal Attention**, and the matched **WHO/DGHS Graph RAG SOP**. |
 | **`Temephos 50EC` & `Deltamethrin Fog`** | Exact chemical micro-dosages in liters calculated for that sector's stagnant water surface area ($\text{m}^2$) and probability tier, capped by WHO ecological stewardship guardrails. |
 
 ---
@@ -268,7 +268,7 @@ When `RCC-W30` is selected, the WGS84 Geodesic Mesh Projector expands the $850\t
 3. **Explainable AI (`XAI`) Driver Shift Proof:** Notice that in `RCC-W30-NW` through `NE`, **Sentinel-2 MNDWI Waterlogging & Drainage Retention** is the #1 XAI driver (`36.7%`–`42.7%`). However, in `RCC-W30-SW` (where drainage efficiency reaches **`71%`**), waterlogging is eliminated so thoroughly that PyTorch Autograd saliency automatically shifts the #1 driver to **`NASA POWER Brière Thermal Incubation Kinetics (35.1%)`** and switches the Graph RAG protocol to **`WHO-DGHS-SOP-03`**.
 
 ### 7.3 Mathematical Proof of Chemical Resource Allocation (`RCC-W30-NW` & `RCC-W30-CORE`)
-For the two sectors breaching the $55\%$ preemption threshold ($\hat{Y}_{\text{NW}, 14} = 0.816$, $\hat{Y}_{\text{CORE}, 14} = 0.685$), each with detected stagnant water area $A_{\text{water}} = 800\text{ m}^2$:
+For the two sectors breaching the $55\%$ preemption threshold ($`\hat{Y}_{\text{NW}, 14} = 0.816`$, $`\hat{Y}_{\text{CORE}, 14} = 0.685`$), each with detected stagnant water area $`A_{\text{water}} = 800\text{ m}^2`$:
 
 1. **Work Order #1 (`RCC-W30-NW` — `LEVEL-1 CRITICAL PREEMPTION`, $\hat{Y} = 0.816$):**
    * **Temephos 50EC Larvicide:**
@@ -287,7 +287,7 @@ For the two sectors breaching the $55\%$ preemption threshold ($\hat{Y}_{\text{N
 ## 8. Hybrid Graph RAG, Model Context Protocol (`MCP`) & Deployment Guide
 
 ### 8.1 Hybrid Graph RAG Epidemiological Knowledge Base (`WHO_DGHS_KNOWLEDGE_GRAPH`)
-Every sector forecast is encoded into a normalized 6D state vector $\mathbf{q} = [\tilde{\text{MNDWI}}, \; 1-\eta_{\text{drain}}, \; \text{XAI}_{\text{thermo}}, \; \text{XAI}_{\text{dghs}}, \; \text{XAI}_{\text{spatial}}, \; \mathbb{I}_{\text{rooftop}}]^\top$ and matched against 5 authoritative WHO/DGHS protocol nodes via dense cosine similarity + keyword boosting + 1-hop companion graph traversal:
+Every sector forecast is encoded into a normalized 6D state vector $`\mathbf{q} = [\tilde{\text{MNDWI}}, \; 1-\eta_{\text{drain}}, \; \text{XAI}_{\text{thermo}}, \; \text{XAI}_{\text{dghs}}, \; \text{XAI}_{\text{spatial}}, \; \mathbb{I}_{\text{rooftop}}]^\top`$ and matched against 5 authoritative WHO/DGHS protocol nodes via dense cosine similarity + keyword boosting + 1-hop companion graph traversal:
 
 * **`WHO-DGHS-SOP-01`:** *Perennial Structural Drainage & Alley Channel Larviciding Protocol*
 * **`WHO-DGHS-SOP-02`:** *High-Density Concrete Rooftop Depression & Construction Curing Protocol*
